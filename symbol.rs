@@ -37,6 +37,14 @@ pub struct Symbol(usize);
 
 impl fmt::Display for Symbol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO?: Drop this lock before the write!. write! will block, and in pathological
+        // cases, could cause other threads attempting to create/format symbols to block
+        // longer than necessary in acquire_lock() (assuming the try_lock().expect(...) is
+        // replaced with lock()).
+        //
+        // Average case performance might be better if, after acquiring the lock and
+        // resolve to a &str, we create a String and immediately drop the lock, *then* do
+        // the write!. That prevents holding the lock while doing a write!.
         let lock = acquire_lock();
         // TODO: Replace this with resolve_unchecked once I'm confident that's correct.
         let s: &str = lock.resolve(self.0)
