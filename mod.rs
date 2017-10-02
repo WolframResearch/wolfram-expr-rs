@@ -32,6 +32,13 @@ impl Normal {
     pub fn new(head: Expr, contents: Vec<Expr>) -> Self {
         Normal { head, contents }
     }
+
+    pub fn has_head(&self, sym: Symbol) -> bool {
+        match self.head {
+            Expr::Symbol(self_head) => self_head == sym,
+            _ => false
+        }
+    }
 }
 
 impl fmt::Display for Expr {
