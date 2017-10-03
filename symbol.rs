@@ -32,7 +32,7 @@ fn acquire_lock() -> ::std::sync::MutexGuard<'static, StringInterner<usize>> {
     lock
 }
 
-#[derive(Debug, Copy, Clone, Eq, Hash)]
+#[derive(Copy, Clone, Eq, Hash)]
 pub struct Symbol(usize);
 
 impl fmt::Display for Symbol {
@@ -50,6 +50,16 @@ impl fmt::Display for Symbol {
         let s: &str = lock.resolve(self.0)
             .expect("Failed to resolve Symbol from global SYMBOL_INTERNER");
         write!(f, "{}", s)
+    }
+}
+
+impl fmt::Debug for Symbol {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let lock = acquire_lock();
+        // TODO: Replace this with resolve_unchecked once I'm confident that's correct.
+        let s: &str = lock.resolve(self.0)
+            .expect("Failed to resolve Symbol from global SYMBOL_INTERNER");
+        write!(f, "Symbol({}: {})", self.0, s)
     }
 }
 
