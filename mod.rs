@@ -113,3 +113,11 @@ fn indent_amount(base: &mut String, indent: usize) {
         *base += " ";
     }
 }
+
+impl Expr {
+    pub fn normal<H: Into<Expr>>(head: H, contents: Vec<Expr>) -> Expr {
+        let head = head.into();
+        let contents = contents.into();
+        Expr::Normal(Box::new(Normal { head, contents }))
+    }
+}
