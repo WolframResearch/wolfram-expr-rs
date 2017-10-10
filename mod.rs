@@ -29,8 +29,8 @@ pub enum Number {
 //=======================================
 
 impl Normal {
-    pub fn new(head: Expr, contents: Vec<Expr>) -> Self {
-        Normal { head, contents }
+    pub fn new<E: Into<Expr>>(head: E, contents: Vec<Expr>) -> Self {
+        Normal { head: head.into(), contents }
     }
 
     pub fn has_head(&self, sym: Symbol) -> bool {
