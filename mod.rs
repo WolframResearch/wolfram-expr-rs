@@ -120,4 +120,19 @@ impl Expr {
         let contents = contents.into();
         Expr::Normal(Box::new(Normal { head, contents }))
     }
+
+    pub fn eq_normal(&self, head: &Expr, contents: &[Expr]) -> bool {
+        match self {
+            &Expr::Normal(box ref normal) => {
+                if *head != normal.head {
+                    return false;
+                }
+                if normal.contents.as_slice() != contents {
+                    return false;
+                }
+                true
+            },
+            _ => false
+        }
+    }
 }
