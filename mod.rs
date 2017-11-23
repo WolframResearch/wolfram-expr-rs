@@ -135,4 +135,15 @@ impl Expr {
             _ => false
         }
     }
+
+    // TODO: _[x] probably should return None, even though technically
+    //       Blank[][x] has the tag Blank.
+    pub fn tag(&self) -> Option<Symbol> {
+        match *self {
+            Expr::Number(_) | Expr::String(_) => None,
+            Expr::Normal(ref normal) => normal.head.tag(),
+            // TODO: Remove this clone when Symbol becomes a Copy/Interned string
+            Expr::Symbol(ref sym) => Some(sym.clone())
+        }
+    }
 }
