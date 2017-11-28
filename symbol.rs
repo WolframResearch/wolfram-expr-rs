@@ -1,3 +1,11 @@
+/*!
+ * Contains the global symbol string interner. The intention is that Symbol can be treated
+ * as if it was a string, without actually having every symbol be a String allocation.
+ *
+ * TODO: Possibly switch this module to using *const pointers to never-freed data, rather
+ * than the identifying usize "tokens" which are used now. This would make prevent ever
+ * having to aquire a lock to Display symbols.
+ */
 use std::fmt;
 
 use string_interner::StringInterner;
@@ -32,6 +40,9 @@ fn acquire_lock() -> ::std::sync::MutexGuard<'static, StringInterner<usize>> {
     lock
 }
 
+// By using `usize` here, we gurantee that we can later change this to be a pointer
+// instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
+// compatibility if I decide to change the way Symbol works.
 #[derive(Copy, Clone, Eq, Hash)]
 pub struct Symbol(usize);
 
