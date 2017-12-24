@@ -3,8 +3,8 @@
  * as if it was a string, without actually having every symbol be a String allocation.
  *
  * TODO: Possibly switch this module to using *const pointers to never-freed data, rather
- * than the identifying usize "tokens" which are used now. This would make prevent ever
- * having to aquire a lock to Display symbols.
+ * than the identifying usize "tokens" which are used now. This would prevent ever having
+ * to aquire a lock to Display symbols.
  */
 use std::fmt;
 
