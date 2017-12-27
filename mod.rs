@@ -20,6 +20,7 @@ pub struct Normal {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Number {
+    // TODO: Rename this to MachineInteger
     Integer(i64),
     // Real(f64),
 }
