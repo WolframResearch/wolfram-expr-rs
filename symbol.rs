@@ -20,24 +20,21 @@ fn acquire_lock() -> ::std::sync::MutexGuard<'static, StringInterner<usize>> {
     // FIXME: This blatantly assumes that the only time STRING_INTERNER will
     // be used by multiple threads is when running tests. This is completely
     // wrong if almost ANY KIND of multithreading is implemented later.
-    let lock = {
-        #[cfg(not(test))] {
-            // Mutex::try_lock does NOT block.
-            // When not running tests, we assume the program will always run
-            // single-threaded, and should therefore getting the lock should
-            // never block (assuming Symbol creation/to_string is correct
-            // and doesn't leak a lock).
-            SYMBOL_INTERNER.try_lock().expect("Failed to aquire lock on SYMBOL_INTERNER")
-        }
-        #[cfg(test)] {
-            // Mutex::lock DOES block.
-            // When running tests, many `#[test] fn ...`'s are run in parallel, sharing
-            // the global STRING_INTERNER. We expect therefore to sometimes have to wait
-            // to acquire the lock.
-            SYMBOL_INTERNER.lock().expect("SYMBOL_INTERNER Mutex was poisoned!")
-        }
-    };
-    lock
+    #[cfg(not(test))] {
+        // Mutex::try_lock does NOT block.
+        // When not running tests, we assume the program will always run
+        // single-threaded, and should therefore getting the lock should
+        // never block (assuming Symbol creation/to_string is correct
+        // and doesn't leak a lock).
+        SYMBOL_INTERNER.try_lock().expect("Failed to aquire lock on SYMBOL_INTERNER")
+    }
+    #[cfg(test)] {
+        // Mutex::lock DOES block.
+        // When running tests, many `#[test] fn ...`'s are run in parallel, sharing
+        // the global STRING_INTERNER. We expect therefore to sometimes have to wait
+        // to acquire the lock.
+        SYMBOL_INTERNER.lock().expect("SYMBOL_INTERNER Mutex was poisoned!")
+    }
 }
 
 // By using `usize` here, we gurantee that we can later change this to be a pointer

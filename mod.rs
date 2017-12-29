@@ -122,23 +122,10 @@ impl Expr {
         Expr::Normal(Box::new(Normal { head, contents }))
     }
 
-    pub fn eq_normal(&self, head: &Expr, contents: &[Expr]) -> bool {
-        match self {
-            &Expr::Normal(box ref normal) => {
-                if *head != normal.head {
-                    return false;
-                }
-                if normal.contents.as_slice() != contents {
-                    return false;
-                }
-                true
-            },
-            _ => false
-        }
-    }
-
     // TODO: _[x] probably should return None, even though technically
     //       Blank[][x] has the tag Blank.
+    // TODO: The above TODO is probably wrong -- tag() shouldn't have any language
+    //       semantics built in to it.
     pub fn tag(&self) -> Option<Symbol> {
         match *self {
             Expr::Number(_) | Expr::String(_) => None,
