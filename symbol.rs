@@ -71,6 +71,8 @@ impl fmt::Debug for Symbol {
     }
 }
 
+// TODO: Maybe this shouldn't exists? Creating a symbol isn't necessarily a cheap
+//       operation, so maybe this easy conversion helper is misleading?
 impl<T: Into<String> + AsRef<str>> From<T> for Symbol {
     fn from(s: T) -> Symbol {
         let mut lock = acquire_lock();
