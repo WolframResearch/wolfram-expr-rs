@@ -2,9 +2,11 @@ use std::fmt;
 use std::rc::Rc;
 use std::ops::Deref;
 
-mod symbol;
+extern crate string_interner;
+#[macro_use]
+extern crate lazy_static;
 
-use lang::sym;
+mod symbol;
 
 pub use self::symbol::Symbol;
 
@@ -90,11 +92,11 @@ impl Expr {
         match *self.inner {
             // TODO Test: >>> Head[Head[67]] -> Symbol
             ExprKind::Number(num) => match num {
-                Number::Integer(_) => Expr::symbol(*sym::Integer),
+                Number::Integer(_) => Expr::symbol(Symbol::from("Integer")),
                 // Number::Real(_) => Expr::symbol(sym!("Real")),
             },
-            ExprKind::Symbol(_) => Expr::symbol(*sym::Symbol),
-            ExprKind::String(_) => Expr::symbol(*sym::String),
+            ExprKind::Symbol(_) => Expr::symbol(Symbol::from("Symbol")),
+            ExprKind::String(_) => Expr::symbol(Symbol::from("String")),
             // TODO Test: Head[Plus[1, 1]]
             ExprKind::Normal(ref normal) => normal.head.clone(),
         }
@@ -108,11 +110,11 @@ impl Expr {
     pub fn symbol_head(&self) -> Option<Symbol> {
         match **self {
             ExprKind::Number(num) => match num {
-                Number::Integer(_) => Some(*sym::Integer),
+                Number::Integer(_) => Some(Symbol::from("Integer")),
                 // Number::Real(_) => Expr::symbol(sym!("Real")),
             },
-            ExprKind::Symbol(_) => Some(*sym::Symbol),
-            ExprKind::String(_) => Some(*sym::String),
+            ExprKind::Symbol(_) => Some(Symbol::from("Symbol")),
+            ExprKind::String(_) => Some(Symbol::from("String")),
             ExprKind::Normal(ref normal) => match *normal.head {
                 ExprKind::Symbol(sym) => Some(sym),
                 _ => None
