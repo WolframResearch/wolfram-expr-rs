@@ -5,10 +5,12 @@ use std::ops::Deref;
 extern crate string_interner;
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate static_assertions;
 
 mod symbol;
 
-pub use self::symbol::Symbol;
+pub use self::symbol::{Symbol, SymbolTable};
 
 // #[derive(Clone, PartialEq)]
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -92,11 +94,11 @@ impl Expr {
         match *self.inner {
             // TODO Test: >>> Head[Head[67]] -> Symbol
             ExprKind::Number(num) => match num {
-                Number::Integer(_) => Expr::symbol(Symbol::from("Integer")),
+                Number::Integer(_) => Expr::symbol(self.symbol_head().unwrap()),
                 // Number::Real(_) => Expr::symbol(sym!("Real")),
             },
-            ExprKind::Symbol(_) => Expr::symbol(Symbol::from("Symbol")),
-            ExprKind::String(_) => Expr::symbol(Symbol::from("String")),
+            ExprKind::Symbol(_) => Expr::symbol(self.symbol_head().unwrap()),
+            ExprKind::String(_) => Expr::symbol(self.symbol_head().unwrap()),
             // TODO Test: Head[Plus[1, 1]]
             ExprKind::Normal(ref normal) => normal.head.clone(),
         }
@@ -108,20 +110,32 @@ impl Expr {
     /// symbol_head(f[x]) => f
     /// symbol_head(f[x][y]) => None
     pub fn symbol_head(&self) -> Option<Symbol> {
-        match **self {
-            ExprKind::Number(num) => match num {
-                Number::Integer(_) => Some(Symbol::from("Integer")),
-                // Number::Real(_) => Expr::symbol(sym!("Real")),
-            },
-            ExprKind::Symbol(_) => Some(Symbol::from("Symbol")),
-            ExprKind::String(_) => Some(Symbol::from("String")),
-            ExprKind::Normal(ref normal) => match *normal.head {
-                ExprKind::Symbol(sym) => Some(sym),
-                _ => None
-            },
+        // TODO: This is one of the few places where I'm not sure about using
+        //       `Symbol::unchecked_new`. The observed behavior in a NB is:
+        //           >>> Remove[System`Integer]
+        //           >>> Head[5]
+        //             | System`Integer
+        //       This means that Head adds back in the System`Integer/System`Symbol/etc.
+        //       symbols when it's executed. We can certainly simply call
+        //       `SymbolTable::add_symbol` in `builtin_downvalue_Head`, but it's
+        //       concerning there might be other places this happens, making that fix a
+        //       a specific solution to a more general problem (and therefore leaving
+        //       holes for bugs).
+        unsafe {
+            match **self {
+                ExprKind::Number(num) => match num {
+                    Number::Integer(_) => Some(Symbol::unchecked_new("System`Integer")),
+                    // Number::Real(_) => Expr::symbol(sym!("Real")),
+                },
+                ExprKind::Symbol(_) => Some(Symbol::unchecked_new("System`Symbol")),
+                ExprKind::String(_) => Some(Symbol::unchecked_new("System`String")),
+                ExprKind::Normal(ref normal) => match *normal.head {
+                    ExprKind::Symbol(sym) => Some(sym),
+                    _ => None
+                },
+            }
         }
     }
-
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -249,30 +263,3 @@ impl From<Box<Normal>> for Expr {
 //         ExprKind::Number(number)
 //     }
 // }
-
-//=======================================
-// Other
-//=======================================
-
-// TODO: Move this to a move sensical location.
-pub(crate) fn column_offset_append(base: &mut String, s: &str, column: Option<usize>) {
-    let column = column.unwrap_or_else(|| base.lines().last().unwrap_or("").chars().count());
-
-    let mut lines = s.lines();
-    match lines.next() {
-        Some(line) => base.push_str(line),
-        None => return
-    };
-    for line in lines {
-        base.push_str("\n");
-        indent_amount(base, column);
-        base.push_str(line);
-    }
-}
-
-fn indent_amount(base: &mut String, indent: usize) {
-    base.reserve(indent);
-    for _ in 0..indent {
-        *base += " ";
-    }
-}
