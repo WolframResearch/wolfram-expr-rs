@@ -110,6 +110,7 @@ impl Expr {
     /// symbol_head(f[x]) => f
     /// symbol_head(f[x][y]) => None
     pub fn symbol_head(&self) -> Option<Symbol> {
+        // QUIRK
         // TODO: This is one of the few places where I'm not sure about using
         //       `Symbol::unchecked_new`. The observed behavior in a NB is:
         //           >>> Remove[System`Integer]
@@ -138,7 +139,7 @@ impl Expr {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub enum ExprKind {
     Normal(Box<Normal>), // TODO: Remove the box here, this indirection isn't needed after
                          //       making Expr an Rc type.
@@ -203,6 +204,13 @@ impl fmt::Display for ExprKind {
             ExprKind::String(ref string) => write!(f, "\"{}\"", string),
             ExprKind::Symbol(ref symbol) => fmt::Display::fmt(symbol, f),
         }
+    }
+}
+
+
+impl fmt::Debug for ExprKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self)
     }
 }
 

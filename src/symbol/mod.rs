@@ -94,6 +94,12 @@ impl SymbolTable {
         self.symbols.remove(&sym);
     }
 
+    // Returns true if `sym` belongs in $Context or an element of $ContextPath.
+    pub fn is_visible(&self, sym: Symbol) -> bool {
+        let context = sym.context_path();
+        context == self.context || self.context_path.contains(&context)
+    }
+
     /// This function assumes that `symbol` matches the syntax of symbol as defined
     /// in the parser. It will likely panic!() if malformed input is given.
     /// TODO: Change the type of `symbol` to enforce syntax
@@ -158,7 +164,6 @@ impl SymbolTable {
         let sym = unsafe {
             Symbol::unchecked_new(format!("{}{}", self.context, symbol_name))
         };
-        println!("  >> {}", sym);
         self.add_symbol(sym);
         sym
     }
