@@ -71,9 +71,9 @@ impl Expr {
         }
     }
 
-    pub fn string(s: String) -> Expr {
+    pub fn string<S: Into<String>>(s: S) -> Expr {
         Expr {
-            inner: Rc::new(ExprKind::String(s))
+            inner: Rc::new(ExprKind::String(s.into()))
         }
     }
 
