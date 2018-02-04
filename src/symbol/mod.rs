@@ -36,7 +36,7 @@ Operations on Symbols
 /// ```
 /// cache_symbol!(
 ///     Internal_Value: "Internal`Value";
-///     _counter: "$counter");
+///     _counter: "MyContext`$counter");
 ///
 /// let sym: Symbol = *Internal_Value;
 /// let counter: Symbol = *_counter;
