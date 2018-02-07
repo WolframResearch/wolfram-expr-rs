@@ -1,6 +1,7 @@
 use std::fmt;
 use std::rc::Rc;
 use std::ops::Deref;
+use std::hash::{Hash, Hasher};
 
 extern crate string_interner;
 #[macro_use]
@@ -23,6 +24,28 @@ impl Deref for Expr {
     type Target = ExprKind;
     fn deref(&self) -> &Self::Target {
         self.inner.deref()
+    }
+}
+
+/// Newtype around Expr, which calculates it's Hash value based on the pointer value,
+/// not the ExprKind.
+///
+/// TODO: Add tests that `ExprRefHash` is working as expected
+///
+/// This is used in `wl_parser::source_map` to give unique source mapping, so that Expr's
+/// which are equal according to the PartialEq impl for ExprKind (and whose hash values
+/// are therefore the same) can be differenciated.
+pub struct ExprRefHash {
+    expr: Expr
+}
+
+impl Hash for ExprRefHash {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        // Clone `expr` to increase the strong count. Otherwise expr would be dropped
+        // inside of `Rc::into_raw` and the `Expr` could be deallocated.
+        let ptr = Rc::into_raw(self.expr.inner.clone());
+        ptr.hash(state);
+        let _ = unsafe { Rc::from_raw(ptr) };
     }
 }
 
