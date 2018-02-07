@@ -39,6 +39,16 @@ pub struct ExprRefHash {
     expr: Expr
 }
 
+impl ExprRefHash {
+    pub fn new(expr: Expr) -> Self {
+        ExprRefHash { expr }
+    }
+
+    pub fn to_expr(self) -> Expr {
+        self.expr
+    }
+}
+
 impl Hash for ExprRefHash {
     fn hash<H: Hasher>(&self, state: &mut H) {
         // Clone `expr` to increase the strong count. Otherwise expr would be dropped
