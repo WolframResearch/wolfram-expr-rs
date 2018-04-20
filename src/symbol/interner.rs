@@ -11,6 +11,7 @@ use std::fmt;
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct InternedString(usize);
 
+// This macro comes from the static_assertions crate.
 assert_eq_size!(interned_string; InternedString, usize);
 
 lazy_static! {

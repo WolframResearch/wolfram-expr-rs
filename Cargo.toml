@@ -7,3 +7,4 @@ authors = ["Connor Gray <accounts@connorgray.com>"]
 string-interner = "^0.6"
 lazy_static = "^0.2"
 static_assertions = "^0.2"
+ordered-float = "^0.5"

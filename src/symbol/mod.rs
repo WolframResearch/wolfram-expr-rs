@@ -33,7 +33,7 @@ Operations on Symbols
 ///
 /// ## Example:
 ///
-/// ```
+/// ```no_test
 /// cache_symbol!(
 ///     Internal_Value: "Internal`Value";
 ///     _counter: "MyContext`$counter");
@@ -47,6 +47,7 @@ macro_rules! cache_symbol {
         lazy_static! {
             $(
             pub static ref $name: expr::Symbol = unsafe {
+                // TODO: This should check the symbol on debug builds
                 expr::Symbol::unchecked_new($symbol_str)
             };
             )*
@@ -56,6 +57,7 @@ macro_rules! cache_symbol {
 
 #[derive(Debug)]
 pub struct SymbolTable {
+    // TODO: Change these String's into AbsoluteContext?
     pub context: String,
     pub context_path: Vec<String>,
 

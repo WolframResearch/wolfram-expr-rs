@@ -8,6 +8,7 @@ extern crate string_interner;
 extern crate lazy_static;
 #[macro_use]
 extern crate static_assertions;
+extern crate ordered_float;
 
 mod symbol;
 
@@ -128,7 +129,7 @@ impl Expr {
             // TODO Test: >>> Head[Head[67]] -> Symbol
             ExprKind::Number(num) => match num {
                 Number::Integer(_) => Expr::symbol(self.symbol_head().unwrap()),
-                // Number::Real(_) => Expr::symbol(sym!("Real")),
+                Number::Real(_) => Expr::symbol(self.symbol_head().unwrap()),
             },
             ExprKind::Symbol(_) => Expr::symbol(self.symbol_head().unwrap()),
             ExprKind::String(_) => Expr::symbol(self.symbol_head().unwrap()),
@@ -159,7 +160,7 @@ impl Expr {
             match **self {
                 ExprKind::Number(num) => match num {
                     Number::Integer(_) => Some(Symbol::unchecked_new("System`Integer")),
-                    // Number::Real(_) => Expr::symbol(sym!("Real")),
+                    Number::Real(_) => Some(Symbol::unchecked_new("System`Real")),
                 },
                 ExprKind::Symbol(_) => Some(Symbol::unchecked_new("System`Symbol")),
                 ExprKind::String(_) => Some(Symbol::unchecked_new("System`String")),
@@ -191,7 +192,7 @@ pub struct Normal {
 pub enum Number {
     // TODO: Rename this to MachineInteger
     Integer(i64),
-    // Real(f64),
+    Real(ordered_float::OrderedFloat<f64>),
 }
 
 
@@ -264,7 +265,7 @@ impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Number::Integer(ref int) => write!(f, "{}", int),
-            // Number::Real(ref real) => write!(f, "{}",  real),
+            Number::Real(ref real) => write!(f, "{}",  real),
         }
     }
 }
