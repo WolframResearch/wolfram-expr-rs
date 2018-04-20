@@ -60,6 +60,14 @@ impl Hash for ExprRefHash {
     }
 }
 
+impl PartialEq for ExprRefHash {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.expr.inner, &other.expr.inner)
+    }
+}
+
+impl Eq for ExprRefHash {}
+
 impl Expr {
     pub fn new(kind: ExprKind) -> Expr {
         Expr {
@@ -194,7 +202,6 @@ pub enum Number {
     Integer(i64),
     Real(ordered_float::OrderedFloat<f64>),
 }
-
 
 //=======================================
 // Type Impl's
