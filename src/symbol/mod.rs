@@ -43,12 +43,12 @@ Operations on Symbols
 /// ```
 #[macro_export]
 macro_rules! cache_symbol {
-    ($($name:ident: $symbol_str:expr);+ ;) => {
+    ($($name:ident: $symbol_str:expr);+ $(;)*) => {
         lazy_static! {
             $(
-            pub static ref $name: expr::Symbol = unsafe {
+            pub static ref $name: ::wl_expr::Symbol = unsafe {
                 // TODO: This should check the symbol on debug builds
-                expr::Symbol::unchecked_new($symbol_str)
+                ::wl_expr::Symbol::unchecked_new($symbol_str)
             };
             )*
         }
@@ -70,6 +70,11 @@ pub struct SymbolTable {
 }
 
 impl SymbolTable {
+    // TODO: Add methods for manipulating `context` and `context_path` safely. I'd like
+    //       to use AbsoluteContext here, but there's also a very strong argument that
+    //       that stays in the parser, and it would be worse to make wl_expr depend on
+    //       wl_parser than to do nothing.
+
     pub fn new<'a, S, I, C>(context: S, context_path: C) -> Self
             where S: Into<String>, I: AsRef<str>, C: IntoIterator<Item=I> {
         let context_path: Vec<String> = context_path.into_iter().map(|s| {
@@ -104,6 +109,7 @@ impl SymbolTable {
 
     /// This function assumes that `symbol` matches the syntax of symbol as defined
     /// in the parser. It will likely panic!() if malformed input is given.
+    /// FIXME: It won't panic, it will just call Symbol::unchecked_new(), fix this.
     /// TODO: Change the type of `symbol` to enforce syntax
     pub fn parse_from_source(&mut self, symbol: &str) -> Symbol {
         let sym = if !symbol.contains("`") {

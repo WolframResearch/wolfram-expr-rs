@@ -179,6 +179,14 @@ impl Expr {
             }
         }
     }
+
+    /// Returns `true` if `self` is a `Normal` expr with the head `sym`.
+    pub fn has_normal_head(&self, sym: Symbol) -> bool {
+        match *self.kind() {
+            ExprKind::Normal(ref normal) => normal.has_head(sym),
+            _ => false,
+        }
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -196,7 +204,7 @@ pub struct Normal {
     pub contents: Vec<Expr>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Hash)]
 pub enum Number {
     // TODO: Rename this to MachineInteger
     Integer(i64),
@@ -217,6 +225,12 @@ impl Normal {
             ExprKind::Symbol(self_head) => self_head == sym,
             _ => false
         }
+    }
+}
+
+impl Number {
+    pub fn real(r: f64) -> Self {
+        Number::Real(ordered_float::OrderedFloat(r))
     }
 }
 
