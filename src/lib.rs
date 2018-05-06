@@ -286,7 +286,7 @@ impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Number::Integer(ref int) => write!(f, "{}", int),
-            Number::Real(ref real) => write!(f, "{}",  real),
+            Number::Real(ref real) => write!(f, "{:?}", real.0),
         }
     }
 }
