@@ -2,6 +2,7 @@
 name = "wl_expr"
 version = "0.1.0"
 authors = ["Connor Gray <accounts@connorgray.com>"]
+publish = false
 
 [dependencies]
 string-interner = "^0.6"
