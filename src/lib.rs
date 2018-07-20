@@ -145,6 +145,13 @@ impl Expr {
         }
     }
 
+    pub fn normal_head(&self) -> Option<Expr> {
+        match *self.inner {
+            ExprKind::Normal(ref normal) => Some(normal.head.clone()),
+            ExprKind::Symbol(_) | ExprKind::Number(_) | ExprKind::String(_) => None,
+        }
+    }
+
     /// Gets the head of all non-sub-value form (_[___][___]) exprs as a symbol.
     ///
     /// symbol_head(10) => Integer
