@@ -9,6 +9,7 @@
 use std::fmt;
 
 use std::collections::{HashMap, HashSet};
+use std::cmp::Ordering;
 
 mod interner;
 
@@ -177,8 +178,18 @@ impl SymbolTable {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord)]
 pub struct Symbol(InternedString);
+
+/// FIXME: It would be nice for symbols to be sorted alphabetically. Right now this will
+///        be identical to `InternedString`, which is essentially random and
+///        non-deterministic. Is it guaranteed that all symbols contain only latin
+///        alphabet characters?
+impl PartialOrd for Symbol {
+    fn partial_cmp(&self, other: &Symbol) -> Option<Ordering> {
+        Some(self.0.cmp(&other.0))
+    }
+}
 
 // By using `usize` here, we gurantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI

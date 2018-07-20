@@ -8,7 +8,10 @@ use std::fmt;
 // compatibility if I decide to change the way Symbol works.
 // TODO: usize would be a u32 on 32-bit platforms. Is it at all possible there will ever
 //       be more than 2^32 symbols?
-#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+// NOTE: Ordering of InternedString is entirely based on the opaque details of the global
+//       `STRING_INTERNER` and is therefore not consistant between runs, and should be
+//       considered to be essentially random and non-deterministic.
+#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct InternedString(usize);
 
 // This macro comes from the static_assertions crate.
