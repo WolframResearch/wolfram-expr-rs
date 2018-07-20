@@ -127,8 +127,7 @@ impl Expr {
         match *self.inner {
             ExprKind::Number(_) | ExprKind::String(_) => None,
             ExprKind::Normal(ref normal) => normal.head.tag(),
-            // TODO: Remove this clone when Symbol becomes a Copy/Interned string
-            ExprKind::Symbol(ref sym) => Some(sym.clone())
+            ExprKind::Symbol(ref sym) => Some(*sym)
         }
     }
 
