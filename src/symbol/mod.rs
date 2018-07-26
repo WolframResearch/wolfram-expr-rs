@@ -272,6 +272,10 @@ impl Symbol {
         Symbol(interned)
     }
 
+    pub unsafe fn unsafe_internal_data(&self) -> usize {
+        self.0.unsafe_internal_data()
+    }
+
     // /// Create a symbol in the System` context.
     // ///
     // /// This function has the same problems with regards to the symbol table as
