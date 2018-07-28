@@ -6,6 +6,6 @@ publish = false
 
 [dependencies]
 string-interner = "^0.6"
-lazy_static = "^0.2"
+lazy_static = "^1.0"
 static_assertions = "^0.2"
 ordered-float = "^0.5"
