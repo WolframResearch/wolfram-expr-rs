@@ -13,7 +13,7 @@ use std::cmp::Ordering;
 
 mod interner;
 
-use self::interner::InternedString;
+pub use self::interner::InternedString;
 
 /* Notes
 
