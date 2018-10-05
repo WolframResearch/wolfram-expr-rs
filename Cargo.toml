@@ -1,5 +1,5 @@
 [package]
-name = "wl_expr"
+name = "wl-expr"
 version = "0.1.0"
 authors = ["Connor Gray <accounts@connorgray.com>"]
 publish = false
