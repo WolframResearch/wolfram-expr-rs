@@ -74,7 +74,7 @@ impl SymbolTable {
     // TODO: Add methods for manipulating `context` and `context_path` safely. I'd like
     //       to use AbsoluteContext here, but there's also a very strong argument that
     //       that stays in the parser, and it would be worse to make wl_expr depend on
-    //       wl_parser than to do nothing.
+    //       wl-parser than to do nothing.
 
     pub fn new<'a, S, I, C>(context: S, context_path: C) -> Self
             where S: Into<String>, I: AsRef<str>, C: IntoIterator<Item=I> {
