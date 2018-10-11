@@ -256,18 +256,23 @@ impl fmt::Display for Expr {
     }
 }
 
-
 impl fmt::Display for ExprKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             ExprKind::Normal(ref normal) => fmt::Display::fmt(normal, f),
             ExprKind::Number(ref number) => fmt::Display::fmt(number, f),
-            ExprKind::String(ref string) => write!(f, "\"{}\"", string),
+            ExprKind::String(ref string) => {
+                // Escape any '"' which appear in the string.
+                // Using the Debug implementation will cause \n, \t, etc. to appear in
+                // place of the literal character they are escapes for. This is necessary
+                // when printing expressions in a way that they can be read back in as a
+                // string, such as with ToExpression.
+                write!(f, "\"{:?}\"", string)
+            },
             ExprKind::Symbol(ref symbol) => fmt::Display::fmt(symbol, f),
         }
     }
 }
-
 
 impl fmt::Debug for ExprKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
