@@ -179,7 +179,13 @@ impl SymbolTable {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord)]
+#[repr(C)]
 pub struct Symbol(InternedString);
+
+// By using `usize` here, we gurantee that we can later change this to be a pointer
+// instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
+// compatibility if I decide to change the way Symbol works.
+assert_eq_size!(symbol; Symbol, usize);
 
 /// FIXME: It would be nice for symbols to be sorted alphabetically. Right now this will
 ///        be identical to `InternedString`, which is essentially random and
@@ -190,11 +196,6 @@ impl PartialOrd for Symbol {
         Some(self.0.cmp(&other.0))
     }
 }
-
-// By using `usize` here, we gurantee that we can later change this to be a pointer
-// instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
-// compatibility if I decide to change the way Symbol works.
-assert_eq_size!(symbol; Symbol, usize);
 
 impl fmt::Display for Symbol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

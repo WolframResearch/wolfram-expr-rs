@@ -12,6 +12,7 @@ use std::fmt;
 //       `STRING_INTERNER` and is therefore not consistant between runs, and should be
 //       considered to be essentially random and non-deterministic.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[repr(C)]
 pub struct InternedString(usize);
 
 // This macro comes from the static_assertions crate.

@@ -267,7 +267,7 @@ impl fmt::Display for ExprKind {
                 // place of the literal character they are escapes for. This is necessary
                 // when printing expressions in a way that they can be read back in as a
                 // string, such as with ToExpression.
-                write!(f, "\"{:?}\"", string)
+                write!(f, "{:?}", string)
             },
             ExprKind::Symbol(ref symbol) => fmt::Display::fmt(symbol, f),
         }
