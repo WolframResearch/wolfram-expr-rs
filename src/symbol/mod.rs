@@ -45,7 +45,7 @@ Operations on Symbols
 #[macro_export]
 macro_rules! cache_symbol {
     ($($name:ident: $symbol_str:expr);+ $(;)*) => {
-        lazy_static! {
+        ::lazy_static::lazy_static! {
             $(
             pub static ref $name: ::wl_expr::Symbol = unsafe {
                 // TODO: This should check the symbol on debug builds
