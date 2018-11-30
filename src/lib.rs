@@ -1,6 +1,6 @@
 use std::fmt;
 use std::rc::Rc;
-use std::ops::Deref;
+use std::sync::Arc;
 use std::hash::{Hash, Hasher};
 
 extern crate string_interner;
@@ -18,14 +18,6 @@ pub use self::symbol::{Symbol, SymbolTable, InternedString};
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct Expr {
     inner: Rc<ExprKind>,
-}
-
-// TODO: Remove this in favor of Expr::kind.
-impl Deref for Expr {
-    type Target = ExprKind;
-    fn deref(&self) -> &Self::Target {
-        self.inner.deref()
-    }
 }
 
 /// Newtype around Expr, which calculates it's Hash value based on the pointer value,
@@ -171,15 +163,15 @@ impl Expr {
         //       a specific solution to a more general problem (and therefore leaving
         //       holes for bugs).
         unsafe {
-            match **self {
+            match self.kind() {
                 ExprKind::Number(num) => match num {
                     Number::Integer(_) => Some(Symbol::unchecked_new("System`Integer")),
                     Number::Real(_) => Some(Symbol::unchecked_new("System`Real")),
                 },
                 ExprKind::Symbol(_) => Some(Symbol::unchecked_new("System`Symbol")),
                 ExprKind::String(_) => Some(Symbol::unchecked_new("System`String")),
-                ExprKind::Normal(ref normal) => match *normal.head {
-                    ExprKind::Symbol(sym) => Some(sym),
+                ExprKind::Normal(ref normal) => match normal.head.kind() {
+                    ExprKind::Symbol(sym) => Some(*sym),
                     _ => None
                 },
             }
@@ -226,8 +218,8 @@ impl Normal {
     }
 
     pub fn has_head(&self, sym: Symbol) -> bool {
-        match *self.head {
-            ExprKind::Symbol(self_head) => self_head == sym,
+        match self.head.kind() {
+            ExprKind::Symbol(self_head) => *self_head == sym,
             _ => false
         }
     }
