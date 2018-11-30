@@ -94,7 +94,7 @@ impl Expr {
         let head = head.into();
         // let contents = contents.into();
         Expr {
-            inner: Rc::new(ExprKind::Normal(Box::new(Normal { head, contents }))),
+            inner: Rc::new(ExprKind::Normal(Normal { head, contents })),
         }
     }
 
@@ -197,8 +197,7 @@ impl Expr {
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum ExprKind {
-    Normal(Box<Normal>), // TODO: Remove the box here, this indirection isn't needed after
-                         //       making Expr an Rc type.
+    Normal(Normal),
     Number(Number),
     String(String),
     Symbol(Symbol),
@@ -312,8 +311,8 @@ impl From<Symbol> for Expr {
     }
 }
 
-impl From<Box<Normal>> for Expr {
-    fn from(normal: Box<Normal>) -> Expr {
+impl From<Normal> for Expr {
+    fn from(normal: Normal) -> Expr {
         Expr {
             inner: Rc::new(ExprKind::Normal(normal))
         }
