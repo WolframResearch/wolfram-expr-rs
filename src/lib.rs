@@ -20,6 +20,24 @@ pub struct Expr {
     inner: Rc<ExprKind>,
 }
 
+/// A version of Expr which is shareable across threads.
+#[derive(Clone)]
+pub struct ArcExpr {
+    inner: Arc<ExprKind<ArcExpr>>,
+}
+
+impl From<Expr> for ArcExpr {
+    fn from(expr: Expr) -> Self {
+        expr.to_arc_expr()
+    }
+}
+
+impl From<ArcExpr> for Expr {
+    fn from(expr: ArcExpr) -> Self {
+        expr.to_rc_expr()
+    }
+}
+
 /// Newtype around Expr, which calculates it's Hash value based on the pointer value,
 /// not the ExprKind.
 ///
@@ -185,20 +203,60 @@ impl Expr {
             _ => false,
         }
     }
+
+    pub fn to_arc_expr(&self) -> ArcExpr {
+        let Expr { inner } = self;
+        let kind: ExprKind<Expr> = inner.as_ref().clone();
+        let kind: ExprKind<ArcExpr> = match kind {
+            ExprKind::Normal(Normal { head, contents }) => {
+                let contents = contents.iter().map(Expr::to_arc_expr).collect();
+                let normal = Normal { head: head.to_arc_expr(), contents };
+                ExprKind::Normal(normal)
+            },
+            ExprKind::Number(num) => ExprKind::Number(num),
+            ExprKind::String(string) => ExprKind::String(string),
+            ExprKind::Symbol(symbol) => ExprKind::Symbol(symbol),
+        };
+        ArcExpr::new(kind)
+    }
+}
+
+impl ArcExpr {
+    fn new(kind: ExprKind<ArcExpr>) -> ArcExpr {
+        ArcExpr {
+            inner: Arc::new(kind)
+        }
+    }
+
+    pub fn to_rc_expr(&self) -> Expr {
+        let ArcExpr { inner } = self;
+        let kind: ExprKind<ArcExpr> = inner.as_ref().clone();
+        let kind: ExprKind<Expr> = match kind {
+            ExprKind::Normal(Normal { head, contents }) => {
+                let contents = contents.iter().map(ArcExpr::to_rc_expr).collect();
+                let normal = Normal { head: head.to_rc_expr(), contents };
+                ExprKind::Normal(normal)
+            },
+            ExprKind::Number(num) => ExprKind::Number(num),
+            ExprKind::String(string) => ExprKind::String(string),
+            ExprKind::Symbol(symbol) => ExprKind::Symbol(symbol),
+        };
+        Expr::new(kind)
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub enum ExprKind {
-    Normal(Normal),
+pub enum ExprKind<E=Expr> {
+    Normal(Normal<E>),
     Number(Number),
     String(String),
     Symbol(Symbol),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Normal {
-    pub head: Expr,
-    pub contents: Vec<Expr>,
+pub struct Normal<E=Expr> {
+    pub head: E,
+    pub contents: Vec<E>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Hash)]
