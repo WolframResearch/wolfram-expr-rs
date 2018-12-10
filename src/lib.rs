@@ -299,6 +299,10 @@ impl fmt::Debug for Expr {
     }
 }
 
+/// By default, this should generate a string which can be unambiguously parsed to
+/// reconstruct the `Expr` being displayed. This means symbols will always include their
+/// contexts, special characters in String's will always be properly escaped, and numeric
+/// literals needing precision and accuracy marks will have them.
 impl fmt::Display for Expr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.inner)
