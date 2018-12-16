@@ -205,7 +205,8 @@ impl fmt::Display for Symbol {
 
 impl fmt::Debug for Symbol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Symbol({})", self.0)
+        let Symbol(interned) = self;
+        write!(f, "Symbol({})", interned)
     }
 }
 

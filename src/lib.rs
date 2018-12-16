@@ -295,7 +295,8 @@ impl Number {
 
 impl fmt::Debug for Expr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self.inner)
+        let Expr { inner } = self;
+        write!(f, "{:?}", inner)
     }
 }
 
