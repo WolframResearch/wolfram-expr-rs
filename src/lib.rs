@@ -43,7 +43,7 @@ impl From<ArcExpr> for Expr {
 ///
 /// TODO: Add tests that `ExprRefHash` is working as expected
 ///
-/// This is used in `wl_parser::source_map` to give unique source mapping, so that Expr's
+/// This is used in `wl_parse::source_map` to give unique source mapping, so that Expr's
 /// which are equal according to the PartialEq impl for ExprKind (and whose hash values
 /// are therefore the same) can be differenciated.
 pub struct ExprRefHash {
