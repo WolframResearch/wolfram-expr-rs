@@ -139,6 +139,9 @@ impl SymbolTable {
     /// `symbol_name` should be a symbol that does NOT contains and "`" characters. It
     /// is the SymbolName part of a symbol (or it other words the part of the symbol that
     /// remains when you remove the context path).
+    ///
+    /// TODO(!): verify that `symbol_name` actually legal as a symbol name. This will have
+    ///          to involve wl-parse somehow.
     fn parse_symbol_name(&mut self, symbol_name: &str) -> Symbol {
         // println!("parse_symbol_name: {} {:?} {}", self.context, self.context_path,
         //                                           symbol_name);
@@ -232,6 +235,10 @@ impl Symbol {
     }
 
     /// Create a symbol.
+    ///
+    /// Strongly prefer using `wl_parse::parse_symbol()` over this function, unless you
+    /// are absolutely certain the string passed in will always be a valid absolute
+    /// symbol.
     ///
     /// Outside of `wl_expr`, it's almost certain a call to `Symbol::unchecked_new`
     /// should be paired with a `SymbolTable::add_symbol`. Do not use this function
