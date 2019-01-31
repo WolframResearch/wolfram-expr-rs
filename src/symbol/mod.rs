@@ -269,8 +269,10 @@ impl Symbol {
     ///
     /// Example:
     ///
+    /// ```norun
     /// Symbol::unchecked_new("Internal`x")
     /// Symbol::unchecked_new("A`B`mySymbol")
+    /// ```
     ///
     // /// Takes a &'static str (as opposed to a &str) to help gurantee that no user input
     // /// is ever fed to this function. This function is only intended to be used as a
