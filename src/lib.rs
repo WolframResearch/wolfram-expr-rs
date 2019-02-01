@@ -164,6 +164,21 @@ impl Expr {
         }
     }
 
+    /// Attempt to get the element at `index` of a `Normal` expression.
+    ///
+    /// Return `None` if this is not a `Normal` expression, or the given index is out of
+    /// bounds.
+    ///
+    /// `index` is 0-based. The 0th index is the first element, not the head.
+    ///
+    /// This function does not panic.
+    pub fn normal_part(&self, index: usize) -> Option<&Expr> {
+        match self.kind() {
+            ExprKind::Normal(ref normal) => normal.contents.get(index),
+            ExprKind::Symbol(_) | ExprKind::Number(_) | ExprKind::String(_) => None,
+        }
+    }
+
     /// Gets the head of all non-sub-value form (_[___][___]) exprs as a symbol.
     ///
     /// symbol_head(10) => Integer
