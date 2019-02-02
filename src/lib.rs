@@ -20,6 +20,8 @@ pub struct Expr {
     inner: Rc<ExprKind>,
 }
 
+assert_eq_size!(expr_size; Expr, usize);
+
 /// A version of Expr which is shareable across threads.
 #[derive(Clone)]
 pub struct ArcExpr {
