@@ -43,8 +43,11 @@ impl fmt::Display for InternedString {
         // the write!. That prevents holding the lock while doing a write!.
         let lock = acquire_lock();
         // TODO: Replace this with resolve_unchecked once I'm confident that's correct.
-        let s: &str = lock.resolve(self.0)
-            .expect("Failed to resolve InternedString from global STRING_INTERNER");
+        let s: &str = match lock.resolve(self.0) {
+            Some(s) => s,
+            None => panic!("Failed to resolve InternedString from global \
+                STRING_INTERNER. InternedString id: {}", self.0),
+        };
         write!(f, "{}", s)
     }
 }
