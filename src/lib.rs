@@ -283,7 +283,10 @@ pub struct Normal<E=Expr> {
 pub enum Number {
     // TODO: Rename this to MachineInteger
     Integer(i64),
-    Real(ordered_float::OrderedFloat<f64>),
+    // TODO: Make an explicit MachineReal type which hides the inner f64, so that other
+    //       code can make use of WL machine reals with a guaranteed type. In
+    //       particular, change wl_compile::mir::Constant to use that type.
+    Real(ordered_float::NotNan<f64>),
 }
 
 //=======================================
