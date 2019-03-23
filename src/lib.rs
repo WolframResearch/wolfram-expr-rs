@@ -307,8 +307,16 @@ impl Normal {
 }
 
 impl Number {
+    /// This function will panic if `r` is NaN.
+    ///
+    /// TODO: Change this function to take `NotNan` instead, so the caller doesn't have to
+    ///       worry about panics.
     pub fn real(r: f64) -> Self {
-        Number::Real(ordered_float::OrderedFloat(r))
+        let r = match ordered_float::NotNan::new(r) {
+            Ok(r) => r,
+            Err(_) => panic!("Number::real: got NaN"),
+        };
+        Number::Real(r)
     }
 }
 
@@ -374,7 +382,7 @@ impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Number::Integer(ref int) => write!(f, "{}", int),
-            Number::Real(ref real) => write!(f, "{:?}", real.0),
+            Number::Real(ref real) => write!(f, "{:?}", *real),
         }
     }
 }
