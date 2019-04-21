@@ -141,7 +141,7 @@ impl Expr {
         match *self.inner {
             ExprKind::Number(_) | ExprKind::String(_) => None,
             ExprKind::Normal(ref normal) => normal.head.tag(),
-            ExprKind::Symbol(ref sym) => Some(*sym)
+            ExprKind::Symbol(ref sym) => Some(sym.clone())
         }
     }
 
@@ -209,7 +209,7 @@ impl Expr {
                 ExprKind::Symbol(_) => Some(Symbol::unchecked_new("System`Symbol")),
                 ExprKind::String(_) => Some(Symbol::unchecked_new("System`String")),
                 ExprKind::Normal(ref normal) => match normal.head.kind() {
-                    ExprKind::Symbol(sym) => Some(*sym),
+                    ExprKind::Symbol(sym) => Some(sym.clone()),
                     _ => None
                 },
             }

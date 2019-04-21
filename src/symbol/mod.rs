@@ -91,7 +91,7 @@ impl SymbolTable {
 
     /// Returns true if `sym` was already a part of this symbol table.
     pub fn add_symbol(&mut self, sym: Symbol) -> bool {
-        self.symbols.insert(sym);
+        self.symbols.insert(sym.clone());
 
         let symbol_name = sym.symbol_name();
         self.common_symbol_names.entry(symbol_name).or_insert(HashSet::new()).insert(sym)
@@ -132,7 +132,7 @@ impl SymbolTable {
             }
         };
 
-        self.add_symbol(sym);
+        self.add_symbol(sym.clone());
         sym
     }
 
@@ -162,11 +162,11 @@ impl SymbolTable {
 
             for context_path_entry in &self.context_path {
                 // println!("CPE: {}", context_path_entry);
-                for &common_name in common_names {
+                for common_name in common_names {
                     // println!("CN: {}", common_name);
                     // println!("  | {}", common_name.context_path());
-                    if &common_name.context_path() == context_path_entry {
-                        return common_name;
+                    if common_name.context_path() == *context_path_entry {
+                        return common_name.clone();
                     }
                 }
             }
@@ -176,12 +176,12 @@ impl SymbolTable {
         let sym = unsafe {
             Symbol::unchecked_new(format!("{}{}", self.context, symbol_name))
         };
-        self.add_symbol(sym);
+        self.add_symbol(sym.clone());
         sym
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord)]
+#[derive(Clone, PartialEq, Eq, Hash, Ord)]
 #[repr(C)]
 pub struct Symbol(InternedString);
 
