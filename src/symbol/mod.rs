@@ -103,7 +103,7 @@ impl SymbolTable {
     }
 
     // Returns true if `sym` belongs in $Context or an element of $ContextPath.
-    pub fn is_visible(&self, sym: Symbol) -> bool {
+    pub fn is_visible(&self, sym: &Symbol) -> bool {
         let context = sym.context_path();
         context == self.context || self.context_path.contains(&context)
     }
