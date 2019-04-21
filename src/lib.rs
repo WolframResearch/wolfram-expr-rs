@@ -217,7 +217,7 @@ impl Expr {
     }
 
     /// Returns `true` if `self` is a `Normal` expr with the head `sym`.
-    pub fn has_normal_head(&self, sym: Symbol) -> bool {
+    pub fn has_normal_head(&self, sym: &Symbol) -> bool {
         match *self.kind() {
             ExprKind::Normal(ref normal) => normal.has_head(sym),
             _ => false,
@@ -298,9 +298,9 @@ impl Normal {
         Normal { head: head.into(), contents }
     }
 
-    pub fn has_head(&self, sym: Symbol) -> bool {
+    pub fn has_head(&self, sym: &Symbol) -> bool {
         match self.head.kind() {
-            ExprKind::Symbol(self_head) => *self_head == sym,
+            ExprKind::Symbol(self_head) => self_head == sym,
             _ => false
         }
     }
