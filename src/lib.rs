@@ -402,6 +402,12 @@ impl From<Symbol> for Expr {
     }
 }
 
+impl From<&Symbol> for Expr {
+    fn from(sym: &Symbol) -> Expr {
+        Expr::symbol(sym)
+    }
+}
+
 impl From<Normal> for Expr {
     fn from(normal: Normal) -> Expr {
         Expr {

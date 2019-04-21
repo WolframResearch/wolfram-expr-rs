@@ -213,6 +213,12 @@ impl fmt::Debug for Symbol {
     }
 }
 
+impl From<&Symbol> for Symbol {
+    fn from(sym: &Symbol) -> Self {
+        sym.clone()
+    }
+}
+
 impl Symbol {
     /// Get the context path part of a symbol as a &str.
     pub fn context_path(&self) -> String {
