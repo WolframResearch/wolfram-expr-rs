@@ -98,8 +98,8 @@ impl SymbolTable {
     }
 
     /// Used by Remove[_Symbol]
-    pub fn remove_symbol(&mut self, sym: Symbol) {
-        self.symbols.remove(&sym);
+    pub fn remove_symbol(&mut self, sym: &Symbol) {
+        self.symbols.remove(sym);
     }
 
     // Returns true if `sym` belongs in $Context or an element of $ContextPath.
