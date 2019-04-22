@@ -9,7 +9,7 @@
 use std::fmt;
 
 use std::collections::{HashMap, HashSet};
-use std::rc::Rc;
+use std::sync::Arc;
 
 mod interner;
 
@@ -192,7 +192,7 @@ impl SymbolTable {
 /// instances of this type to be included in ordered sets (e.g. `BTreeMap`).
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(C)]
-pub struct Symbol(Rc<String>);
+pub struct Symbol(Arc<String>);
 
 // By using `usize` here, we gurantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
@@ -283,7 +283,7 @@ impl Symbol {
     // /// is ever fed to this function. This function is only intended to be used as a
     // /// helper in the kernel.
     pub unsafe fn unchecked_new<S: Into<String> + AsRef<str>>(s: S) -> Symbol {
-        let inner = Rc::new(s.into());
+        let inner = Arc::new(s.into());
         // TODO: Add a debug_assert! here to validate `s`.
         Symbol(inner)
     }
