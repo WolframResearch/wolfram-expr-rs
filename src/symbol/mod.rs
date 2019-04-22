@@ -9,7 +9,7 @@
 use std::fmt;
 
 use std::collections::{HashMap, HashSet};
-use std::cmp::Ordering;
+use std::rc::Rc;
 
 mod interner;
 
@@ -181,24 +181,23 @@ impl SymbolTable {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, Ord)]
+/// Represents a WL symbol.
+///
+/// # PartialOrd sorting order
+///
+/// The comparison behavior of this type is **NOT** guaranteed to match the behavior of
+/// `` System`Order `` for symbols (and does *not* match it at the moment).
+///
+/// This type implements `PartialOrd`/`Ord` primarily for the purposes of allowing
+/// instances of this type to be included in ordered sets (e.g. `BTreeMap`).
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(C)]
-pub struct Symbol(InternedString);
+pub struct Symbol(Rc<String>);
 
 // By using `usize` here, we gurantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
 assert_eq_size!(symbol; Symbol, usize);
-
-/// FIXME: It would be nice for symbols to be sorted alphabetically. Right now this will
-///        be identical to `InternedString`, which is essentially random and
-///        non-deterministic. Is it guaranteed that all symbols contain only latin
-///        alphabet characters?
-impl PartialOrd for Symbol {
-    fn partial_cmp(&self, other: &Symbol) -> Option<Ordering> {
-        Some(self.0.cmp(&other.0))
-    }
-}
 
 impl fmt::Display for Symbol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -284,13 +283,9 @@ impl Symbol {
     // /// is ever fed to this function. This function is only intended to be used as a
     // /// helper in the kernel.
     pub unsafe fn unchecked_new<S: Into<String> + AsRef<str>>(s: S) -> Symbol {
-        let interned = InternedString::from(s);
+        let inner = Rc::new(s.into());
         // TODO: Add a debug_assert! here to validate `s`.
-        Symbol(interned)
-    }
-
-    pub unsafe fn unsafe_internal_data(&self) -> usize {
-        self.0.unsafe_internal_data()
+        Symbol(inner)
     }
 
     // /// Create a symbol in the System` context.
