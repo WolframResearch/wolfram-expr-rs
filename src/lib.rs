@@ -286,8 +286,11 @@ pub enum Number {
     // TODO: Make an explicit MachineReal type which hides the inner f64, so that other
     //       code can make use of WL machine reals with a guaranteed type. In
     //       particular, change wl_compile::mir::Constant to use that type.
-    Real(ordered_float::NotNan<f64>),
+    Real(F64),
 }
+
+pub type F64 = ordered_float::NotNan<f64>;
+pub type F32 = ordered_float::NotNan<f32>;
 
 //=======================================
 // Type Impl's
