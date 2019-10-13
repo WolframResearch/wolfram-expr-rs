@@ -183,10 +183,12 @@ impl Expr {
 
     /// Gets the head of all non-sub-value form (_[___][___]) exprs as a symbol.
     ///
+    /// ```text
     /// symbol_head(10) => Integer
     /// symbol_head(f[x]) => f
     /// symbol_head(f[x][y]) => None
     /// symbol_head(10[x]) => None
+    /// ```
     pub fn symbol_head(&self) -> Option<Symbol> {
         // QUIRK
         // TODO: This is one of the few places where I'm not sure about using

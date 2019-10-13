@@ -47,6 +47,7 @@ macro_rules! cache_symbol {
     ($($name:ident: $symbol_str:expr);+ $(;)*) => {
         ::lazy_static::lazy_static! {
             $(
+            #[allow(non_upper_case_globals)]
             pub static ref $name: ::wl_expr::Symbol = unsafe {
                 // TODO: This should check the symbol on debug builds
                 ::wl_expr::Symbol::unchecked_new($symbol_str)
