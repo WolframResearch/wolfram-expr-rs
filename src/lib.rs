@@ -181,6 +181,13 @@ impl Expr {
         }
     }
 
+    pub fn as_normal(&self) -> Option<&Normal> {
+        match self.kind() {
+            ExprKind::Normal(ref normal) => Some(normal),
+            ExprKind::Symbol(_) | ExprKind::String(_) | ExprKind::Number(_) => None,
+        }
+    }
+
     /// Gets the head of all non-sub-value form (_[___][___]) exprs as a symbol.
     ///
     /// ```text
