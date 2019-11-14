@@ -181,9 +181,16 @@ impl Expr {
         }
     }
 
-    pub fn as_normal(&self) -> Option<&Normal> {
+    pub fn try_normal(&self) -> Option<&Normal> {
         match self.kind() {
             ExprKind::Normal(ref normal) => Some(normal),
+            ExprKind::Symbol(_) | ExprKind::String(_) | ExprKind::Number(_) => None,
+        }
+    }
+
+    pub fn try_symbol(&self) -> Option<&Symbol> {
+        match self.kind() {
+            ExprKind::Symbol(ref symbol) => Some(symbol),
             ExprKind::Symbol(_) | ExprKind::String(_) | ExprKind::Number(_) => None,
         }
     }
