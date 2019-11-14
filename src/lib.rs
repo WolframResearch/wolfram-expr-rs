@@ -191,7 +191,7 @@ impl Expr {
     pub fn try_symbol(&self) -> Option<&Symbol> {
         match self.kind() {
             ExprKind::Symbol(ref symbol) => Some(symbol),
-            ExprKind::Symbol(_) | ExprKind::String(_) | ExprKind::Number(_) => None,
+            ExprKind::Normal(_) | ExprKind::String(_) | ExprKind::Number(_) => None,
         }
     }
 
