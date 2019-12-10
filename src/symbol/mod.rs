@@ -246,10 +246,6 @@ impl Symbol {
     /// are absolutely certain the string passed in will always be a valid absolute
     /// symbol.
     ///
-    /// Outside of `wl_expr`, it's almost certain a call to `Symbol::unchecked_new`
-    /// should be paired with a `SymbolTable::add_symbol`. Do not use this function
-    /// if you don't understand why.
-    ///
     /// If a symbol needs to be created multiple times, consider using cache_symbol!()
     /// instead.
     ///
