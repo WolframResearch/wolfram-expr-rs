@@ -264,7 +264,7 @@ impl Symbol {
     ///
     /// NOTE: This function does NOT validate it's input. It's up to the caller to check
     ///       that the passed `str` matches the syntax of a symbol:
-    ///           <context path>`<symbol_name>.
+    ///           `` <context path>`<symbol_name> ``.
     ///
     /// The passed in string should be in the form of a context path followed by a symbol
     /// name.
