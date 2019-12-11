@@ -16,7 +16,7 @@ use std::fmt;
 pub struct InternedString(usize);
 
 // This macro comes from the static_assertions crate.
-assert_eq_size!(interned_string; InternedString, usize);
+assert_eq_size!(InternedString, usize);
 
 lazy_static! {
     static ref STRING_INTERNER: Mutex<StringInterner<usize>> =

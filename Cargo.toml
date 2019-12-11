@@ -7,5 +7,5 @@ publish = false
 [dependencies]
 string-interner = "^0.6"
 lazy_static = "^1.0"
-static_assertions = "^0.2"
+static_assertions = "^1.1.0"
 ordered-float = "1"

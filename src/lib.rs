@@ -20,7 +20,11 @@ pub struct Expr {
     inner: Rc<ExprKind>,
 }
 
-assert_eq_size!(expr_size; Expr, usize);
+assert_eq_size!(Expr, usize);
+assert_eq_align!(Expr, usize);
+
+assert_eq_size!(Expr, *const ());
+assert_eq_align!(Expr, *const ());
 
 /// A version of Expr which is shareable across threads.
 #[derive(Clone)]

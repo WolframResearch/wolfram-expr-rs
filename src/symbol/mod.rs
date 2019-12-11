@@ -198,7 +198,7 @@ pub struct Symbol(Arc<String>);
 // By using `usize` here, we gurantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
-assert_eq_size!(symbol; Symbol, usize);
+assert_eq_size!(Symbol, usize);
 
 impl fmt::Display for Symbol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
