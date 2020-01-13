@@ -220,6 +220,12 @@ impl From<&Symbol> for Symbol {
 }
 
 impl Symbol {
+    pub fn as_str(&self) -> &str {
+        let Symbol(arc_string) = self;
+
+        arc_string.as_str()
+    }
+
     /// Get the context path part of a symbol as a &str.
     pub fn context_path(&self) -> String {
         let mut s = self.to_string();
