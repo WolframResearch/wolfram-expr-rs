@@ -244,6 +244,13 @@ impl Expr {
         }
     }
 
+    pub fn is_symbol(&self, sym: &Symbol) -> bool {
+        match self.kind() {
+            ExprKind::Symbol(ref self_sym) => self_sym == sym,
+            _ => false,
+        }
+    }
+
     pub fn to_arc_expr(&self) -> ArcExpr {
         let Expr { inner } = self;
         let kind: ExprKind<Expr> = inner.as_ref().clone();
@@ -322,10 +329,7 @@ impl Normal {
     }
 
     pub fn has_head(&self, sym: &Symbol) -> bool {
-        match self.head.kind() {
-            ExprKind::Symbol(self_head) => self_head == sym,
-            _ => false
-        }
+        self.head.is_symbol(sym)
     }
 }
 
