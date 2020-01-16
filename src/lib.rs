@@ -27,7 +27,7 @@ assert_eq_size!(Expr, *const ());
 assert_eq_align!(Expr, *const ());
 
 /// A version of Expr which is shareable across threads.
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ArcExpr {
     inner: Arc<ExprKind<ArcExpr>>,
 }
