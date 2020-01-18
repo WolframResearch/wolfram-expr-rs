@@ -1,7 +1,7 @@
 use std::fmt;
+use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 use std::sync::Arc;
-use std::hash::{Hash, Hasher};
 
 extern crate string_interner;
 #[macro_use]
@@ -12,7 +12,7 @@ extern crate ordered_float;
 
 mod symbol;
 
-pub use self::symbol::{Symbol, SymbolTable, InternedString};
+pub use self::symbol::{InternedString, Symbol, SymbolTable};
 
 // #[derive(Clone, PartialEq)]
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -55,7 +55,7 @@ impl From<ArcExpr> for Expr {
 ///
 /// TODO: Rename this to ExprRefCmp
 pub struct ExprRefHash {
-    expr: Expr
+    expr: Expr,
 }
 
 impl ExprRefHash {
@@ -89,7 +89,7 @@ impl Eq for ExprRefHash {}
 impl Expr {
     pub fn new(kind: ExprKind) -> Expr {
         Expr {
-            inner: Rc::new(kind)
+            inner: Rc::new(kind),
         }
     }
 
@@ -121,19 +121,19 @@ impl Expr {
     pub fn symbol<S: Into<Symbol>>(s: S) -> Expr {
         let s = s.into();
         Expr {
-            inner: Rc::new(ExprKind::Symbol(s))
+            inner: Rc::new(ExprKind::Symbol(s)),
         }
     }
 
     pub fn number(num: Number) -> Expr {
         Expr {
-            inner: Rc::new(ExprKind::Number(num))
+            inner: Rc::new(ExprKind::Number(num)),
         }
     }
 
     pub fn string<S: Into<String>>(s: S) -> Expr {
         Expr {
-            inner: Rc::new(ExprKind::String(s.into()))
+            inner: Rc::new(ExprKind::String(s.into())),
         }
     }
 
@@ -145,7 +145,7 @@ impl Expr {
         match *self.inner {
             ExprKind::Number(_) | ExprKind::String(_) => None,
             ExprKind::Normal(ref normal) => normal.head.tag(),
-            ExprKind::Symbol(ref sym) => Some(sym.clone())
+            ExprKind::Symbol(ref sym) => Some(sym.clone()),
         }
     }
 
@@ -230,7 +230,7 @@ impl Expr {
                 ExprKind::String(_) => Some(Symbol::unchecked_new("System`String")),
                 ExprKind::Normal(ref normal) => match normal.head.kind() {
                     ExprKind::Symbol(sym) => Some(sym.clone()),
-                    _ => None
+                    _ => None,
                 },
             }
         }
@@ -257,7 +257,10 @@ impl Expr {
         let kind: ExprKind<ArcExpr> = match kind {
             ExprKind::Normal(Normal { head, contents }) => {
                 let contents = contents.iter().map(Expr::to_arc_expr).collect();
-                let normal = Normal { head: head.to_arc_expr(), contents };
+                let normal = Normal {
+                    head: head.to_arc_expr(),
+                    contents,
+                };
                 ExprKind::Normal(normal)
             },
             ExprKind::Number(num) => ExprKind::Number(num),
@@ -271,7 +274,7 @@ impl Expr {
 impl ArcExpr {
     fn new(kind: ExprKind<ArcExpr>) -> ArcExpr {
         ArcExpr {
-            inner: Arc::new(kind)
+            inner: Arc::new(kind),
         }
     }
 
@@ -281,7 +284,10 @@ impl ArcExpr {
         let kind: ExprKind<Expr> = match kind {
             ExprKind::Normal(Normal { head, contents }) => {
                 let contents = contents.iter().map(ArcExpr::to_rc_expr).collect();
-                let normal = Normal { head: head.to_rc_expr(), contents };
+                let normal = Normal {
+                    head: head.to_rc_expr(),
+                    contents,
+                };
                 ExprKind::Normal(normal)
             },
             ExprKind::Number(num) => ExprKind::Number(num),
@@ -293,7 +299,7 @@ impl ArcExpr {
 }
 
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub enum ExprKind<E=Expr> {
+pub enum ExprKind<E = Expr> {
     Normal(Normal<E>),
     Number(Number),
     String(String),
@@ -301,7 +307,7 @@ pub enum ExprKind<E=Expr> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Normal<E=Expr> {
+pub struct Normal<E = Expr> {
     pub head: E,
     pub contents: Vec<E>,
 }
@@ -325,7 +331,10 @@ pub type F32 = ordered_float::NotNan<f32>;
 
 impl Normal {
     pub fn new<E: Into<Expr>>(head: E, contents: Vec<Expr>) -> Self {
-        Normal { head: head.into(), contents }
+        Normal {
+            head: head.into(),
+            contents,
+        }
     }
 
     pub fn has_head(&self, sym: &Symbol) -> bool {
@@ -438,7 +447,7 @@ impl From<&Symbol> for Expr {
 impl From<Normal> for Expr {
     fn from(normal: Normal) -> Expr {
         Expr {
-            inner: Rc::new(ExprKind::Normal(normal))
+            inner: Rc::new(ExprKind::Normal(normal)),
         }
     }
 }

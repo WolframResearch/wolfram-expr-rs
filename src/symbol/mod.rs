@@ -78,10 +78,15 @@ impl SymbolTable {
     //       wl-parse than to do nothing.
 
     pub fn new<'a, S, I, C>(context: S, context_path: C) -> Self
-            where S: Into<String>, I: AsRef<str>, C: IntoIterator<Item=I> {
-        let context_path: Vec<String> = context_path.into_iter().map(|s| {
-            s.as_ref().to_owned()
-        }).collect();
+    where
+        S: Into<String>,
+        I: AsRef<str>,
+        C: IntoIterator<Item = I>,
+    {
+        let context_path: Vec<String> = context_path
+            .into_iter()
+            .map(|s| s.as_ref().to_owned())
+            .collect();
         SymbolTable {
             context: context.into(),
             context_path,
@@ -95,7 +100,10 @@ impl SymbolTable {
         self.symbols.insert(sym.clone());
 
         let symbol_name = sym.symbol_name();
-        self.common_symbol_names.entry(symbol_name).or_insert(HashSet::new()).insert(sym)
+        self.common_symbol_names
+            .entry(symbol_name)
+            .or_insert(HashSet::new())
+            .insert(sym)
     }
 
     /// Used by Remove[_Symbol]
@@ -123,9 +131,7 @@ impl SymbolTable {
             // that out before concatenating with `symbol`. We assume the grave
             // character is encoded as a single byte
             let full_symbol = format!("{}{}", self.context, &symbol[1..]);
-            unsafe {
-                Symbol::unchecked_new(full_symbol)
-            }
+            unsafe { Symbol::unchecked_new(full_symbol) }
         } else {
             unsafe {
                 // This must be an absolute symbol.
@@ -156,8 +162,10 @@ impl SymbolTable {
 
             let common_names = match self.common_symbol_names.get(symbol_name) {
                 Some(common_names) => common_names,
-                None => return unsafe {
-                    Symbol::unchecked_new(format!("{}{}", self.context, symbol_name))
+                None => {
+                    return unsafe {
+                        Symbol::unchecked_new(format!("{}{}", self.context, symbol_name))
+                    }
                 },
             };
 
@@ -174,9 +182,8 @@ impl SymbolTable {
         }
         // We didn't find a symbol in $ContextPath with the name `symbol_name`, so create
         // a symbol symbol in the current context: $Context`<symbol_name>
-        let sym = unsafe {
-            Symbol::unchecked_new(format!("{}{}", self.context, symbol_name))
-        };
+        let sym =
+            unsafe { Symbol::unchecked_new(format!("{}{}", self.context, symbol_name)) };
         self.add_symbol(sym.clone());
         sym
     }
@@ -229,7 +236,8 @@ impl Symbol {
     /// Get the context path part of a symbol as a &str.
     pub fn context_path(&self) -> String {
         let mut s = self.to_string();
-        let last_grave = s.rfind("`")
+        let last_grave = s
+            .rfind("`")
             .expect("Failed to find grave '`' character in symbol");
         // Slicing is [a..b), non inclusive of the 2nd index
         s.truncate(last_grave + 1);
@@ -239,7 +247,8 @@ impl Symbol {
     // Get the symbol name part of a symbol as a &str.
     pub fn symbol_name(&self) -> String {
         let mut s = self.to_string();
-        let last_grave = s.rfind("`")
+        let last_grave = s
+            .rfind("`")
             .expect("Failed to find grave '`' character in symbol");
         // We assume the grave character is encoded as a single byte
         let substr = s.split_off(last_grave + 1);

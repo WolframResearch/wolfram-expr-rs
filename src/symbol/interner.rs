@@ -1,7 +1,7 @@
 use string_interner::StringInterner;
 
-use std::sync::Mutex;
 use std::fmt;
+use std::sync::Mutex;
 
 // By using `usize` here, we gurantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
@@ -28,7 +28,9 @@ fn acquire_lock() -> ::std::sync::MutexGuard<'static, StringInterner<usize>> {
     // When running tests, many `#[test] fn ...`'s are run in parallel, sharing
     // the global STRING_INTERNER. We expect therefore to sometimes have to wait
     // to acquire the lock. Benchmarks should not be run in parallel for this reason.
-    STRING_INTERNER.lock().expect("STRING_INTERNER Mutex was poisoned!")
+    STRING_INTERNER
+        .lock()
+        .expect("STRING_INTERNER Mutex was poisoned!")
 }
 
 impl fmt::Display for InternedString {
@@ -45,8 +47,11 @@ impl fmt::Display for InternedString {
         // TODO: Replace this with resolve_unchecked once I'm confident that's correct.
         let s: &str = match lock.resolve(self.0) {
             Some(s) => s,
-            None => panic!("Failed to resolve InternedString from global \
-                STRING_INTERNER. InternedString id: {}", self.0),
+            None => panic!(
+                "Failed to resolve InternedString from global \
+                 STRING_INTERNER. InternedString id: {}",
+                self.0
+            ),
         };
         write!(f, "{}", s)
     }
