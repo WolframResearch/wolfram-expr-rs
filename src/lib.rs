@@ -108,6 +108,10 @@ impl Expr {
         Rc::make_mut(&mut self.inner)
     }
 
+    pub fn ref_count(&self) -> usize {
+        Rc::strong_count(&self.inner)
+    }
+
     pub fn normal<H: Into<Expr>>(head: H, contents: Vec<Expr>) -> Expr {
         let head = head.into();
         // let contents = contents.into();
@@ -178,9 +182,9 @@ impl Expr {
     /// `index` is 0-based. The 0th index is the first element, not the head.
     ///
     /// This function does not panic.
-    pub fn normal_part(&self, index: usize) -> Option<&Expr> {
+    pub fn normal_part(&self, index_0: usize) -> Option<&Expr> {
         match self.kind() {
-            ExprKind::Normal(ref normal) => normal.contents.get(index),
+            ExprKind::Normal(ref normal) => normal.contents.get(index_0),
             ExprKind::Symbol(_) | ExprKind::Number(_) | ExprKind::String(_) => None,
         }
     }
