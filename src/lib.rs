@@ -54,6 +54,7 @@ impl From<ArcExpr> for Expr {
 /// are therefore the same) can be differenciated.
 ///
 /// TODO: Rename this to ExprRefCmp
+#[derive(Debug)]
 pub struct ExprRefHash {
     expr: Expr,
 }
@@ -407,11 +408,11 @@ impl fmt::Debug for ExprKind {
 
 impl fmt::Display for Normal {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(f, "{}[", self.head));
+        write!(f, "{}[", self.head)?;
         for (idx, elem) in self.contents.iter().enumerate() {
-            try!(write!(f, "{}", elem));
+            write!(f, "{}", elem)?;
             if idx != self.contents.len() - 1 {
-                try!(write!(f, ", "));
+                write!(f, ", ")?;
             }
         }
         write!(f, "]")
