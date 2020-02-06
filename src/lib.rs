@@ -1,6 +1,5 @@
 use std::fmt;
 use std::hash::{Hash, Hasher};
-use std::rc::Rc;
 use std::sync::Arc;
 
 extern crate string_interner;
@@ -17,32 +16,16 @@ pub use self::symbol::{InternedString, Symbol, SymbolTable};
 // #[derive(Clone, PartialEq)]
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct Expr {
-    inner: Rc<ExprKind>,
+    inner: Arc<ExprKind>,
 }
+
+pub type ArcExpr = Expr;
 
 assert_eq_size!(Expr, usize);
 assert_eq_align!(Expr, usize);
 
 assert_eq_size!(Expr, *const ());
 assert_eq_align!(Expr, *const ());
-
-/// A version of Expr which is shareable across threads.
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct ArcExpr {
-    inner: Arc<ExprKind<ArcExpr>>,
-}
-
-impl From<Expr> for ArcExpr {
-    fn from(expr: Expr) -> Self {
-        expr.to_arc_expr()
-    }
-}
-
-impl From<ArcExpr> for Expr {
-    fn from(expr: ArcExpr) -> Self {
-        expr.to_rc_expr()
-    }
-}
 
 /// Newtype around Expr, which calculates it's Hash value based on the pointer value,
 /// not the ExprKind.
@@ -72,16 +55,16 @@ impl ExprRefHash {
 impl Hash for ExprRefHash {
     fn hash<H: Hasher>(&self, state: &mut H) {
         // Clone `expr` to increase the strong count. Otherwise expr would be dropped
-        // inside of `Rc::into_raw` and the `Expr` could be deallocated.
-        let ptr = Rc::into_raw(self.expr.inner.clone());
+        // inside of `Arc::into_raw` and the `Expr` could be deallocated.
+        let ptr = Arc::into_raw(self.expr.inner.clone());
         ptr.hash(state);
-        let _ = unsafe { Rc::from_raw(ptr) };
+        let _ = unsafe { Arc::from_raw(ptr) };
     }
 }
 
 impl PartialEq for ExprRefHash {
     fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.expr.inner, &other.expr.inner)
+        Arc::ptr_eq(&self.expr.inner, &other.expr.inner)
     }
 }
 
@@ -90,12 +73,12 @@ impl Eq for ExprRefHash {}
 impl Expr {
     pub fn new(kind: ExprKind) -> Expr {
         Expr {
-            inner: Rc::new(kind),
+            inner: Arc::new(kind),
         }
     }
 
     pub fn to_kind(self) -> ExprKind {
-        match Rc::try_unwrap(self.inner) {
+        match Arc::try_unwrap(self.inner) {
             Ok(kind) => kind,
             Err(self_) => (*self_).clone(),
         }
@@ -106,18 +89,18 @@ impl Expr {
     }
 
     pub fn kind_mut(&mut self) -> &mut ExprKind {
-        Rc::make_mut(&mut self.inner)
+        Arc::make_mut(&mut self.inner)
     }
 
     pub fn ref_count(&self) -> usize {
-        Rc::strong_count(&self.inner)
+        Arc::strong_count(&self.inner)
     }
 
     pub fn normal<H: Into<Expr>>(head: H, contents: Vec<Expr>) -> Expr {
         let head = head.into();
         // let contents = contents.into();
         Expr {
-            inner: Rc::new(ExprKind::Normal(Normal { head, contents })),
+            inner: Arc::new(ExprKind::Normal(Normal { head, contents })),
         }
     }
 
@@ -126,19 +109,19 @@ impl Expr {
     pub fn symbol<S: Into<Symbol>>(s: S) -> Expr {
         let s = s.into();
         Expr {
-            inner: Rc::new(ExprKind::Symbol(s)),
+            inner: Arc::new(ExprKind::Symbol(s)),
         }
     }
 
     pub fn number(num: Number) -> Expr {
         Expr {
-            inner: Rc::new(ExprKind::Number(num)),
+            inner: Arc::new(ExprKind::Number(num)),
         }
     }
 
     pub fn string<S: Into<String>>(s: S) -> Expr {
         Expr {
-            inner: Rc::new(ExprKind::String(s.into())),
+            inner: Arc::new(ExprKind::String(s.into())),
         }
     }
 
@@ -257,49 +240,24 @@ impl Expr {
     }
 
     pub fn to_arc_expr(&self) -> ArcExpr {
-        let Expr { inner } = self;
-        let kind: ExprKind<Expr> = inner.as_ref().clone();
-        let kind: ExprKind<ArcExpr> = match kind {
-            ExprKind::Normal(Normal { head, contents }) => {
-                let contents = contents.iter().map(Expr::to_arc_expr).collect();
-                let normal = Normal {
-                    head: head.to_arc_expr(),
-                    contents,
-                };
-                ExprKind::Normal(normal)
-            },
-            ExprKind::Number(num) => ExprKind::Number(num),
-            ExprKind::String(string) => ExprKind::String(string),
-            ExprKind::Symbol(symbol) => ExprKind::Symbol(symbol),
-        };
-        ArcExpr::new(kind)
-    }
-}
+        self.clone()
 
-impl ArcExpr {
-    fn new(kind: ExprKind<ArcExpr>) -> ArcExpr {
-        ArcExpr {
-            inner: Arc::new(kind),
-        }
-    }
-
-    pub fn to_rc_expr(&self) -> Expr {
-        let ArcExpr { inner } = self;
-        let kind: ExprKind<ArcExpr> = inner.as_ref().clone();
-        let kind: ExprKind<Expr> = match kind {
-            ExprKind::Normal(Normal { head, contents }) => {
-                let contents = contents.iter().map(ArcExpr::to_rc_expr).collect();
-                let normal = Normal {
-                    head: head.to_rc_expr(),
-                    contents,
-                };
-                ExprKind::Normal(normal)
-            },
-            ExprKind::Number(num) => ExprKind::Number(num),
-            ExprKind::String(string) => ExprKind::String(string),
-            ExprKind::Symbol(symbol) => ExprKind::Symbol(symbol),
-        };
-        Expr::new(kind)
+        // let Expr { inner } = self;
+        // let kind: ExprKind<Expr> = inner.as_ref().clone();
+        // let kind: ExprKind<ArcExpr> = match kind {
+        //     ExprKind::Normal(Normal { head, contents }) => {
+        //         let contents = contents.iter().map(Expr::to_arc_expr).collect();
+        //         let normal = Normal {
+        //             head: head.to_arc_expr(),
+        //             contents,
+        //         };
+        //         ExprKind::Normal(normal)
+        //     },
+        //     ExprKind::Number(num) => ExprKind::Number(num),
+        //     ExprKind::String(string) => ExprKind::String(string),
+        //     ExprKind::Symbol(symbol) => ExprKind::Symbol(symbol),
+        // };
+        // ArcExpr::new(kind)
     }
 }
 
@@ -452,7 +410,7 @@ impl From<&Symbol> for Expr {
 impl From<Normal> for Expr {
     fn from(normal: Normal) -> Expr {
         Expr {
-            inner: Rc::new(ExprKind::Normal(normal)),
+            inner: Arc::new(ExprKind::Normal(normal)),
         }
     }
 }
