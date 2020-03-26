@@ -106,7 +106,7 @@ impl SymbolTable {
             .insert(sym)
     }
 
-    /// Used by Remove[_Symbol]
+    /// Used by `Remove[_Symbol]`.
     pub fn remove_symbol(&mut self, sym: &Symbol) {
         self.symbols.remove(sym);
     }

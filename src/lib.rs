@@ -187,7 +187,7 @@ impl Expr {
         }
     }
 
-    /// Gets the head of all non-sub-value form (_[___][___]) exprs as a symbol.
+    /// Gets the head of all non-sub-value form `(_[___][___])` exprs as a symbol.
     ///
     /// ```text
     /// symbol_head(10) => Integer
