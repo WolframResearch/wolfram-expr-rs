@@ -77,6 +77,10 @@ impl Expr {
         }
     }
 
+    /// Consume `self` and return an owned [`ExprKind`].
+    ///
+    /// If the reference count of `self` is equal to 1 this function will *not* perform
+    /// a clone of the stored `ExprKind`, making this operation very cheap in that case.
     pub fn to_kind(self) -> ExprKind {
         match Arc::try_unwrap(self.inner) {
             Ok(kind) => kind,
