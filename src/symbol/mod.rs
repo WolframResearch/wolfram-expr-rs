@@ -6,7 +6,7 @@
  * than the identifying usize "tokens" which are used now. This would prevent ever having
  * to aquire a lock to Display symbols.
  */
-use std::fmt;
+use std::fmt::{self, Debug, Display};
 
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -202,21 +202,33 @@ impl SymbolTable {
 #[repr(C)]
 pub struct Symbol(Arc<String>);
 
+/// The identifier portion of a symbol. This contains no context marks ('`').
+///
+/// In the symbol `` Global`foo ``, the `SymbolName` is `"foo"`.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct SymbolName(Arc<String>);
+
 // By using `usize` here, we gurantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
 assert_eq_size!(Symbol, usize);
 
-impl fmt::Display for Symbol {
+impl Display for Symbol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl fmt::Debug for Symbol {
+impl Debug for Symbol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let Symbol(interned) = self;
         write!(f, "Symbol({})", interned)
+    }
+}
+
+impl Display for SymbolName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -331,6 +343,20 @@ impl Symbol {
     //     let s = format!("Global`{}", s);
     //     Symbol::unchecked_new(&s)
     // }
+}
+
+impl SymbolName {
+    pub fn as_str(&self) -> &str {
+        let SymbolName(arc_name) = self;
+
+        arc_name.as_str()
+    }
+
+    pub unsafe fn unchecked_new<S: Into<String> + AsRef<str>>(s: S) -> SymbolName {
+        let inner = Arc::new(s.into());
+        // TODO: Add a debug_assert! here to validate `s`.
+        SymbolName(inner)
+    }
 }
 
 // impl PartialEq<str> for Symbol {
