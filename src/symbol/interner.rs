@@ -3,7 +3,7 @@ use string_interner::StringInterner;
 use std::fmt;
 use std::sync::Mutex;
 
-// By using `usize` here, we gurantee that we can later change this to be a pointer
+// By using `usize` here, we guarantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
 // TODO: usize would be a u32 on 32-bit platforms. Is it at all possible there will ever

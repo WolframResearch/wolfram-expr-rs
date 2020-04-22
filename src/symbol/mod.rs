@@ -208,7 +208,7 @@ pub struct Symbol(Arc<String>);
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolName(Arc<String>);
 
-// By using `usize` here, we gurantee that we can later change this to be a pointer
+// By using `usize` here, we guarantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
 assert_eq_size!(Symbol, usize);
@@ -303,7 +303,7 @@ impl Symbol {
     /// Symbol::unchecked_new("A`B`mySymbol")
     /// ```
     ///
-    // /// Takes a &'static str (as opposed to a &str) to help gurantee that no user input
+    // /// Takes a &'static str (as opposed to a &str) to help guarantee that no user input
     // /// is ever fed to this function. This function is only intended to be used as a
     // /// helper in the kernel.
     pub unsafe fn unchecked_new<S: Into<String> + AsRef<str>>(s: S) -> Symbol {
@@ -325,7 +325,7 @@ impl Symbol {
     // /// Take care, a call like `Symbol::system("System`x")` will produce the symbol
     // /// "System`System`x".
     // ///
-    // /// Takes a &'static str (as opposed to a &str) to help gurantee that no user input
+    // /// Takes a &'static str (as opposed to a &str) to help guarantee that no user input
     // /// is ever fed to this function. This function is only intended to be used as a
     // /// helper.
     // pub fn system(s: &'static str) -> Symbol {
