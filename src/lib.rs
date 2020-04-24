@@ -19,8 +19,6 @@ pub struct Expr {
     inner: Arc<ExprKind>,
 }
 
-pub type ArcExpr = Expr;
-
 assert_eq_size!(Expr, usize);
 assert_eq_align!(Expr, usize);
 
@@ -241,27 +239,6 @@ impl Expr {
             ExprKind::Symbol(ref self_sym) => self_sym == sym,
             _ => false,
         }
-    }
-
-    pub fn to_arc_expr(&self) -> ArcExpr {
-        self.clone()
-
-        // let Expr { inner } = self;
-        // let kind: ExprKind<Expr> = inner.as_ref().clone();
-        // let kind: ExprKind<ArcExpr> = match kind {
-        //     ExprKind::Normal(Normal { head, contents }) => {
-        //         let contents = contents.iter().map(Expr::to_arc_expr).collect();
-        //         let normal = Normal {
-        //             head: head.to_arc_expr(),
-        //             contents,
-        //         };
-        //         ExprKind::Normal(normal)
-        //     },
-        //     ExprKind::Number(num) => ExprKind::Number(num),
-        //     ExprKind::String(string) => ExprKind::String(string),
-        //     ExprKind::Symbol(symbol) => ExprKind::Symbol(symbol),
-        // };
-        // ArcExpr::new(kind)
     }
 }
 
