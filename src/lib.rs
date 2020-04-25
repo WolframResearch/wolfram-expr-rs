@@ -396,6 +396,12 @@ impl From<Normal> for Expr {
     }
 }
 
+impl From<i64> for Expr {
+    fn from(int: i64) -> Expr {
+        Expr::number(Number::Integer(int))
+    }
+}
+
 // impl From<Normal> for ExprKind {
 //     fn from(normal: Normal) -> ExprKind {
 //         ExprKind::Normal(Box::new(normal))
