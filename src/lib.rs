@@ -240,6 +240,14 @@ impl Expr {
             _ => false,
         }
     }
+
+    //==================================
+    // Common values
+    //==================================
+
+    pub fn null() -> Expr {
+        Expr::symbol(unsafe { Symbol::unchecked_new("System`Null") })
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -287,6 +295,8 @@ impl Normal {
 }
 
 impl Number {
+    /// # Panics
+    ///
     /// This function will panic if `r` is NaN.
     ///
     /// TODO: Change this function to take `NotNan` instead, so the caller doesn't have to
