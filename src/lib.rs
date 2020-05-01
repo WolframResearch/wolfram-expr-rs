@@ -11,7 +11,7 @@ extern crate ordered_float;
 
 mod symbol;
 
-pub use self::symbol::{InternedString, Symbol, SymbolName, SymbolTable};
+pub use self::symbol::{Symbol, SymbolName, SymbolTable};
 
 // #[derive(Clone, PartialEq)]
 #[derive(Clone, PartialEq, Eq, Hash)]

@@ -13,7 +13,7 @@ use std::sync::Mutex;
 //       considered to be essentially random and non-deterministic.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[repr(C)]
-pub struct InternedString(usize);
+struct InternedString(usize);
 
 // This macro comes from the static_assertions crate.
 assert_eq_size!(InternedString, usize);

@@ -13,8 +13,6 @@ use std::sync::Arc;
 
 mod interner;
 
-pub use self::interner::InternedString;
-
 /* Notes
 
 Operations on Symbols
