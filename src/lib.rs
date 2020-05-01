@@ -32,7 +32,7 @@ assert_eq_align!(Expr, *const ());
 /// Newtype around Expr, which calculates it's Hash value based on the pointer value,
 /// not the ExprKind.
 ///
-/// TODO: Add tests that `ExprRefHash` is working as expected
+/// TODO: Add tests that `ExprRefCmp` is working as expected
 ///
 /// This is used in `wl_parse::source_map` to give unique source mapping, so that Expr's
 /// which are equal according to the PartialEq impl for ExprKind (and whose hash values
@@ -40,13 +40,13 @@ assert_eq_align!(Expr, *const ());
 ///
 /// TODO: Rename this to ExprRefCmp
 #[derive(Debug)]
-pub struct ExprRefHash {
+pub struct ExprRefCmp {
     expr: Expr,
 }
 
-impl ExprRefHash {
+impl ExprRefCmp {
     pub fn new(expr: Expr) -> Self {
-        ExprRefHash { expr }
+        ExprRefCmp { expr }
     }
 
     pub fn into_expr(self) -> Expr {
@@ -54,7 +54,7 @@ impl ExprRefHash {
     }
 }
 
-impl Hash for ExprRefHash {
+impl Hash for ExprRefCmp {
     fn hash<H: Hasher>(&self, state: &mut H) {
         // Clone `expr` to increase the strong count. Otherwise expr would be dropped
         // inside of `Arc::into_raw` and the `Expr` could be deallocated.
@@ -64,13 +64,13 @@ impl Hash for ExprRefHash {
     }
 }
 
-impl PartialEq for ExprRefHash {
+impl PartialEq for ExprRefCmp {
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.expr.inner, &other.expr.inner)
     }
 }
 
-impl Eq for ExprRefHash {}
+impl Eq for ExprRefCmp {}
 
 impl Expr {
     pub fn new(kind: ExprKind) -> Expr {
