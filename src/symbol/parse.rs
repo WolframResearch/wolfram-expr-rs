@@ -1,4 +1,4 @@
-use crate::{Symbol, SymbolName};
+use crate::{AbsoluteContext, RelativeContext, Symbol, SymbolName};
 
 use nom::{
     branch::alt,
@@ -6,7 +6,7 @@ use nom::{
     combinator::{complete, recognize},
     multi::{many0, many1},
     sequence::{pair, tuple},
-    IResult,
+    IResult, InputLength,
 };
 use nom_locate::LocatedSpan;
 
@@ -15,9 +15,10 @@ impl Symbol {
     ///
     /// An absolute symbol is a symbol with an explicit context path. "System`Plus" is an
     /// absolute symbol, "Plus" is a relative symbol. "`Plus" is also a relative symbol.
+    ///
+    /// If a symbol needs to be created multiple times, consider using cache_symbol!()
+    /// instead.
     pub fn new<I: AsRef<str>>(input: I) -> Option<Self> {
-        use nom::InputLength;
-
         let input = LocatedSpan::new(input.as_ref());
 
         let (rem, (_span, sym)) = absolute_symbol_ty(input).ok()?;
@@ -36,8 +37,6 @@ impl SymbolName {
     ///
     /// A symbol name is a symbol without any context marks.
     pub fn new<I: AsRef<str>>(input: I) -> Option<SymbolName> {
-        use nom::InputLength;
-
         let input = LocatedSpan::new(input.as_ref());
 
         let (remaining, (_span, symname)) = symbol_name_ty(input).ok()?;
@@ -51,9 +50,42 @@ impl SymbolName {
     }
 }
 
+impl AbsoluteContext {
+    pub fn new<I: AsRef<str>>(input: I) -> Option<Self> {
+        let input = LocatedSpan::new(input.as_ref());
+
+        let (remaining, _) = absolute_context_path(input).ok()?;
+
+        if remaining.input_len() == 0 {
+            Some(unsafe { AbsoluteContext::unchecked_new(input.fragment.to_owned()) })
+        } else {
+            None
+        }
+    }
+}
+
+impl RelativeContext {
+    pub fn new<I: AsRef<str>>(input: I) -> Option<Self> {
+        let input = LocatedSpan::new(input.as_ref());
+
+        let (remaining, _) = relative_context_path(input).ok()?;
+
+        if remaining.input_len() == 0 {
+            Some(unsafe { RelativeContext::unchecked_new(input.fragment.to_owned()) })
+        } else {
+            None
+        }
+    }
+}
+
+//======================================
+// Compound combinators -- these conceptually still only parse single tokens, and are used
+// directly by wl-parse.
+//======================================
 
 pub(super) type StrSpan<'a> = LocatedSpan<&'a str>;
 
+#[cfg_attr(not(feature = "unstable_parse"), allow(dead_code))]
 pub fn symbol(i: StrSpan) -> IResult<StrSpan, StrSpan> {
     alt((absolute_symbol, relative_symbol, symbol_name))(i)
 }
@@ -68,20 +100,20 @@ pub fn symbol_name(i: StrSpan) -> IResult<StrSpan, StrSpan> {
     Ok((i, res))
 }
 
-pub fn absolute_context_path(i: StrSpan) -> IResult<StrSpan, StrSpan> {
+fn absolute_context_path(i: StrSpan) -> IResult<StrSpan, StrSpan> {
     recognize(many1(complete(pair(symbol_name, tag("`")))))(i)
 }
 
-pub fn relative_context_path(i: StrSpan) -> IResult<StrSpan, StrSpan> {
+fn relative_context_path(i: StrSpan) -> IResult<StrSpan, StrSpan> {
     // ` (<symbol_name>`)+
     recognize(pair(tag("`"), many1(complete(pair(symbol_name, tag("`"))))))(i)
 }
 
-pub fn absolute_symbol(i: StrSpan) -> IResult<StrSpan, StrSpan> {
+fn absolute_symbol(i: StrSpan) -> IResult<StrSpan, StrSpan> {
     recognize(pair(absolute_context_path, symbol_name))(i)
 }
 
-pub fn relative_symbol(i: StrSpan) -> IResult<StrSpan, StrSpan> {
+fn relative_symbol(i: StrSpan) -> IResult<StrSpan, StrSpan> {
     recognize(pair(relative_context_path, symbol_name))(i)
 }
 

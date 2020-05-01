@@ -67,22 +67,18 @@ pub struct Symbol(Arc<String>);
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolName(Arc<String>);
 
+/// A context path which does not begin with `.
+/// E.g.: Global`A`
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct AbsoluteContext(Arc<String>);
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct RelativeContext(Arc<String>);
+
 // By using `usize` here, we guarantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
 assert_eq_size!(Symbol, usize);
-
-impl Display for Symbol {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl Display for SymbolName {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
 
 impl From<&Symbol> for Symbol {
     fn from(sym: &Symbol) -> Self {
@@ -91,12 +87,6 @@ impl From<&Symbol> for Symbol {
 }
 
 impl Symbol {
-    pub fn as_str(&self) -> &str {
-        let Symbol(arc_string) = self;
-
-        arc_string.as_str()
-    }
-
     /// Get the context path part of a symbol as a &str.
     pub fn context_path(&self) -> String {
         let mut s = self.to_string();
@@ -118,52 +108,55 @@ impl Symbol {
         let substr = s.split_off(last_grave + 1);
         substr
     }
+}
 
-    /// Create a symbol.
-    ///
-    /// Strongly prefer using `wl_parse::parse_symbol()` over this function, unless you
-    /// are absolutely certain the string passed in will always be a valid absolute
-    /// symbol.
-    ///
-    /// If a symbol needs to be created multiple times, consider using cache_symbol!()
-    /// instead.
-    ///
-    /// NOTE: Adding an entry in the lang::sym::builtin_symbols! is almost always what's
-    ///       needed instead of `Symbol::unchecked_new`.
-    ///
-    /// ## Safety
-    ///
-    /// This function actually does not do anything that would be rejected by rustc were
-    /// the function not marked unsafe. However, this funciton is so often *not* what is
-    /// really needed, it's marked unsafe as a deterent to possible users.
-    ///
-    /// NOTE: This function bypasses adding the new symbol to the evaluator's symbol table,
-    ///       which is ALMOST ALWAYS not what is wanted (this means the new symbol could
-    ///       not be found on the $ContextPath).
-    ///
-    /// NOTE: This function does NOT validate it's input. It's up to the caller to check
-    ///       that the passed `str` matches the syntax of a symbol:
-    ///           `` <context path>`<symbol_name> ``.
-    ///
-    /// The passed in string should be in the form of a context path followed by a symbol
-    /// name.
-    ///
-    /// Example:
-    ///
-    /// ```norun
-    /// Symbol::unchecked_new("Internal`x")
-    /// Symbol::unchecked_new("A`B`mySymbol")
-    /// ```
-    ///
-    // /// Takes a &'static str (as opposed to a &str) to help guarantee that no user input
-    // /// is ever fed to this function. This function is only intended to be used as a
-    // /// helper in the kernel.
-    pub unsafe fn unchecked_new<S: Into<String> + AsRef<str>>(s: S) -> Symbol {
-        let inner = Arc::new(s.into());
-        // TODO: Add a debug_assert! here to validate `s`.
-        Symbol(inner)
-    }
+macro_rules! common_impls {
+    ($ty:ident) => {
+        impl Display for $ty {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                let $ty(string) = self;
 
+                write!(f, "{}", string)
+            }
+        }
+
+        impl $ty {
+            /// Get the underlying `&str` representation of this type.
+            pub fn as_str(&self) -> &str {
+                let $ty(string) = self;
+
+                string.as_str()
+            }
+
+            /// Create a new instance of this type from a string, without validating the
+            /// string contents.
+            ///
+            /// It's up to the caller to ensure that the passed `input` has the correct
+            /// syntax.
+            ///
+            /// ## Safety
+            ///
+            /// This function actually does not do anything that would be rejected by
+            /// rustc were the function not marked `unsafe`. However, this function is so
+            /// often *not* what is really needed, it's marked unsafe as a deterent to
+            /// possible users.
+            pub(crate) unsafe fn unchecked_new<S: AsRef<str> + Into<String>>(
+                input: S,
+            ) -> $ty {
+                let inner: Arc<String> = Arc::new(input.into());
+                $ty(inner)
+            }
+        }
+    };
+}
+
+common_impls! { Symbol }
+common_impls!(SymbolName);
+common_impls!(AbsoluteContext);
+common_impls!(RelativeContext);
+
+/*
+impl Symbol {
     // /// Create a symbol in the System` context.
     // ///
     // /// This function has the same problems with regards to the symbol table as
@@ -196,20 +189,7 @@ impl Symbol {
     //     Symbol::unchecked_new(&s)
     // }
 }
-
-impl SymbolName {
-    pub fn as_str(&self) -> &str {
-        let SymbolName(arc_name) = self;
-
-        arc_name.as_str()
-    }
-
-    pub unsafe fn unchecked_new<S: Into<String> + AsRef<str>>(s: S) -> SymbolName {
-        let inner = Arc::new(s.into());
-        // TODO: Add a debug_assert! here to validate `s`.
-        SymbolName(inner)
-    }
-}
+*/
 
 // impl PartialEq<str> for Symbol {
 //     fn eq(&self, other: &str) -> bool {
