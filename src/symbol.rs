@@ -39,9 +39,9 @@ macro_rules! cache_symbol {
         ::lazy_static::lazy_static! {
             $(
             #[allow(non_upper_case_globals)]
-            pub static ref $name: $crate::Symbol = unsafe {
+            pub static ref $name: $crate::Symbol = {
                 // TODO: This should check the symbol on debug builds
-                $crate::Symbol::unchecked_new($symbol_str)
+                $crate::Symbol::new($symbol_str).expect("cache_symbol!: invalid symbol syntax")
             };
             )*
         }
