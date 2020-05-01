@@ -91,7 +91,7 @@ impl Symbol {
     pub fn context_path(&self) -> String {
         let mut s = self.to_string();
         let last_grave = s
-            .rfind("`")
+            .rfind('`')
             .expect("Failed to find grave '`' character in symbol");
         // Slicing is [a..b), non inclusive of the 2nd index
         s.truncate(last_grave + 1);
@@ -102,7 +102,7 @@ impl Symbol {
     pub fn symbol_name(&self) -> String {
         let mut s = self.to_string();
         let last_grave = s
-            .rfind("`")
+            .rfind('`')
             .expect("Failed to find grave '`' character in symbol");
         // We assume the grave character is encoded as a single byte
         let substr = s.split_off(last_grave + 1);

@@ -23,7 +23,7 @@ impl SymbolTable {
     //       wl-parse than to do nothing.
 
     /// Construct a new symbol table from a context and context path.
-    pub fn new<'a, S, I, C>(context: S, context_path: C) -> Self
+    pub fn new<S, I, C>(context: S, context_path: C) -> Self
     where
         S: Into<String>,
         I: AsRef<str>,
@@ -50,7 +50,7 @@ impl SymbolTable {
         let symbol_name = sym.symbol_name();
         self.common_symbol_names
             .entry(symbol_name)
-            .or_insert(HashSet::new())
+            .or_insert_with(HashSet::new)
             .insert(sym)
     }
 
@@ -70,9 +70,9 @@ impl SymbolTable {
     /// FIXME: It won't panic, it will just call Symbol::unchecked_new(), fix this.
     /// TODO: Change the type of `symbol` to enforce syntax
     pub fn parse_from_source(&mut self, symbol: &str) -> Symbol {
-        let sym = if !symbol.contains("`") {
+        let sym = if !symbol.contains('`') {
             self.parse_symbol_name(symbol)
-        } else if symbol.starts_with("`") {
+        } else if symbol.starts_with('`') {
             // This is a relative symbol, e.g.: `y`x in the source.
             // So if $Context is "Internal`", the full symbol is Internal`y`x
             // `context` ($Context) should always end in a grave character, so strip

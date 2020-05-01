@@ -1,3 +1,5 @@
+#![allow(clippy::let_and_return)]
+
 mod symbol;
 mod symbol_table;
 
