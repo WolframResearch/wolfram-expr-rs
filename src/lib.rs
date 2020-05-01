@@ -2,12 +2,7 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 
-extern crate string_interner;
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate static_assertions;
-extern crate ordered_float;
+use static_assertions::{assert_eq_align, assert_eq_size};
 
 mod symbol;
 

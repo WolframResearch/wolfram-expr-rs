@@ -3,6 +3,9 @@ use string_interner::StringInterner;
 use std::fmt;
 use std::sync::Mutex;
 
+use lazy_static::lazy_static;
+use static_assertions::assert_eq_size;
+
 // By using `usize` here, we guarantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
@@ -15,7 +18,6 @@ use std::sync::Mutex;
 #[repr(C)]
 struct InternedString(usize);
 
-// This macro comes from the static_assertions crate.
 assert_eq_size!(InternedString, usize);
 
 lazy_static! {

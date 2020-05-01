@@ -6,12 +6,15 @@
  * than the identifying usize "tokens" which are used now. This would prevent ever having
  * to aquire a lock to Display symbols.
  */
+
+mod interner;
+
 use std::fmt::{self, Debug, Display};
 
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
-mod interner;
+use static_assertions::assert_eq_size;
 
 /* Notes
 
