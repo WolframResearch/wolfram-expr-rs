@@ -76,17 +76,3 @@ impl<S: Into<String> + AsRef<str>> From<S> for InternedString {
         InternedString(value)
     }
 }
-
-impl InternedString {
-    pub unsafe fn unsafe_internal_data(&self) -> usize {
-        self.0
-    }
-}
-
-// impl<'a> From<&'a str> for InternedString {
-//     fn from(s: &'a str) -> InternedString {
-//         let mut lock = acquire_lock();
-//         let value: usize = lock.get_or_intern(s);
-//         InternedString(value)
-//     }
-// }
