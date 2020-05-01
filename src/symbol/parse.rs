@@ -83,7 +83,7 @@ impl RelativeContext {
 // directly by wl-parse.
 //======================================
 
-pub(super) type StrSpan<'a> = LocatedSpan<&'a str>;
+type StrSpan<'a> = LocatedSpan<&'a str>;
 
 #[cfg_attr(not(feature = "unstable_parse"), allow(dead_code))]
 pub fn symbol(i: StrSpan) -> IResult<StrSpan, StrSpan> {
