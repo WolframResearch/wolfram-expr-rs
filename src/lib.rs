@@ -49,7 +49,7 @@ impl ExprRefHash {
         ExprRefHash { expr }
     }
 
-    pub fn to_expr(self) -> Expr {
+    pub fn into_expr(self) -> Expr {
         self.expr
     }
 }
