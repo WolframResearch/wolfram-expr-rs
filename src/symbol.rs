@@ -57,7 +57,7 @@ macro_rules! cache_symbol {
 ///
 /// This type implements `PartialOrd`/`Ord` primarily for the purposes of allowing
 /// instances of this type to be included in ordered sets (e.g. `BTreeMap`).
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(C)]
 pub struct Symbol(Arc<String>);
 
@@ -75,13 +75,6 @@ assert_eq_size!(Symbol, usize);
 impl Display for Symbol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
-    }
-}
-
-impl Debug for Symbol {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let Symbol(interned) = self;
-        write!(f, "Symbol({})", interned)
     }
 }
 

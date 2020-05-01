@@ -8,7 +8,7 @@ use std::sync::Arc;
 use static_assertions::{assert_eq_align, assert_eq_size};
 
 
-pub use self::symbol::{Symbol, SymbolName};
+pub use self::symbol::{AbsoluteContext, RelativeContext, Symbol, SymbolName};
 pub use self::symbol_table::SymbolTable;
 
 #[cfg(feature = "unstable_parse")]
