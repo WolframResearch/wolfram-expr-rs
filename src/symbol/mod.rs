@@ -67,6 +67,7 @@ impl SymbolTable {
     //       that stays in the parser, and it would be worse to make wl-expr depend on
     //       wl-parse than to do nothing.
 
+    /// Construct a new symbol table from a context and context path.
     pub fn new<'a, S, I, C>(context: S, context_path: C) -> Self
     where
         S: Into<String>,
@@ -85,7 +86,9 @@ impl SymbolTable {
         }
     }
 
-    /// Returns true if `sym` was already a part of this symbol table.
+    /// Add `sym` to this symbol table.
+    ///
+    /// Returns `true` if `sym` was already a part of this symbol table.
     pub fn add_symbol(&mut self, sym: Symbol) -> bool {
         self.symbols.insert(sym.clone());
 
@@ -101,7 +104,7 @@ impl SymbolTable {
         self.symbols.remove(sym);
     }
 
-    // Returns true if `sym` belongs in $Context or an element of $ContextPath.
+    /// Returns true if `sym` resides in $Context or an element of $ContextPath.
     pub fn is_visible(&self, sym: &Symbol) -> bool {
         let context = sym.context_path();
         context == self.context || self.context_path.contains(&context)
