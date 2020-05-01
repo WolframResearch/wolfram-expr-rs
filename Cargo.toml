@@ -5,7 +5,20 @@ authors = ["Connor Gray <connorg@wolfram.com>"]
 edition = "2018"
 publish = false
 
+[features]
+default = []
+
+# Whether to publically export nom functions for parsing symbols. This feature should not
+# be considered stable -- it is included only so that wl-parse can build higher-level
+# expression parsing on top of it.
+unstable_parse = []
+
 [dependencies]
 lazy_static = "^1.0"
 static_assertions = "^1.1.0"
 ordered-float = "1"
+
+# Used for parsing symbols. These version ranges should be kept in sync with what wl-parse
+# uses.
+nom = "^5.1"
+nom_locate = "^1"

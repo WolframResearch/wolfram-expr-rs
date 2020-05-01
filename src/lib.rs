@@ -11,7 +11,11 @@ use static_assertions::{assert_eq_align, assert_eq_size};
 pub use self::symbol::{Symbol, SymbolName};
 pub use self::symbol_table::SymbolTable;
 
-// #[derive(Clone, PartialEq)]
+#[cfg(feature = "unstable_parse")]
+pub mod parse {
+    pub use crate::symbol::parse::*;
+}
+
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct Expr {
     inner: Arc<ExprKind>,
