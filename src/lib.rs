@@ -1,12 +1,15 @@
+mod symbol;
+mod symbol_table;
+
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 
 use static_assertions::{assert_eq_align, assert_eq_size};
 
-mod symbol;
 
-pub use self::symbol::{Symbol, SymbolName, SymbolTable};
+pub use self::symbol::{Symbol, SymbolName};
+pub use self::symbol_table::SymbolTable;
 
 // #[derive(Clone, PartialEq)]
 #[derive(Clone, PartialEq, Eq, Hash)]
