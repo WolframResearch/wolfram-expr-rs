@@ -83,6 +83,15 @@ impl Expr {
     ///
     /// If the reference count of `self` is equal to 1 this function will *not* perform
     /// a clone of the stored `ExprKind`, making this operation very cheap in that case.
+    // Silence the clippy warning about this method. While this method technically doesn't
+    // follow the Rust style convention of using `into` to prefix methods which take
+    // `self` by move, I think using `to` is more appropriate given the expected
+    // performance characteristics of this method. `into` implies that the method is
+    // always returning data already owned by this type, and as such should be a very
+    // cheap operation. This method can make no such guarantee; if the reference count is
+    // 1, then performance is very good, but if the reference count is >1, a deeper clone
+    // must be done.
+    #[allow(clippy::wrong_self_convention)]
     pub fn to_kind(self) -> ExprKind {
         match Arc::try_unwrap(self.inner) {
             Ok(kind) => kind,
