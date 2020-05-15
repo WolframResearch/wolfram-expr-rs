@@ -86,15 +86,6 @@ impl SymbolTable {
     /// is the [`SymbolName`] part of a symbol (or it other words the part of the symbol
     /// that remains when you remove the context path).
     fn parse_symbol_name(&mut self, symbol_name: &SymbolName) -> Symbol {
-        // println!("parse_symbol_name: {} {:?} {}", self.context, self.context_path,
-        //                                           symbol_name);
-
-        // let common_names = if self.common_symbol_names.contains_key(symbol_name) {
-        //     self.common_symbol_names.get(symbol_name).unwrap()
-        // } else {
-        //     return self.unchecked_new_symbol(&format!("{}{}", context, symbol_name));
-        // };
-
         let common_names = match self.common_symbol_names.get(symbol_name) {
             Some(common_names) => common_names,
             None => {
