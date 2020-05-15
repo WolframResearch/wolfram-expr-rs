@@ -17,10 +17,8 @@ pub struct SymbolTable {
 
 impl SymbolTable {
     /// Construct a new symbol table from a context and context path.
-    pub fn new<S, I, C>(context: AbsoluteContext, context_path: C) -> Self
+    pub fn new<C>(context: AbsoluteContext, context_path: C) -> Self
     where
-        S: Into<String>,
-        I: AsRef<str>,
         C: IntoIterator<Item = AbsoluteContext>,
     {
         let context_path: Vec<AbsoluteContext> = context_path.into_iter().collect();
