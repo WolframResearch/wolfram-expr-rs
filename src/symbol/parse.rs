@@ -10,8 +10,11 @@ use nom::{
 };
 use nom_locate::LocatedSpan;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolRef<'s>(&'s str);
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolNameRef<'s>(&'s str);
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AbsoluteContextRef<'s>(&'s str);
 
 impl<'s> SymbolRef<'s> {
