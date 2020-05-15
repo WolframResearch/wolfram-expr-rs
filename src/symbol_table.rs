@@ -71,12 +71,11 @@ impl SymbolTable {
             // that out before concatenating with `symbol`. We assume the grave
             // character is encoded as a single byte
             let full_symbol = format!("{}{}", self.context, &symbol[1..]);
-            unsafe { Symbol::unchecked_new(full_symbol) }
+            Symbol::new(full_symbol)
+                .expect("SymbolTable::parse_from_source: invalid symbol")
         } else {
-            unsafe {
-                // This must be an absolute symbol.
-                Symbol::unchecked_new(symbol)
-            }
+            // This must be an absolute symbol.
+            Symbol::new(symbol).expect("SymbolTable::parse_from_source: invalid symbol")
         };
 
         self.add_symbol(sym.clone());
@@ -99,9 +98,7 @@ impl SymbolTable {
         let common_names = match self.common_symbol_names.get(symbol_name) {
             Some(common_names) => common_names,
             None => {
-                return unsafe {
-                    Symbol::unchecked_new(format!("{}{}", self.context, symbol_name))
-                }
+                return Symbol::new(format!("{}{}", self.context, symbol_name)).unwrap()
             },
         };
 
@@ -118,8 +115,7 @@ impl SymbolTable {
 
         // We didn't find a symbol in $ContextPath with the name `symbol_name`, so create
         // a symbol symbol in the current context: $Context`<symbol_name>
-        let sym =
-            unsafe { Symbol::unchecked_new(format!("{}{}", self.context, symbol_name)) };
+        let sym = Symbol::new(format!("{}{}", self.context, symbol_name)).unwrap();
         self.add_symbol(sym.clone());
         sym
     }
