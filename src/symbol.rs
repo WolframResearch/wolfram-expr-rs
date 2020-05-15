@@ -82,6 +82,8 @@ pub struct AbsoluteContext(Arc<String>);
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RelativeContext(Arc<String>);
 
+pub use crate::symbol::parse::{AbsoluteContextRef, SymbolNameRef, SymbolRef};
+
 // By using `usize` here, we guarantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
@@ -94,26 +96,34 @@ impl From<&Symbol> for Symbol {
 }
 
 impl Symbol {
-    /// Get the context path part of a symbol as a &str.
-    pub fn context_path(&self) -> String {
-        let mut s = self.to_string();
-        let last_grave = s
+    /// Get the context path part of a symbol as an [`AbsoluteContextRef`].
+    pub fn context(&self) -> AbsoluteContextRef {
+        let string = self.as_str();
+
+        let last_grave = string
             .rfind('`')
             .expect("Failed to find grave '`' character in symbol");
-        // Slicing is [a..b), non inclusive of the 2nd index
-        s.truncate(last_grave + 1);
-        s
+
+        // SAFETY: All valid Symbol's will contain at least one grave mark '`', will
+        //         have at least 1 character after that grave mark, and the string up
+        //         to and including the last grave mark will be a valid absolute context.
+        let (context, _) = string.split_at(last_grave + 1);
+        unsafe { AbsoluteContextRef::unchecked_new(context) }
     }
 
-    // Get the symbol name part of a symbol as a &str.
-    pub fn symbol_name(&self) -> String {
-        let mut s = self.to_string();
-        let last_grave = s
+    // Get the symbol name part of a symbol as a [`SymbolNameRef`].
+    pub fn symbol_name(&self) -> SymbolNameRef {
+        let string = self.as_str();
+
+        let last_grave = string
             .rfind('`')
             .expect("Failed to find grave '`' character in symbol");
-        // We assume the grave character is encoded as a single byte
-        let substr = s.split_off(last_grave + 1);
-        substr
+
+        // SAFETY: All valid Symbol's will contain at least one grave mark '`', will
+        //         have at least 1 character after that grave mark, and the string up
+        //         to and including the last grave mark will be a valid absolute context.
+        let (_, name) = string.split_at(last_grave + 1);
+        unsafe { SymbolNameRef::unchecked_new(name) }
     }
 }
 
