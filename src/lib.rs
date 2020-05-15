@@ -18,6 +18,19 @@ pub mod parse {
     pub use crate::symbol::parse::*;
 }
 
+/// A Wolfram Language expression.
+///
+/// ```
+/// use wl_expr_core::Expr;
+/// use wl_symbol_table as st;
+///
+/// Expr::normal(&*st::List, vec![Expr::from(1), Expr::from(2), Expr::from(3)])
+/// ```
+///
+/// # Reference counting
+///
+/// Internally, `Expr` is an atomically reference counted [`ExprKind`]. This makes cloning
+/// an expression computationally inexpensive.
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct Expr {
     inner: Arc<ExprKind>,
@@ -166,6 +179,8 @@ impl Expr {
         }
     }
 
+    /// If this represents a [`Normal`] expression, return it's head. Otherwise, return
+    /// `None`.
     pub fn normal_head(&self) -> Option<Expr> {
         match *self.inner {
             ExprKind::Normal(ref normal) => Some(normal.head.clone()),
