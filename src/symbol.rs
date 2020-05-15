@@ -57,6 +57,8 @@ macro_rules! cache_symbol {
 ///
 /// This type implements `PartialOrd`/`Ord` primarily for the purposes of allowing
 /// instances of this type to be included in ordered sets (e.g. `BTreeMap`).
+///
+/// TODO: Change this to Arc<str>
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(C)]
 pub struct Symbol(Arc<String>);
@@ -64,14 +66,19 @@ pub struct Symbol(Arc<String>);
 /// The identifier portion of a symbol. This contains no context marks ('`').
 ///
 /// In the symbol `` Global`foo ``, the `SymbolName` is `"foo"`.
+///
+/// TODO: Change this to Arc<str>
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolName(Arc<String>);
 
 /// A context path which does not begin with `.
 /// E.g.: Global`A`
+///
+/// TODO: Change this to Arc<str>
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AbsoluteContext(Arc<String>);
 
+/// TODO: Change this to Arc<str>
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RelativeContext(Arc<String>);
 
