@@ -127,6 +127,16 @@ impl Symbol {
     }
 }
 
+impl AbsoluteContext {
+    pub fn global() -> Self {
+        AbsoluteContext(Arc::new(String::from("Global`")))
+    }
+
+    pub fn system() -> Self {
+        AbsoluteContext(Arc::new(String::from("System`")))
+    }
+}
+
 macro_rules! common_impls {
     ($ty:ident) => {
         impl Display for $ty {
