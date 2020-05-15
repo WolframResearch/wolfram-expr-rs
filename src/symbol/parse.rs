@@ -133,6 +133,10 @@ impl AbsoluteContext {
             .as_ref()
             .map(AbsoluteContextRef::to_absolute_context)
     }
+
+    pub fn as_absolute_context_ref(&self) -> AbsoluteContextRef {
+        AbsoluteContextRef(self.as_str())
+    }
 }
 
 impl RelativeContext {

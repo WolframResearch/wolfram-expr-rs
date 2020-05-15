@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::{AbsoluteContext, Symbol, SymbolName};
+use crate::{AbsoluteContext, AbsoluteContextRef, Symbol, SymbolName};
 
 #[derive(Debug)]
 pub struct SymbolTable {
@@ -51,10 +51,13 @@ impl SymbolTable {
     /// Returns true if `sym` resides in $Context or an element of $ContextPath.
     pub fn is_visible(&self, sym: &Symbol) -> bool {
         sym.context().as_str() == self.context.as_str()
-            || self
-                .context_path
-                .iter()
-                .any(|context| sym.context().as_str() == context.as_str())
+            || self.context_path_contains(sym.context())
+    }
+
+    pub fn context_path_contains(&self, context: AbsoluteContextRef) -> bool {
+        self.context_path
+            .iter()
+            .any(|path_context| path_context.as_str() == context.as_str())
     }
 
     /// This function assumes that `symbol` matches the syntax of symbol as defined
