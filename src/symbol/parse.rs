@@ -10,6 +10,97 @@ use nom::{
 };
 use nom_locate::LocatedSpan;
 
+pub struct SymbolRef<'s>(&'s str);
+pub struct SymbolNameRef<'s>(&'s str);
+pub struct AbsoluteContextRef<'s>(&'s str);
+
+impl<'s> SymbolRef<'s> {
+    pub fn new(string: &'s str) -> Option<Self> {
+        let input = LocatedSpan::new(string);
+
+        let (rem, (_span, sym)) = absolute_symbol_ref_ty(input).ok()?;
+
+        // Check that the input didn't contain any trailing characters after the symbol.
+        if rem.input_len() == 0 {
+            Some(sym)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_str(&self) -> &'s str {
+        let SymbolRef(string) = self;
+        string
+    }
+
+    pub fn to_symbol(&self) -> Symbol {
+        let SymbolRef(string) = self;
+        unsafe { Symbol::unchecked_new(string.to_owned()) }
+    }
+
+    pub unsafe fn unchecked_new(string: &'s str) -> Self {
+        SymbolRef(string)
+    }
+}
+
+impl<'s> SymbolNameRef<'s> {
+    pub fn new(string: &'s str) -> Option<Self> {
+        let input = LocatedSpan::new(string);
+
+        let (rem, (_span, sym)) = symbol_name_ref_ty(input).ok()?;
+
+        // Check that the input didn't contain any trailing characters after the symbol.
+        if rem.input_len() == 0 {
+            Some(sym)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_str(&self) -> &'s str {
+        let SymbolNameRef(string) = self;
+        string
+    }
+
+    pub fn to_symbol_name(&self) -> SymbolName {
+        let SymbolNameRef(string) = self;
+        unsafe { SymbolName::unchecked_new(string.to_owned()) }
+    }
+
+    pub unsafe fn unchecked_new(string: &'s str) -> Self {
+        SymbolNameRef(string)
+    }
+}
+
+impl<'s> AbsoluteContextRef<'s> {
+    pub fn new(string: &'s str) -> Option<Self> {
+        let input = LocatedSpan::new(string);
+
+        let (remaining, _) = absolute_context_path(input).ok()?;
+
+        // Check that the input didn't contain any trailing characters after the symbol.
+        if remaining.input_len() == 0 {
+            Some(AbsoluteContextRef(input.fragment))
+        } else {
+            None
+        }
+    }
+
+    pub fn as_str(&self) -> &'s str {
+        let AbsoluteContextRef(string) = self;
+        string
+    }
+
+    pub fn to_absolute_context(&self) -> AbsoluteContext {
+        let AbsoluteContextRef(string) = self;
+        unsafe { AbsoluteContext::unchecked_new(string.to_owned()) }
+    }
+
+    pub unsafe fn unchecked_new(string: &'s str) -> Self {
+        AbsoluteContextRef(string)
+    }
+}
+
 impl Symbol {
     /// Attempt to parse `input` as an absolute symbol.
     ///
@@ -19,16 +110,9 @@ impl Symbol {
     /// If a symbol needs to be created multiple times, consider using cache_symbol!()
     /// instead.
     pub fn new<I: AsRef<str>>(input: I) -> Option<Self> {
-        let input = LocatedSpan::new(input.as_ref());
-
-        let (rem, (_span, sym)) = absolute_symbol_ty(input).ok()?;
-
-        // Check that the input didn't contain any trailing characters after the symbol.
-        if rem.input_len() == 0 {
-            Some(sym)
-        } else {
-            None
-        }
+        SymbolRef::new(input.as_ref())
+            .as_ref()
+            .map(SymbolRef::to_symbol)
     }
 }
 
@@ -37,30 +121,17 @@ impl SymbolName {
     ///
     /// A symbol name is a symbol without any context marks.
     pub fn new<I: AsRef<str>>(input: I) -> Option<SymbolName> {
-        let input = LocatedSpan::new(input.as_ref());
-
-        let (remaining, (_span, symname)) = symbol_name_ty(input).ok()?;
-
-        // Check that the input didn't contain any trailing characters after the symbol.
-        if remaining.input_len() == 0 {
-            Some(symname)
-        } else {
-            None
-        }
+        SymbolNameRef::new(input.as_ref())
+            .as_ref()
+            .map(SymbolNameRef::to_symbol_name)
     }
 }
 
 impl AbsoluteContext {
     pub fn new<I: AsRef<str>>(input: I) -> Option<Self> {
-        let input = LocatedSpan::new(input.as_ref());
-
-        let (remaining, _) = absolute_context_path(input).ok()?;
-
-        if remaining.input_len() == 0 {
-            Some(unsafe { AbsoluteContext::unchecked_new(input.fragment.to_owned()) })
-        } else {
-            None
-        }
+        AbsoluteContextRef::new(input.as_ref())
+            .as_ref()
+            .map(AbsoluteContextRef::to_absolute_context)
     }
 }
 
@@ -125,14 +196,14 @@ fn relative_symbol(i: StrSpan) -> IResult<StrSpan, StrSpan> {
 // These return a (StrSpan, <type>) so that the consumer can get line / extent information
 // for the consumed input.
 
-fn absolute_symbol_ty(i: StrSpan) -> IResult<StrSpan, (StrSpan, Symbol)> {
+fn absolute_symbol_ref_ty(i: StrSpan) -> IResult<StrSpan, (StrSpan, SymbolRef)> {
     let (i, span) = absolute_symbol(i)?;
-    let sym = unsafe { Symbol::unchecked_new(span.fragment) };
+    let sym = SymbolRef(span.fragment);
     Ok((i, (span, sym)))
 }
 
-fn symbol_name_ty(i: StrSpan) -> IResult<StrSpan, (StrSpan, SymbolName)> {
+fn symbol_name_ref_ty(i: StrSpan) -> IResult<StrSpan, (StrSpan, SymbolNameRef)> {
     let (i, span) = symbol_name(i)?;
-    let symname = unsafe { SymbolName::unchecked_new(span.fragment) };
+    let symname = SymbolNameRef(span.fragment);
     Ok((i, (span, symname)))
 }
