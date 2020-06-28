@@ -132,6 +132,23 @@ impl AbsoluteContext {
     pub fn system() -> Self {
         AbsoluteContext(Arc::new(String::from("System`")))
     }
+
+    /// Construct a new `AbsoluteContext` by appending a new context component to this
+    /// context.
+    ///
+    /// ```
+    /// use wl_expr_core::{AbsoluteContext, SymbolName, SymbolNameRef};
+    ///
+    /// let context = AbsoluteContext::from(SymbolName::new("MyContext").unwrap());
+    /// let private = context.join(SymbolNameRef::new("Private").unwrap());
+    ///
+    /// assert!(private.as_str() == "MyContext`Private`");
+    /// ```
+    pub fn join(&self, name: SymbolNameRef) -> AbsoluteContext {
+        let AbsoluteContext(context) = self;
+        AbsoluteContext::new(format!("{}`{}", context, name.as_str()))
+            .expect("AbsoluteContext::join(): invalid AbsoluteContext")
+    }
 }
 
 macro_rules! common_impls {
