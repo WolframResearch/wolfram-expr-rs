@@ -149,6 +149,36 @@ impl AbsoluteContext {
         AbsoluteContext::new(format!("{}{}`", context, name.as_str()))
             .expect("AbsoluteContext::join(): invalid AbsoluteContext")
     }
+
+    /// Return the components of this [`AbsoluteContext`].
+    ///
+    /// ```
+    /// use wl_expr_core::AbsoluteContext;
+    ///
+    /// let context = AbsoluteContext::new("MyPackage`Sub`Module`").unwrap();
+    ///
+    /// let components = context.components();
+    ///
+    /// assert!(components.len() == 3);
+    /// assert!(components[0].as_str() == "MyPackage");
+    /// assert!(components[1].as_str() == "Sub");
+    /// assert!(components[2].as_str() == "Module");
+    /// ```
+    pub fn components(&self) -> Vec<SymbolNameRef> {
+        let AbsoluteContext(string) = self;
+
+        let comps: Vec<SymbolNameRef> = string
+            .split('`')
+            // Remove the last component, which will always be the empty string
+            .filter(|comp| !comp.is_empty())
+            .map(|comp| {
+                SymbolNameRef::new(comp)
+                    .expect("AbsoluteContext::components(): invalid context component")
+            })
+            .collect();
+
+        comps
+    }
 }
 
 macro_rules! common_impls {
