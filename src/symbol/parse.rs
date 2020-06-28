@@ -160,6 +160,12 @@ impl RelativeContext {
     }
 }
 
+impl From<SymbolName> for AbsoluteContext {
+    fn from(name: SymbolName) -> AbsoluteContext {
+        AbsoluteContext::new(format!("{}`", name)).unwrap()
+    }
+}
+
 //======================================
 // Compound combinators -- these conceptually still only parse single tokens, and are used
 // directly by wl-parse.
