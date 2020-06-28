@@ -128,6 +128,10 @@ impl SymbolName {
             .as_ref()
             .map(SymbolNameRef::to_symbol_name)
     }
+
+    pub fn as_symbol_name_ref(&self) -> SymbolNameRef {
+        SymbolNameRef(self.as_str())
+    }
 }
 
 impl AbsoluteContext {
