@@ -146,7 +146,7 @@ impl AbsoluteContext {
     /// ```
     pub fn join(&self, name: SymbolNameRef) -> AbsoluteContext {
         let AbsoluteContext(context) = self;
-        AbsoluteContext::new(format!("{}`{}", context, name.as_str()))
+        AbsoluteContext::new(format!("{}{}`", context, name.as_str()))
             .expect("AbsoluteContext::join(): invalid AbsoluteContext")
     }
 }
