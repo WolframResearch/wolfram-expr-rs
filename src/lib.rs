@@ -23,7 +23,7 @@ pub mod parse {
 
 /// A Wolfram Language expression.
 ///
-/// ```norun
+/// ```ignore
 /// use wl_expr_core::Expr;
 /// use wl_symbol_table as st;
 ///
