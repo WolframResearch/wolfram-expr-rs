@@ -48,6 +48,10 @@ macro_rules! cache_symbol {
     }
 }
 
+// TODO: Change these types to be Arc<str>. This has the consequence of increasing the
+//       size of these types from 64-bits to 128 bits, so first take care that they are
+//       not passed through a C FFI anywhere as a pointer-sized type.
+
 /// Represents a WL symbol.
 ///
 /// # PartialOrd sorting order
@@ -57,8 +61,6 @@ macro_rules! cache_symbol {
 ///
 /// This type implements `PartialOrd`/`Ord` primarily for the purposes of allowing
 /// instances of this type to be included in ordered sets (e.g. `BTreeMap`).
-///
-/// TODO: Change this to Arc<str>
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(C)]
 pub struct Symbol(Arc<String>);
@@ -66,19 +68,14 @@ pub struct Symbol(Arc<String>);
 /// The identifier portion of a symbol. This contains no context marks ('`').
 ///
 /// In the symbol `` Global`foo ``, the `SymbolName` is `"foo"`.
-///
-/// TODO: Change this to Arc<str>
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolName(Arc<String>);
 
 /// A context path which does not begin with `.
 /// E.g.: Global`A`
-///
-/// TODO: Change this to Arc<str>
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AbsoluteContext(Arc<String>);
 
-/// TODO: Change this to Arc<str>
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RelativeContext(Arc<String>);
 
