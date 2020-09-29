@@ -181,6 +181,37 @@ impl AbsoluteContext {
     }
 }
 
+impl RelativeContext {
+    /// Return the components of this [`RelativeContext`].
+    ///
+    /// ```
+    /// use wl_expr_core::RelativeContext;
+    ///
+    /// let context = RelativeContext::new("`Sub`Module`").unwrap();
+    ///
+    /// let components = context.components();
+    ///
+    /// assert!(components.len() == 2);
+    /// assert!(components[0].as_str() == "Sub");
+    /// assert!(components[1].as_str() == "Module");
+    /// ```
+    pub fn components(&self) -> Vec<SymbolNameRef> {
+        let RelativeContext(string) = self;
+
+        let comps: Vec<SymbolNameRef> = string
+            .split('`')
+            // Remove the last component, which will always be the empty string
+            .filter(|comp| !comp.is_empty())
+            .map(|comp| {
+                SymbolNameRef::new(comp)
+                    .expect("AbsoluteContext::components(): invalid context component")
+            })
+            .collect();
+
+        comps
+    }
+}
+
 macro_rules! common_impls {
     ($ty:ident) => {
         impl Display for $ty {
