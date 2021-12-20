@@ -83,7 +83,7 @@ impl<'s> AbsoluteContextRef<'s> {
 
         // Check that the input didn't contain any trailing characters after the symbol.
         if remaining.input_len() == 0 {
-            Some(AbsoluteContextRef(input.fragment))
+            Some(AbsoluteContextRef(input.fragment()))
         } else {
             None
         }
@@ -153,7 +153,7 @@ impl RelativeContext {
         let (remaining, _) = relative_context_path(input).ok()?;
 
         if remaining.input_len() == 0 {
-            Some(unsafe { RelativeContext::unchecked_new(input.fragment.to_owned()) })
+            Some(unsafe { RelativeContext::unchecked_new(input.fragment().to_owned()) })
         } else {
             None
         }
@@ -215,12 +215,12 @@ fn relative_symbol(i: StrSpan) -> IResult<StrSpan, StrSpan> {
 
 fn absolute_symbol_ref_ty(i: StrSpan) -> IResult<StrSpan, (StrSpan, SymbolRef)> {
     let (i, span) = absolute_symbol(i)?;
-    let sym = SymbolRef(span.fragment);
+    let sym = SymbolRef(span.fragment());
     Ok((i, (span, sym)))
 }
 
 fn symbol_name_ref_ty(i: StrSpan) -> IResult<StrSpan, (StrSpan, SymbolNameRef)> {
     let (i, span) = symbol_name(i)?;
-    let symname = SymbolNameRef(span.fragment);
+    let symname = SymbolNameRef(span.fragment());
     Ok((i, (span, symname)))
 }
