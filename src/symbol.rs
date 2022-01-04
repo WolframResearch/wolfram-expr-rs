@@ -113,7 +113,7 @@ impl Context {
     /// ```
     /// use wolfram_expr::symbol::{Context, SymbolName, SymbolNameRef};
     ///
-    /// let context = Context::from(SymbolName::new("MyContext").unwrap());
+    /// let context = Context::from_symbol_name(&SymbolName::new("MyContext").unwrap());
     /// let private = context.join(SymbolNameRef::new("Private").unwrap());
     ///
     /// assert!(private.as_str() == "MyContext`Private`");
@@ -152,6 +152,11 @@ impl Context {
             .collect();
 
         comps
+    }
+
+    /// Create the context `` name` ``.
+    pub fn from_symbol_name(name: &SymbolName) -> Self {
+        Context::new(format!("{}`", name)).unwrap()
     }
 }
 

@@ -161,12 +161,6 @@ impl RelativeContext {
     }
 }
 
-impl From<SymbolName> for Context {
-    fn from(name: SymbolName) -> Context {
-        Context::new(format!("{}`", name)).unwrap()
-    }
-}
-
 //======================================
 // Compound combinators -- these conceptually still only parse single tokens, and are used
 // directly by wl-parse.
