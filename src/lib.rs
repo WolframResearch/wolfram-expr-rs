@@ -183,6 +183,7 @@ impl Expr {
     }
 }
 
+/// Wolfram Language expression variants.
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum ExprKind<E = Expr> {
     Normal(Normal<E>),
@@ -191,6 +192,10 @@ pub enum ExprKind<E = Expr> {
     Symbol(Symbol),
 }
 
+/// Wolfram Language "normal" expression: `f[...]`.
+///
+/// A *normal* expression is any expression that consists of a head and zero or
+/// more arguments.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Normal<E = Expr> {
     pub head: E,
