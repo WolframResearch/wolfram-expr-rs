@@ -49,6 +49,7 @@ pub struct SymbolName(Arc<String>);
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Context(Arc<String>);
 
+/// Context begining with a `` ` ``.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RelativeContext(Arc<String>);
 
@@ -167,10 +168,12 @@ impl Context {
         }
     }
 
+    /// The `` Global` `` context.
     pub fn global() -> Self {
         Context(Arc::new(String::from("Global`")))
     }
 
+    /// The `` System` `` context.
     pub fn system() -> Self {
         Context(Arc::new(String::from("System`")))
     }
