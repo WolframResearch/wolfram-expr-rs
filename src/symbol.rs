@@ -120,7 +120,7 @@ impl Context {
     /// ```
     pub fn join(&self, name: SymbolNameRef) -> Context {
         let Context(context) = self;
-        Context::new(&format!("{}{}`", context, name.as_str()))
+        Context::try_new(&format!("{}{}`", context, name.as_str()))
             .expect("Context::join(): invalid Context")
     }
 
@@ -146,7 +146,7 @@ impl Context {
             // Remove the last component, which will always be the empty string
             .filter(|comp| !comp.is_empty())
             .map(|comp| {
-                SymbolNameRef::new(comp)
+                SymbolNameRef::try_new(comp)
                     .expect("Context::components(): invalid context component")
             })
             .collect();
@@ -156,7 +156,7 @@ impl Context {
 
     /// Create the context `` name` ``.
     pub fn from_symbol_name(name: &SymbolName) -> Self {
-        Context::new(&format!("{}`", name)).unwrap()
+        Context::try_new(&format!("{}`", name)).unwrap()
     }
 }
 
@@ -182,7 +182,7 @@ impl RelativeContext {
             // Remove the last component, which will always be the empty string
             .filter(|comp| !comp.is_empty())
             .map(|comp| {
-                SymbolNameRef::new(comp)
+                SymbolNameRef::try_new(comp)
                     .expect("RelativeContext::components(): invalid context component")
             })
             .collect();

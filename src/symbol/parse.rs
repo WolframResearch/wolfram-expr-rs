@@ -23,7 +23,7 @@ pub struct SymbolNameRef<'s>(&'s str);
 pub struct ContextRef<'s>(&'s str);
 
 impl<'s> SymbolRef<'s> {
-    pub fn new(string: &'s str) -> Option<Self> {
+    pub fn try_new(string: &'s str) -> Option<Self> {
         let input = LocatedSpan::new(string);
 
         let (rem, (_span, sym)) = absolute_symbol_ref_ty(input).ok()?;
@@ -52,7 +52,7 @@ impl<'s> SymbolRef<'s> {
 }
 
 impl<'s> SymbolNameRef<'s> {
-    pub fn new(string: &'s str) -> Option<Self> {
+    pub fn try_new(string: &'s str) -> Option<Self> {
         let input = LocatedSpan::new(string);
 
         let (rem, (_span, sym)) = symbol_name_ref_ty(input).ok()?;
@@ -81,7 +81,7 @@ impl<'s> SymbolNameRef<'s> {
 }
 
 impl<'s> ContextRef<'s> {
-    pub fn new(string: &'s str) -> Option<Self> {
+    pub fn try_new(string: &'s str) -> Option<Self> {
         let input = LocatedSpan::new(string);
 
         let (remaining, _) = absolute_context_path(input).ok()?;
@@ -115,8 +115,8 @@ impl Symbol {
     /// An absolute symbol is a symbol with an explicit context path. ``"System`Plus"`` is
     /// an absolute symbol, ``"Plus"`` is a relative symbol and/or a [`SymbolName`].
     /// ``"`Plus"`` is also a relative symbol.
-    pub fn new(input: &str) -> Option<Self> {
-        SymbolRef::new(input).as_ref().map(SymbolRef::to_symbol)
+    pub fn try_new(input: &str) -> Option<Self> {
+        SymbolRef::try_new(input).as_ref().map(SymbolRef::to_symbol)
     }
 }
 
@@ -124,8 +124,8 @@ impl SymbolName {
     /// Attempt to parse `input` as a symbol name.
     ///
     /// A symbol name is a symbol without any context marks.
-    pub fn new(input: &str) -> Option<SymbolName> {
-        SymbolNameRef::new(input)
+    pub fn try_new(input: &str) -> Option<SymbolName> {
+        SymbolNameRef::try_new(input)
             .as_ref()
             .map(SymbolNameRef::to_symbol_name)
     }
@@ -136,8 +136,10 @@ impl SymbolName {
 }
 
 impl Context {
-    pub fn new(input: &str) -> Option<Self> {
-        ContextRef::new(input).as_ref().map(ContextRef::to_context)
+    pub fn try_new(input: &str) -> Option<Self> {
+        ContextRef::try_new(input)
+            .as_ref()
+            .map(ContextRef::to_context)
     }
 
     pub fn as_context_ref(&self) -> ContextRef {
@@ -146,7 +148,7 @@ impl Context {
 }
 
 impl RelativeContext {
-    pub fn new(input: &str) -> Option<Self> {
+    pub fn try_new(input: &str) -> Option<Self> {
         let input = LocatedSpan::new(input.as_ref());
 
         let (remaining, _) = relative_context_path(input).ok()?;
