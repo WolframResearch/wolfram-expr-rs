@@ -1,3 +1,5 @@
+//! Representation of Wolfram Language symbols.
+
 pub(crate) mod parse;
 
 use std::{
@@ -22,7 +24,7 @@ Operations on Symbols
 //       size of these types from 64-bits to 128 bits, so first take care that they are
 //       not passed through a C FFI anywhere as a pointer-sized type.
 
-/// Represents a WL symbol.
+/// Wolfram Language symbol.
 ///
 /// # PartialOrd sorting order
 ///
@@ -108,7 +110,7 @@ impl AbsoluteContext {
     /// context.
     ///
     /// ```
-    /// use wolfram_expr::{AbsoluteContext, SymbolName, SymbolNameRef};
+    /// use wolfram_expr::symbol::{AbsoluteContext, SymbolName, SymbolNameRef};
     ///
     /// let context = AbsoluteContext::from(SymbolName::new("MyContext").unwrap());
     /// let private = context.join(SymbolNameRef::new("Private").unwrap());
@@ -124,7 +126,7 @@ impl AbsoluteContext {
     /// Return the components of this [`AbsoluteContext`].
     ///
     /// ```
-    /// use wolfram_expr::AbsoluteContext;
+    /// use wolfram_expr::symbol::AbsoluteContext;
     ///
     /// let context = AbsoluteContext::new("MyPackage`Sub`Module`").unwrap();
     ///
@@ -156,7 +158,7 @@ impl RelativeContext {
     /// Return the components of this [`RelativeContext`].
     ///
     /// ```
-    /// use wolfram_expr::RelativeContext;
+    /// use wolfram_expr::symbol::RelativeContext;
     ///
     /// let context = RelativeContext::new("`Sub`Module`").unwrap();
     ///

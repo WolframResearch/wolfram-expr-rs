@@ -1,6 +1,8 @@
+//! Wolfram Language expressions.
+
 #![allow(clippy::let_and_return)]
 
-mod symbol;
+pub mod symbol;
 
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -8,17 +10,15 @@ use std::mem;
 use std::sync::Arc;
 
 
-pub use self::symbol::{
-    AbsoluteContext, AbsoluteContextRef, RelativeContext, Symbol, SymbolName,
-    SymbolNameRef, SymbolRef,
-};
+#[doc(inline)]
+pub use self::symbol::Symbol;
 
 #[cfg(feature = "unstable_parse")]
 pub mod parse {
     pub use crate::symbol::parse::*;
 }
 
-/// A Wolfram Language expression.
+/// Wolfram Language expression.
 ///
 /// ```ignore
 /// use wolfram_expr::Expr;

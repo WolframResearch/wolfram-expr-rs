@@ -1,4 +1,7 @@
-use crate::{AbsoluteContext, RelativeContext, Symbol, SymbolName};
+use crate::{
+    symbol::{AbsoluteContext, RelativeContext, SymbolName},
+    Symbol,
+};
 
 use nom::{
     branch::alt,
