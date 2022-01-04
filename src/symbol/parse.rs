@@ -15,8 +15,10 @@ use nom_locate::LocatedSpan;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolRef<'s>(&'s str);
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolNameRef<'s>(&'s str);
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ContextRef<'s>(&'s str);
 
@@ -113,10 +115,8 @@ impl Symbol {
     /// An absolute symbol is a symbol with an explicit context path. ``"System`Plus"`` is
     /// an absolute symbol, ``"Plus"`` is a relative symbol and/or a [`SymbolName`].
     /// ``"`Plus"`` is also a relative symbol.
-    pub fn new<I: AsRef<str>>(input: I) -> Option<Self> {
-        SymbolRef::new(input.as_ref())
-            .as_ref()
-            .map(SymbolRef::to_symbol)
+    pub fn new(input: &str) -> Option<Self> {
+        SymbolRef::new(input).as_ref().map(SymbolRef::to_symbol)
     }
 }
 
@@ -124,8 +124,8 @@ impl SymbolName {
     /// Attempt to parse `input` as a symbol name.
     ///
     /// A symbol name is a symbol without any context marks.
-    pub fn new<I: AsRef<str>>(input: I) -> Option<SymbolName> {
-        SymbolNameRef::new(input.as_ref())
+    pub fn new(input: &str) -> Option<SymbolName> {
+        SymbolNameRef::new(input)
             .as_ref()
             .map(SymbolNameRef::to_symbol_name)
     }
@@ -136,10 +136,8 @@ impl SymbolName {
 }
 
 impl Context {
-    pub fn new<I: AsRef<str>>(input: I) -> Option<Self> {
-        ContextRef::new(input.as_ref())
-            .as_ref()
-            .map(ContextRef::to_context)
+    pub fn new(input: &str) -> Option<Self> {
+        ContextRef::new(input).as_ref().map(ContextRef::to_context)
     }
 
     pub fn as_context_ref(&self) -> ContextRef {
@@ -148,7 +146,7 @@ impl Context {
 }
 
 impl RelativeContext {
-    pub fn new<I: AsRef<str>>(input: I) -> Option<Self> {
+    pub fn new(input: &str) -> Option<Self> {
         let input = LocatedSpan::new(input.as_ref());
 
         let (remaining, _) = relative_context_path(input).ok()?;

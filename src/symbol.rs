@@ -120,7 +120,7 @@ impl Context {
     /// ```
     pub fn join(&self, name: SymbolNameRef) -> Context {
         let Context(context) = self;
-        Context::new(format!("{}{}`", context, name.as_str()))
+        Context::new(&format!("{}{}`", context, name.as_str()))
             .expect("Context::join(): invalid Context")
     }
 
@@ -156,7 +156,7 @@ impl Context {
 
     /// Create the context `` name` ``.
     pub fn from_symbol_name(name: &SymbolName) -> Self {
-        Context::new(format!("{}`", name)).unwrap()
+        Context::new(&format!("{}`", name)).unwrap()
     }
 }
 
@@ -221,9 +221,7 @@ macro_rules! common_impls {
             /// rustc were the function not marked `unsafe`. However, this function is so
             /// often *not* what is really needed, it's marked unsafe as a deterent to
             /// possible users.
-            pub(crate) unsafe fn unchecked_new<S: AsRef<str> + Into<String>>(
-                input: S,
-            ) -> $ty {
+            pub(crate) unsafe fn unchecked_new<S: Into<String>>(input: S) -> $ty {
                 let inner: Arc<String> = Arc::new(input.into());
                 $ty(inner)
             }
