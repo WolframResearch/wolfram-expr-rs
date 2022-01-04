@@ -24,7 +24,7 @@ pub mod parse {
 /// A Wolfram Language expression.
 ///
 /// ```ignore
-/// use wl_expr_core::Expr;
+/// use wolfram_expr::Expr;
 /// use wl_symbol_table as st;
 ///
 /// Expr::normal(&*st::List, vec![Expr::from(1), Expr::from(2), Expr::from(3)])

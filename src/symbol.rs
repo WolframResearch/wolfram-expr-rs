@@ -137,7 +137,7 @@ impl AbsoluteContext {
     /// context.
     ///
     /// ```
-    /// use wl_expr_core::{AbsoluteContext, SymbolName, SymbolNameRef};
+    /// use wolfram_expr::{AbsoluteContext, SymbolName, SymbolNameRef};
     ///
     /// let context = AbsoluteContext::from(SymbolName::new("MyContext").unwrap());
     /// let private = context.join(SymbolNameRef::new("Private").unwrap());
@@ -153,7 +153,7 @@ impl AbsoluteContext {
     /// Return the components of this [`AbsoluteContext`].
     ///
     /// ```
-    /// use wl_expr_core::AbsoluteContext;
+    /// use wolfram_expr::AbsoluteContext;
     ///
     /// let context = AbsoluteContext::new("MyPackage`Sub`Module`").unwrap();
     ///
@@ -185,7 +185,7 @@ impl RelativeContext {
     /// Return the components of this [`RelativeContext`].
     ///
     /// ```
-    /// use wl_expr_core::RelativeContext;
+    /// use wolfram_expr::RelativeContext;
     ///
     /// let context = RelativeContext::new("`Sub`Module`").unwrap();
     ///

@@ -1,5 +1,5 @@
 [package]
-name = "wl-expr-core"
+name = "wolfram-expr"
 version = "0.1.0"
 authors = ["Connor Gray <connorg@wolfram.com>"]
 edition = "2018"
