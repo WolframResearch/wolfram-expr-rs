@@ -42,49 +42,6 @@ const _: () = assert!(mem::size_of::<Expr>() == mem::size_of::<*const ()>());
 const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<usize>());
 const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<*const ()>());
 
-/// Newtype around Expr, which calculates it's Hash value based on the pointer value,
-/// not the ExprKind.
-///
-/// TODO: Add tests that `ExprRefCmp` is working as expected
-///
-/// This is used in `wl_parse::source_map` to give unique source mapping, so that Expr's
-/// which are equal according to the PartialEq impl for ExprKind (and whose hash values
-/// are therefore the same) can be differenciated.
-///
-/// TODO: Rename this to ExprRefCmp
-#[derive(Debug)]
-pub struct ExprRefCmp {
-    expr: Expr,
-}
-
-impl ExprRefCmp {
-    pub fn new(expr: Expr) -> Self {
-        ExprRefCmp { expr }
-    }
-
-    pub fn into_expr(self) -> Expr {
-        self.expr
-    }
-}
-
-impl Hash for ExprRefCmp {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        // Clone `expr` to increase the strong count. Otherwise expr would be dropped
-        // inside of `Arc::into_raw` and the `Expr` could be deallocated.
-        let ptr = Arc::into_raw(self.expr.inner.clone());
-        ptr.hash(state);
-        let _ = unsafe { Arc::from_raw(ptr) };
-    }
-}
-
-impl PartialEq for ExprRefCmp {
-    fn eq(&self, other: &Self) -> bool {
-        Arc::ptr_eq(&self.expr.inner, &other.expr.inner)
-    }
-}
-
-impl Eq for ExprRefCmp {}
-
 impl Expr {
     pub fn new(kind: ExprKind) -> Expr {
         Expr {
