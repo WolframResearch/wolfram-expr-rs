@@ -110,11 +110,9 @@ impl<'s> ContextRef<'s> {
 impl Symbol {
     /// Attempt to parse `input` as an absolute symbol.
     ///
-    /// An absolute symbol is a symbol with an explicit context path. "System`Plus" is an
-    /// absolute symbol, "Plus" is a relative symbol. "`Plus" is also a relative symbol.
-    ///
-    /// If a symbol needs to be created multiple times, consider using cache_symbol!()
-    /// instead.
+    /// An absolute symbol is a symbol with an explicit context path. ``"System`Plus"`` is
+    /// an absolute symbol, ``"Plus"`` is a relative symbol and/or a [`SymbolName`].
+    /// ``"`Plus"`` is also a relative symbol.
     pub fn new<I: AsRef<str>>(input: I) -> Option<Self> {
         SymbolRef::new(input.as_ref())
             .as_ref()
