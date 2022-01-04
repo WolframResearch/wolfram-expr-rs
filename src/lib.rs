@@ -106,7 +106,7 @@ impl Expr {
 
     pub fn number(num: Number) -> Expr {
         Expr {
-            inner: Arc::new(ExprKind::Number(num)),
+            inner: Arc::new(ExprKind::from(num)),
         }
     }
 
@@ -116,13 +116,22 @@ impl Expr {
         }
     }
 
+    /// Construct an expression from a floating-point number.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if `real` is NaN.
+    pub fn real(real: f64) -> Expr {
+        Expr::number(Number::real(real))
+    }
+
     // TODO: _[x] probably should return None, even though technically
     //       Blank[][x] has the tag Blank.
     // TODO: The above TODO is probably wrong -- tag() shouldn't have any language
     //       semantics built in to it.
     pub fn tag(&self) -> Option<Symbol> {
         match *self.inner {
-            ExprKind::Number(_) | ExprKind::String(_) => None,
+            ExprKind::Integer(_) | ExprKind::Real(_) | ExprKind::String(_) => None,
             ExprKind::Normal(ref normal) => normal.head.tag(),
             ExprKind::Symbol(ref sym) => Some(sym.clone()),
         }
@@ -133,7 +142,10 @@ impl Expr {
     pub fn normal_head(&self) -> Option<Expr> {
         match *self.inner {
             ExprKind::Normal(ref normal) => Some(normal.head.clone()),
-            ExprKind::Symbol(_) | ExprKind::Number(_) | ExprKind::String(_) => None,
+            ExprKind::Symbol(_)
+            | ExprKind::Integer(_)
+            | ExprKind::Real(_)
+            | ExprKind::String(_) => None,
         }
     }
 
@@ -148,21 +160,38 @@ impl Expr {
     pub fn normal_part(&self, index_0: usize) -> Option<&Expr> {
         match self.kind() {
             ExprKind::Normal(ref normal) => normal.contents.get(index_0),
-            ExprKind::Symbol(_) | ExprKind::Number(_) | ExprKind::String(_) => None,
+            ExprKind::Symbol(_)
+            | ExprKind::Integer(_)
+            | ExprKind::Real(_)
+            | ExprKind::String(_) => None,
         }
     }
 
     pub fn try_normal(&self) -> Option<&Normal> {
         match self.kind() {
             ExprKind::Normal(ref normal) => Some(normal),
-            ExprKind::Symbol(_) | ExprKind::String(_) | ExprKind::Number(_) => None,
+            ExprKind::Symbol(_)
+            | ExprKind::String(_)
+            | ExprKind::Integer(_)
+            | ExprKind::Real(_) => None,
         }
     }
 
     pub fn try_symbol(&self) -> Option<&Symbol> {
         match self.kind() {
             ExprKind::Symbol(ref symbol) => Some(symbol),
-            ExprKind::Normal(_) | ExprKind::String(_) | ExprKind::Number(_) => None,
+            ExprKind::Normal(_)
+            | ExprKind::String(_)
+            | ExprKind::Integer(_)
+            | ExprKind::Real(_) => None,
+        }
+    }
+
+    pub fn try_number(&self) -> Option<Number> {
+        match self.kind() {
+            ExprKind::Integer(int) => Some(Number::Integer(*int)),
+            ExprKind::Real(real) => Some(Number::Real(*real)),
+            ExprKind::Normal(_) | ExprKind::String(_) | ExprKind::Symbol(_) => None,
         }
     }
 
@@ -193,10 +222,11 @@ impl Expr {
 /// Wolfram Language expression variants.
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum ExprKind<E = Expr> {
-    Normal(Normal<E>),
-    Number(Number),
+    Integer(i64),
+    Real(F64),
     String(String),
     Symbol(Symbol),
+    Normal(Normal<E>),
 }
 
 /// Wolfram Language "normal" expression: `f[...]`.
@@ -280,7 +310,8 @@ impl fmt::Display for ExprKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             ExprKind::Normal(ref normal) => fmt::Display::fmt(normal, f),
-            ExprKind::Number(ref number) => fmt::Display::fmt(number, f),
+            ExprKind::Integer(ref int) => fmt::Display::fmt(int, f),
+            ExprKind::Real(ref real) => fmt::Display::fmt(real, f),
             ExprKind::String(ref string) => {
                 // Escape any '"' which appear in the string.
                 // Using the Debug implementation will cause \n, \t, etc. to appear in
@@ -369,8 +400,11 @@ impl From<i64> for Expr {
 //     }
 // }
 
-// impl From<Number> for ExprKind {
-//     fn from(number: Number) -> ExprKind {
-//         ExprKind::Number(number)
-//     }
-// }
+impl From<Number> for ExprKind {
+    fn from(number: Number) -> ExprKind {
+        match number {
+            Number::Integer(int) => ExprKind::Integer(int),
+            Number::Real(real) => ExprKind::Real(real),
+        }
+    }
+}
