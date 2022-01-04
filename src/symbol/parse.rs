@@ -1,5 +1,5 @@
 use crate::{
-    symbol::{AbsoluteContext, RelativeContext, SymbolName},
+    symbol::{Context, RelativeContext, SymbolName},
     Symbol,
 };
 
@@ -18,7 +18,7 @@ pub struct SymbolRef<'s>(&'s str);
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolNameRef<'s>(&'s str);
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct AbsoluteContextRef<'s>(&'s str);
+pub struct ContextRef<'s>(&'s str);
 
 impl<'s> SymbolRef<'s> {
     pub fn new(string: &'s str) -> Option<Self> {
@@ -78,7 +78,7 @@ impl<'s> SymbolNameRef<'s> {
     }
 }
 
-impl<'s> AbsoluteContextRef<'s> {
+impl<'s> ContextRef<'s> {
     pub fn new(string: &'s str) -> Option<Self> {
         let input = LocatedSpan::new(string);
 
@@ -86,24 +86,24 @@ impl<'s> AbsoluteContextRef<'s> {
 
         // Check that the input didn't contain any trailing characters after the symbol.
         if remaining.input_len() == 0 {
-            Some(AbsoluteContextRef(input.fragment()))
+            Some(ContextRef(input.fragment()))
         } else {
             None
         }
     }
 
     pub fn as_str(&self) -> &'s str {
-        let AbsoluteContextRef(string) = self;
+        let ContextRef(string) = self;
         string
     }
 
-    pub fn to_absolute_context(&self) -> AbsoluteContext {
-        let AbsoluteContextRef(string) = self;
-        unsafe { AbsoluteContext::unchecked_new(string.to_owned()) }
+    pub fn to_context(&self) -> Context {
+        let ContextRef(string) = self;
+        unsafe { Context::unchecked_new(string.to_owned()) }
     }
 
     pub unsafe fn unchecked_new(string: &'s str) -> Self {
-        AbsoluteContextRef(string)
+        ContextRef(string)
     }
 }
 
@@ -137,15 +137,15 @@ impl SymbolName {
     }
 }
 
-impl AbsoluteContext {
+impl Context {
     pub fn new<I: AsRef<str>>(input: I) -> Option<Self> {
-        AbsoluteContextRef::new(input.as_ref())
+        ContextRef::new(input.as_ref())
             .as_ref()
-            .map(AbsoluteContextRef::to_absolute_context)
+            .map(ContextRef::to_context)
     }
 
-    pub fn as_absolute_context_ref(&self) -> AbsoluteContextRef {
-        AbsoluteContextRef(self.as_str())
+    pub fn as_context_ref(&self) -> ContextRef {
+        ContextRef(self.as_str())
     }
 }
 
@@ -163,9 +163,9 @@ impl RelativeContext {
     }
 }
 
-impl From<SymbolName> for AbsoluteContext {
-    fn from(name: SymbolName) -> AbsoluteContext {
-        AbsoluteContext::new(format!("{}`", name)).unwrap()
+impl From<SymbolName> for Context {
+    fn from(name: SymbolName) -> Context {
+        Context::new(format!("{}`", name)).unwrap()
     }
 }
 

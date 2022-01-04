@@ -43,15 +43,16 @@ pub struct Symbol(Arc<String>);
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolName(Arc<String>);
 
-/// A context path which does not begin with `.
-/// E.g.: Global`A`
+/// Wolfram Language context.
+///
+/// Examples: `` System` ``, `` Global` ``, `` MyPackage`Utils` ``, etc.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct AbsoluteContext(Arc<String>);
+pub struct Context(Arc<String>);
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RelativeContext(Arc<String>);
 
-pub use crate::symbol::parse::{AbsoluteContextRef, SymbolNameRef, SymbolRef};
+pub use crate::symbol::parse::{ContextRef, SymbolNameRef, SymbolRef};
 
 // By using `usize` here, we guarantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
@@ -66,8 +67,8 @@ impl From<&Symbol> for Symbol {
 }
 
 impl Symbol {
-    /// Get the context path part of a symbol as an [`AbsoluteContextRef`].
-    pub fn context(&self) -> AbsoluteContextRef {
+    /// Get the context path part of a symbol as an [`ContextRef`].
+    pub fn context(&self) -> ContextRef {
         let string = self.as_str();
 
         let last_grave = string
@@ -78,7 +79,7 @@ impl Symbol {
         //         have at least 1 character after that grave mark, and the string up
         //         to and including the last grave mark will be a valid absolute context.
         let (context, _) = string.split_at(last_grave + 1);
-        unsafe { AbsoluteContextRef::unchecked_new(context) }
+        unsafe { ContextRef::unchecked_new(context) }
     }
 
     // Get the symbol name part of a symbol as a [`SymbolNameRef`].
@@ -97,38 +98,38 @@ impl Symbol {
     }
 }
 
-impl AbsoluteContext {
+impl Context {
     pub fn global() -> Self {
-        AbsoluteContext(Arc::new(String::from("Global`")))
+        Context(Arc::new(String::from("Global`")))
     }
 
     pub fn system() -> Self {
-        AbsoluteContext(Arc::new(String::from("System`")))
+        Context(Arc::new(String::from("System`")))
     }
 
-    /// Construct a new `AbsoluteContext` by appending a new context component to this
+    /// Construct a new [`Context`] by appending a new context component to this
     /// context.
     ///
     /// ```
-    /// use wolfram_expr::symbol::{AbsoluteContext, SymbolName, SymbolNameRef};
+    /// use wolfram_expr::symbol::{Context, SymbolName, SymbolNameRef};
     ///
-    /// let context = AbsoluteContext::from(SymbolName::new("MyContext").unwrap());
+    /// let context = Context::from(SymbolName::new("MyContext").unwrap());
     /// let private = context.join(SymbolNameRef::new("Private").unwrap());
     ///
     /// assert!(private.as_str() == "MyContext`Private`");
     /// ```
-    pub fn join(&self, name: SymbolNameRef) -> AbsoluteContext {
-        let AbsoluteContext(context) = self;
-        AbsoluteContext::new(format!("{}{}`", context, name.as_str()))
-            .expect("AbsoluteContext::join(): invalid AbsoluteContext")
+    pub fn join(&self, name: SymbolNameRef) -> Context {
+        let Context(context) = self;
+        Context::new(format!("{}{}`", context, name.as_str()))
+            .expect("Context::join(): invalid Context")
     }
 
-    /// Return the components of this [`AbsoluteContext`].
+    /// Return the components of this [`Context`].
     ///
     /// ```
-    /// use wolfram_expr::symbol::AbsoluteContext;
+    /// use wolfram_expr::symbol::Context;
     ///
-    /// let context = AbsoluteContext::new("MyPackage`Sub`Module`").unwrap();
+    /// let context = Context::new("MyPackage`Sub`Module`").unwrap();
     ///
     /// let components = context.components();
     ///
@@ -138,7 +139,7 @@ impl AbsoluteContext {
     /// assert!(components[2].as_str() == "Module");
     /// ```
     pub fn components(&self) -> Vec<SymbolNameRef> {
-        let AbsoluteContext(string) = self;
+        let Context(string) = self;
 
         let comps: Vec<SymbolNameRef> = string
             .split('`')
@@ -146,7 +147,7 @@ impl AbsoluteContext {
             .filter(|comp| !comp.is_empty())
             .map(|comp| {
                 SymbolNameRef::new(comp)
-                    .expect("AbsoluteContext::components(): invalid context component")
+                    .expect("Context::components(): invalid context component")
             })
             .collect();
 
@@ -177,7 +178,7 @@ impl RelativeContext {
             .filter(|comp| !comp.is_empty())
             .map(|comp| {
                 SymbolNameRef::new(comp)
-                    .expect("AbsoluteContext::components(): invalid context component")
+                    .expect("RelativeContext::components(): invalid context component")
             })
             .collect();
 
@@ -227,7 +228,7 @@ macro_rules! common_impls {
 
 common_impls! { Symbol }
 common_impls!(SymbolName);
-common_impls!(AbsoluteContext);
+common_impls!(Context);
 common_impls!(RelativeContext);
 
 /*
