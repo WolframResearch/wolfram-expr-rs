@@ -1,19 +1,17 @@
 #![allow(clippy::let_and_return)]
 
 mod symbol;
-mod symbol_table;
 
 use std::fmt;
 use std::hash::{Hash, Hasher};
-use std::sync::Arc;
 use std::mem;
+use std::sync::Arc;
 
 
 pub use self::symbol::{
     AbsoluteContext, AbsoluteContextRef, RelativeContext, Symbol, SymbolName,
     SymbolNameRef, SymbolRef,
 };
-pub use self::symbol_table::SymbolTable;
 
 #[cfg(feature = "unstable_parse")]
 pub mod parse {
