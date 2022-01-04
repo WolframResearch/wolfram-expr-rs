@@ -322,6 +322,13 @@ impl Normal {
         &self.contents
     }
 
+    /// The elements of this normal expression.
+    ///
+    /// Use [`Normal::elements()`] to get a reference to this value.
+    pub fn into_elements(self) -> Vec<Expr> {
+        self.contents
+    }
+
     /// Returns `true` if the head of this expression is `sym`.
     pub fn has_head(&self, sym: &Symbol) -> bool {
         self.head == *sym
