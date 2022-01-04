@@ -270,12 +270,13 @@ pub enum ExprKind<E = Expr> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Normal<E = Expr> {
     /// The head of this normal expression.
-    pub head: E,
+    head: E,
+
     /// The elements of this normal expression.
     ///
     /// If `head` conceptually represents a function, these are the arguments that are
     /// being applied to `head`.
-    pub contents: Vec<E>,
+    contents: Vec<E>,
 }
 
 /// Subset of [`ExprKind`] that covers number-type expression values.
@@ -306,6 +307,19 @@ impl Normal {
             head: head.into(),
             contents,
         }
+    }
+
+    /// The head of this normal expression.
+    pub fn head(&self) -> &Expr {
+        &self.head
+    }
+
+    /// The elements of this normal expression.
+    ///
+    /// If `head` conceptually represents a function, these are the arguments that are
+    /// being applied to `head`.
+    pub fn elements(&self) -> &[Expr] {
+        &self.contents
     }
 
     /// Returns `true` if the head of this expression is `sym`.
@@ -424,6 +438,12 @@ impl From<Normal> for Expr {
         Expr {
             inner: Arc::new(ExprKind::Normal(normal)),
         }
+    }
+}
+
+impl From<&str> for Expr {
+    fn from(str: &str) -> Expr {
+        Expr::string(str)
     }
 }
 

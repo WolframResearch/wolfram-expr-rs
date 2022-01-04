@@ -336,6 +336,16 @@ common_impls!(SymbolName);
 common_impls!(Context);
 common_impls!(RelativeContext);
 
+//======================================
+// Formatting impls
+//======================================
+
+impl Display for SymbolNameRef<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
 /*
 impl Symbol {
     // /// Create a symbol in the System` context.
