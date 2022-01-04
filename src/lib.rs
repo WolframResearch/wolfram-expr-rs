@@ -130,6 +130,10 @@ impl Expr {
 
     /// Construct an expression from a floating-point number.
     ///
+    /// ```
+    /// let expr = Expr::real(3.14159);
+    /// ```
+    ///
     /// # Panics
     ///
     /// This function will panic if `real` is NaN.
@@ -412,6 +416,46 @@ impl From<Normal> for Expr {
         Expr {
             inner: Arc::new(ExprKind::Normal(normal)),
         }
+    }
+}
+
+//--------------------
+// Integer conversions
+//--------------------
+
+impl From<u8> for Expr {
+    fn from(int: u8) -> Expr {
+        Expr::from(i64::from(int))
+    }
+}
+
+impl From<i8> for Expr {
+    fn from(int: i8) -> Expr {
+        Expr::from(i64::from(int))
+    }
+}
+
+impl From<u16> for Expr {
+    fn from(int: u16) -> Expr {
+        Expr::from(i64::from(int))
+    }
+}
+
+impl From<i16> for Expr {
+    fn from(int: i16) -> Expr {
+        Expr::from(i64::from(int))
+    }
+}
+
+impl From<u32> for Expr {
+    fn from(int: u32) -> Expr {
+        Expr::from(i64::from(int))
+    }
+}
+
+impl From<i32> for Expr {
+    fn from(int: i32) -> Expr {
+        Expr::from(i64::from(int))
     }
 }
 
