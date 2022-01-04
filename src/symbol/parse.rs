@@ -153,7 +153,7 @@ impl SymbolName {
 impl RelativeContext {
     /// Attempt to parse `input` as a relative context.
     pub fn try_new(input: &str) -> Option<Self> {
-        let input = LocatedSpan::new(input.as_ref());
+        let input = LocatedSpan::new(input);
 
         let (remaining, _) = relative_context_path(input).ok()?;
 
