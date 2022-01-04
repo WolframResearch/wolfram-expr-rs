@@ -1,4 +1,29 @@
 //! Representation of Wolfram Language symbols.
+//!
+//! This module provides four primary types:
+//!
+//! * [`Symbol`]
+//! * [`SymbolName`]
+//! * [`Context`]
+//! * [`RelativeContext`]
+//!
+//! These types are used for storing a string value that has been validated to conform
+//! to the syntax of Wolfram Language [symbols and contexts][ref/SymbolNamesAndContexts].
+//!
+//! In addition to the previous types, which own there string value, types are provided
+//! that can be used to validate a borrowed `&str` value, without requiring another
+//! allocation:
+//!
+//! * [`SymbolRef`]
+//! * [`SymbolNameRef`]
+//! * [`ContextRef`]
+// * TODO: `RelativeContextRef`
+//!
+//! ## Related Links
+//!
+//! * [Input Syntax: Symbol Names and Contexts][ref/SymbolNamesAndContexts]
+//!
+//! [ref/SymbolNamesAndContexts]: https://reference.wolfram.com/language/tutorial/InputSyntax.html#6562
 
 pub(crate) mod parse;
 
