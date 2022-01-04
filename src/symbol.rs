@@ -222,6 +222,10 @@ impl Context {
         comps
     }
 
+    pub fn as_context_ref(&self) -> ContextRef {
+        ContextRef(self.as_str())
+    }
+
     /// Create the context `` name` ``.
     pub fn from_symbol_name(name: &SymbolName) -> Self {
         Context::try_new(&format!("{}`", name)).unwrap()

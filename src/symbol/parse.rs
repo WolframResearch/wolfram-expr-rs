@@ -20,7 +20,7 @@ pub struct SymbolRef<'s>(&'s str);
 pub struct SymbolNameRef<'s>(&'s str);
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct ContextRef<'s>(&'s str);
+pub struct ContextRef<'s>(pub(super) &'s str);
 
 impl<'s> SymbolRef<'s> {
     pub fn try_new(string: &'s str) -> Option<Self> {
@@ -121,12 +121,6 @@ impl SymbolName {
 
     pub fn as_symbol_name_ref(&self) -> SymbolNameRef {
         SymbolNameRef(self.as_str())
-    }
-}
-
-impl Context {
-    pub fn as_context_ref(&self) -> ContextRef {
-        ContextRef(self.as_str())
     }
 }
 
