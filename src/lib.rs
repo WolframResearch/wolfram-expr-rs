@@ -5,7 +5,6 @@
 pub mod symbol;
 
 use std::fmt;
-use std::hash::{Hash, Hasher};
 use std::mem;
 use std::sync::Arc;
 
@@ -122,20 +121,6 @@ impl Expr {
         }
     }
 
-    pub fn head(&self) -> Expr {
-        match *self.inner {
-            // TODO Test: >>> Head[Head[67]] -> Symbol
-            ExprKind::Number(num) => match num {
-                Number::Integer(_) => Expr::symbol(self.symbol_head().unwrap()),
-                Number::Real(_) => Expr::symbol(self.symbol_head().unwrap()),
-            },
-            ExprKind::Symbol(_) => Expr::symbol(self.symbol_head().unwrap()),
-            ExprKind::String(_) => Expr::symbol(self.symbol_head().unwrap()),
-            // TODO Test: Head[Plus[1, 1]]
-            ExprKind::Normal(ref normal) => normal.head.clone(),
-        }
-    }
-
     /// If this represents a [`Normal`] expression, return it's head. Otherwise, return
     /// `None`.
     pub fn normal_head(&self) -> Option<Expr> {
@@ -171,43 +156,6 @@ impl Expr {
         match self.kind() {
             ExprKind::Symbol(ref symbol) => Some(symbol),
             ExprKind::Normal(_) | ExprKind::String(_) | ExprKind::Number(_) => None,
-        }
-    }
-
-    /// Gets the head of all non-sub-value form `(_[___][___])` exprs as a symbol.
-    ///
-    /// ```text
-    /// symbol_head(10) => Integer
-    /// symbol_head(f[x]) => f
-    /// symbol_head(f[x][y]) => None
-    /// symbol_head(10[x]) => None
-    /// ```
-    pub fn symbol_head(&self) -> Option<Symbol> {
-        // QUIRK
-        // TODO: This is one of the few places where I'm not sure about using
-        //       `Symbol::unchecked_new`. The observed behavior in a NB is:
-        //           >>> Remove[System`Integer]
-        //           >>> Head[5]
-        //             | System`Integer
-        //       This means that Head adds back in the System`Integer/System`Symbol/etc.
-        //       symbols when it's executed. We can certainly simply call
-        //       `SymbolTable::add_symbol` in `builtin_downvalue_Head`, but it's
-        //       concerning there might be other places this happens, making that fix a
-        //       a specific solution to a more general problem (and therefore leaving
-        //       holes for bugs).
-        unsafe {
-            match self.kind() {
-                ExprKind::Number(num) => match num {
-                    Number::Integer(_) => Some(Symbol::unchecked_new("System`Integer")),
-                    Number::Real(_) => Some(Symbol::unchecked_new("System`Real")),
-                },
-                ExprKind::Symbol(_) => Some(Symbol::unchecked_new("System`Symbol")),
-                ExprKind::String(_) => Some(Symbol::unchecked_new("System`String")),
-                ExprKind::Normal(ref normal) => match normal.head.kind() {
-                    ExprKind::Symbol(sym) => Some(sym.clone()),
-                    _ => None,
-                },
-            }
         }
     }
 
