@@ -19,16 +19,23 @@ pub mod parse {
 
 /// Wolfram Language expression.
 ///
-/// ```ignore
-/// use wolfram_expr::Expr;
-/// use wl_symbol_table as st;
+/// # Example
 ///
-/// Expr::normal(&*st::List, vec![Expr::from(1), Expr::from(2), Expr::from(3)])
+/// Construct the expression `{1, 2, 3}`:
+///
+/// ```
+/// use wolfram_expr::{Expr, Symbol};
+///
+/// let expr = Expr::normal(Symbol::new("System`List").unwrap(), vec![
+///     Expr::from(1),
+///     Expr::from(2),
+///     Expr::from(3)
+/// ]);
 /// ```
 ///
 /// # Reference counting
 ///
-/// Internally, `Expr` is an atomically reference counted [`ExprKind`]. This makes cloning
+/// Internally, `Expr` is an atomically reference-counted [`ExprKind`]. This makes cloning
 /// an expression computationally inexpensive.
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct Expr {
