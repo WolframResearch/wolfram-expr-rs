@@ -18,37 +18,6 @@ Operations on Symbols
 
 */
 
-/// Create a Deref'erencable lazy_static! accessor for a symbol.
-///
-/// NOTE: This function will not check that the string given as the value of a symbol
-///       is a syntactically correct absolute symbol. Care should be taken that this is
-///       the case; a mistake could lead to a difficult bug.
-///
-/// ## Example:
-///
-/// ```no_test
-/// cache_symbol!(
-///     Internal_Value: "Internal`Value";
-///     _counter: "MyContext`$counter");
-///
-/// let sym: Symbol = *Internal_Value;
-/// let counter: Symbol = *_counter;
-/// ```
-#[macro_export]
-macro_rules! cache_symbol {
-    ($($name:ident: $symbol_str:expr);+ $(;)*) => {
-        ::lazy_static::lazy_static! {
-            $(
-            #[allow(non_upper_case_globals)]
-            pub static ref $name: $crate::Symbol = {
-                // TODO: This should check the symbol on debug builds
-                $crate::Symbol::new($symbol_str).expect("cache_symbol!: invalid symbol syntax")
-            };
-            )*
-        }
-    }
-}
-
 // TODO: Change these types to be Arc<str>. This has the consequence of increasing the
 //       size of these types from 64-bits to 128 bits, so first take care that they are
 //       not passed through a C FFI anywhere as a pointer-sized type.
