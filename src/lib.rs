@@ -128,7 +128,7 @@ impl Expr {
         }
     }
 
-    /// If this represents a [`Normal`] expression, return it's head. Otherwise, return
+    /// If this represents a [`Normal`] expression, return its head. Otherwise, return
     /// `None`.
     pub fn normal_head(&self) -> Option<Expr> {
         match *self.inner {
