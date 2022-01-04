@@ -1,10 +1,11 @@
 pub(crate) mod parse;
 
-use std::fmt::{self, Debug, Display};
+use std::{
+    fmt::{self, Debug, Display},
+    mem,
+    sync::Arc,
+};
 
-use std::sync::Arc;
-
-use static_assertions::assert_eq_size;
 
 /* Notes
 
@@ -84,7 +85,8 @@ pub use crate::symbol::parse::{AbsoluteContextRef, SymbolNameRef, SymbolRef};
 // By using `usize` here, we guarantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
-assert_eq_size!(Symbol, usize);
+const _: () = assert!(mem::size_of::<Symbol>() == mem::size_of::<usize>());
+const _: () = assert!(mem::align_of::<Symbol>() == mem::align_of::<usize>());
 
 impl From<&Symbol> for Symbol {
     fn from(sym: &Symbol) -> Self {

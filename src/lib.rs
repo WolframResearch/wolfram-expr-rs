@@ -6,8 +6,7 @@ mod symbol_table;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
-
-use static_assertions::{assert_eq_align, assert_eq_size};
+use std::mem;
 
 
 pub use self::symbol::{
@@ -39,11 +38,11 @@ pub struct Expr {
     inner: Arc<ExprKind>,
 }
 
-assert_eq_size!(Expr, usize);
-assert_eq_align!(Expr, usize);
-
-assert_eq_size!(Expr, *const ());
-assert_eq_align!(Expr, *const ());
+// Assert that Expr has the same size and alignment as a usize / pointer.
+const _: () = assert!(mem::size_of::<Expr>() == mem::size_of::<usize>());
+const _: () = assert!(mem::size_of::<Expr>() == mem::size_of::<*const ()>());
+const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<usize>());
+const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<*const ()>());
 
 /// Newtype around Expr, which calculates it's Hash value based on the pointer value,
 /// not the ExprKind.

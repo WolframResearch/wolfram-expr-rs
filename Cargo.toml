@@ -15,7 +15,6 @@ unstable_parse = []
 
 [dependencies]
 lazy_static = "^1.0"
-static_assertions = "^1.1.0"
 ordered-float = "1"
 
 # Used for parsing symbols. These version ranges should be kept in sync with what wl-parse
