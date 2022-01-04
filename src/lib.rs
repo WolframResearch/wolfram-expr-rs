@@ -230,13 +230,6 @@ impl Expr {
         }
     }
 
-    pub fn is_symbol(&self, sym: &Symbol) -> bool {
-        match self.kind() {
-            ExprKind::Symbol(ref self_sym) => self_sym == sym,
-            _ => false,
-        }
-    }
-
     //==================================
     // Common values
     //==================================
@@ -305,7 +298,7 @@ impl Normal {
 
     /// Returns `true` if the head of this expression is `sym`.
     pub fn has_head(&self, sym: &Symbol) -> bool {
-        self.head.is_symbol(sym)
+        self.head == *sym
     }
 }
 
@@ -445,6 +438,19 @@ impl From<Number> for ExprKind {
         match number {
             Number::Integer(int) => ExprKind::Integer(int),
             Number::Real(real) => ExprKind::Real(real),
+        }
+    }
+}
+
+//======================================
+// Comparision trait impls
+//======================================
+
+impl PartialEq<Symbol> for Expr {
+    fn eq(&self, other: &Symbol) -> bool {
+        match self.kind() {
+            ExprKind::Symbol(self_sym) => self_sym == other,
+            _ => false,
         }
     }
 }
