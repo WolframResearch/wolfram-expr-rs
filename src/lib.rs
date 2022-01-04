@@ -26,7 +26,7 @@ pub mod parse {
 /// ```
 /// use wolfram_expr::{Expr, Symbol};
 ///
-/// let expr = Expr::normal(Symbol::new("System`List").unwrap(), vec![
+/// let expr = Expr::normal(Symbol::new("System`List"), vec![
 ///     Expr::from(1),
 ///     Expr::from(2),
 ///     Expr::from(3)

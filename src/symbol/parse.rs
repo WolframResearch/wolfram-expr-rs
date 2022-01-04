@@ -109,17 +109,6 @@ impl<'s> ContextRef<'s> {
     }
 }
 
-impl Symbol {
-    /// Attempt to parse `input` as an absolute symbol.
-    ///
-    /// An absolute symbol is a symbol with an explicit context path. ``"System`Plus"`` is
-    /// an absolute symbol, ``"Plus"`` is a relative symbol and/or a [`SymbolName`].
-    /// ``"`Plus"`` is also a relative symbol.
-    pub fn try_new(input: &str) -> Option<Self> {
-        SymbolRef::try_new(input).as_ref().map(SymbolRef::to_symbol)
-    }
-}
-
 impl SymbolName {
     /// Attempt to parse `input` as a symbol name.
     ///
@@ -136,12 +125,6 @@ impl SymbolName {
 }
 
 impl Context {
-    pub fn try_new(input: &str) -> Option<Self> {
-        ContextRef::try_new(input)
-            .as_ref()
-            .map(ContextRef::to_context)
-    }
-
     pub fn as_context_ref(&self) -> ContextRef {
         ContextRef(self.as_str())
     }

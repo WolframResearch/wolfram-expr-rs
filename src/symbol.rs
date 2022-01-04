@@ -67,6 +67,42 @@ impl From<&Symbol> for Symbol {
 }
 
 impl Symbol {
+    /// Attempt to parse `input` as an absolute symbol.
+    ///
+    /// An absolute symbol is a symbol with an explicit context path. ``"System`Plus"`` is
+    /// an absolute symbol, ``"Plus"`` is a relative symbol and/or a [`SymbolName`].
+    /// ``"`Plus"`` is also a relative symbol.
+    pub fn try_new(input: &str) -> Option<Self> {
+        let sym_ref = SymbolRef::try_new(input)?;
+
+        Some(sym_ref.to_symbol())
+    }
+
+    /// Construct a symbol from `input`.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if `input` is not a valid Wolfram Language symbol.
+    /// `Symbol::try_new(input)` must succeed.
+    ///
+    /// This method is intended to be used for convenient construction of symbols from
+    /// string literals, where an error is unlikely to occur, e.g.:
+    ///
+    /// ```
+    /// # use wolfram_expr::{Expr, Symbol};
+    /// let expr = Expr::normal(Symbol::new("MyPackage`Foo"), vec![]);
+    /// ```
+    ///
+    /// If not using a string literal as the argument, prefer to use [`Symbol::try_new`]
+    /// and handle the error condition.
+    #[track_caller]
+    pub fn new(input: &str) -> Self {
+        match Symbol::try_new(input) {
+            Some(symbol) => symbol,
+            None => panic!("string is not parseable as a symbol: {}", input),
+        }
+    }
+
     /// Get the context path part of a symbol as an [`ContextRef`].
     pub fn context(&self) -> ContextRef {
         let string = self.as_str();
@@ -99,6 +135,38 @@ impl Symbol {
 }
 
 impl Context {
+    pub fn try_new(input: &str) -> Option<Self> {
+        let context_ref = ContextRef::try_new(input)?;
+
+        Some(context_ref.to_context())
+    }
+
+    /// Construct a context from `input`.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if `input` is not a valid Wolfram Language context.
+    /// `Context::try_new(input)` must succeed.
+    ///
+    /// This method is intended to be used for convenient construction of contexts from
+    /// string literals, where an error is unlikely to occur, e.g.:
+    ///
+    /// ```
+    /// use wolfram_expr::symbol::Context;
+    ///
+    /// let context = Context::new("MyPackage`");
+    /// ```
+    ///
+    /// If not using a string literal as the argument, prefer to use [`Context::try_new`]
+    /// and handle the error condition.
+    #[track_caller]
+    pub fn new(input: &str) -> Self {
+        match Context::try_new(input) {
+            Some(context) => context,
+            None => panic!("string is not parseable as a context: {}", input),
+        }
+    }
+
     pub fn global() -> Self {
         Context(Arc::new(String::from("Global`")))
     }
@@ -113,8 +181,8 @@ impl Context {
     /// ```
     /// use wolfram_expr::symbol::{Context, SymbolName, SymbolNameRef};
     ///
-    /// let context = Context::from_symbol_name(&SymbolName::new("MyContext").unwrap());
-    /// let private = context.join(SymbolNameRef::new("Private").unwrap());
+    /// let context = Context::from_symbol_name(&SymbolName::try_new("MyContext").unwrap());
+    /// let private = context.join(SymbolNameRef::try_new("Private").unwrap());
     ///
     /// assert!(private.as_str() == "MyContext`Private`");
     /// ```
@@ -129,7 +197,7 @@ impl Context {
     /// ```
     /// use wolfram_expr::symbol::Context;
     ///
-    /// let context = Context::new("MyPackage`Sub`Module`").unwrap();
+    /// let context = Context::new("MyPackage`Sub`Module`");
     ///
     /// let components = context.components();
     ///
@@ -166,7 +234,7 @@ impl RelativeContext {
     /// ```
     /// use wolfram_expr::symbol::RelativeContext;
     ///
-    /// let context = RelativeContext::new("`Sub`Module`").unwrap();
+    /// let context = RelativeContext::try_new("`Sub`Module`").unwrap();
     ///
     /// let components = context.components();
     ///
