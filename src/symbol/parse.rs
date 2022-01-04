@@ -13,16 +13,30 @@ use nom::{
 };
 use nom_locate::LocatedSpan;
 
+/// Borrowed string containing a valid symbol.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolRef<'s>(&'s str);
 
+/// Borrowing string containing a valid symbol name.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SymbolNameRef<'s>(&'s str);
 
+/// Borrowed string containing a valid context.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ContextRef<'s>(pub(super) &'s str);
 
 impl<'s> SymbolRef<'s> {
+    /// Attempt to parse `string` as an absolute symbol.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wolfram_expr::symbol::SymbolRef;
+    ///
+    /// assert!(matches!(SymbolRef::try_new("System`List"), Some(_)));
+    /// assert!(matches!(SymbolRef::try_new("List"), None));
+    /// assert!(matches!(SymbolRef::try_new("123"), None));
+    /// ```
     pub fn try_new(string: &'s str) -> Option<Self> {
         let input = LocatedSpan::new(string);
 
@@ -36,22 +50,26 @@ impl<'s> SymbolRef<'s> {
         }
     }
 
+    /// Get the borrowed string data.
     pub fn as_str(&self) -> &'s str {
         let SymbolRef(string) = self;
         string
     }
 
+    /// Convert this borrowed string into an owned [`Symbol`].
     pub fn to_symbol(&self) -> Symbol {
         let SymbolRef(string) = self;
         unsafe { Symbol::unchecked_new(string.to_owned()) }
     }
 
+    #[doc(hidden)]
     pub unsafe fn unchecked_new(string: &'s str) -> Self {
         SymbolRef(string)
     }
 }
 
 impl<'s> SymbolNameRef<'s> {
+    /// Attempt to parse `string` as a symbol name.
     pub fn try_new(string: &'s str) -> Option<Self> {
         let input = LocatedSpan::new(string);
 
@@ -65,22 +83,26 @@ impl<'s> SymbolNameRef<'s> {
         }
     }
 
+    /// Get the borrowed string data.
     pub fn as_str(&self) -> &'s str {
         let SymbolNameRef(string) = self;
         string
     }
 
+    /// Convert this borrowed string into an owned [`SymbolName`].
     pub fn to_symbol_name(&self) -> SymbolName {
         let SymbolNameRef(string) = self;
         unsafe { SymbolName::unchecked_new(string.to_owned()) }
     }
 
+    #[doc(hidden)]
     pub unsafe fn unchecked_new(string: &'s str) -> Self {
         SymbolNameRef(string)
     }
 }
 
 impl<'s> ContextRef<'s> {
+    /// Attempt to parse `string` as context.
     pub fn try_new(string: &'s str) -> Option<Self> {
         let input = LocatedSpan::new(string);
 
@@ -94,16 +116,19 @@ impl<'s> ContextRef<'s> {
         }
     }
 
+    /// Get the borrowed string data.
     pub fn as_str(&self) -> &'s str {
         let ContextRef(string) = self;
         string
     }
 
+    /// Convert this borrowed string into an owned [`Context`].
     pub fn to_context(&self) -> Context {
         let ContextRef(string) = self;
         unsafe { Context::unchecked_new(string.to_owned()) }
     }
 
+    #[doc(hidden)]
     pub unsafe fn unchecked_new(string: &'s str) -> Self {
         ContextRef(string)
     }
@@ -119,12 +144,14 @@ impl SymbolName {
             .map(SymbolNameRef::to_symbol_name)
     }
 
+    /// Get a borrowed [`SymbolNameRef`] from this `SymbolName`.
     pub fn as_symbol_name_ref(&self) -> SymbolNameRef {
         SymbolNameRef(self.as_str())
     }
 }
 
 impl RelativeContext {
+    /// Attempt to parse `input` as a relative context.
     pub fn try_new(input: &str) -> Option<Self> {
         let input = LocatedSpan::new(input.as_ref());
 

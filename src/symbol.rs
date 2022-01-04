@@ -10,7 +10,7 @@
 //! These types are used for storing a string value that has been validated to conform
 //! to the syntax of Wolfram Language [symbols and contexts][ref/SymbolNamesAndContexts].
 //!
-//! In addition to the previous types, which own there string value, types are provided
+//! In addition to the previous types, which own their string value, types are provided
 //! that can be used to validate a borrowed `&str` value, without requiring another
 //! allocation:
 //!
@@ -144,7 +144,7 @@ impl Symbol {
         unsafe { ContextRef::unchecked_new(context) }
     }
 
-    // Get the symbol name part of a symbol as a [`SymbolNameRef`].
+    /// Get the symbol name part of a symbol as a [`SymbolNameRef`].
     pub fn symbol_name(&self) -> SymbolNameRef {
         let string = self.as_str();
 
@@ -161,6 +161,7 @@ impl Symbol {
 }
 
 impl Context {
+    /// Attempt to parse `input` as a context.
     pub fn try_new(input: &str) -> Option<Self> {
         let context_ref = ContextRef::try_new(input)?;
 
@@ -250,6 +251,7 @@ impl Context {
         comps
     }
 
+    /// Get a borrowed [`ContextRef`] from this `Context`.
     pub fn as_context_ref(&self) -> ContextRef {
         ContextRef(self.as_str())
     }

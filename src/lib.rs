@@ -1,6 +1,7 @@
 //! Wolfram Language expressions.
 
 #![allow(clippy::let_and_return)]
+#![warn(missing_docs)]
 
 pub mod symbol;
 
@@ -49,6 +50,7 @@ const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<usize>());
 const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<*const ()>());
 
 impl Expr {
+    /// Construct a new expression from an [`ExprKind`].
     pub fn new(kind: ExprKind) -> Expr {
         Expr {
             inner: Arc::new(kind),
@@ -75,18 +77,25 @@ impl Expr {
         }
     }
 
+    /// Get the [`ExprKind`] representing this expression.
     pub fn kind(&self) -> &ExprKind {
         &*self.inner
     }
 
+    /// Get mutable access to the [`ExprKind`] that represents this expression.
+    ///
+    /// If the reference count of the underlying shared pointer is not equal to 1, this
+    /// will clone the [`ExprKind`] to make it unique.
     pub fn kind_mut(&mut self) -> &mut ExprKind {
         Arc::make_mut(&mut self.inner)
     }
 
+    /// Retrieve the reference count of this expression.
     pub fn ref_count(&self) -> usize {
         Arc::strong_count(&self.inner)
     }
 
+    /// Construct a new normal expression from the head and elements.
     pub fn normal<H: Into<Expr>>(head: H, contents: Vec<Expr>) -> Expr {
         let head = head.into();
         // let contents = contents.into();
@@ -97,6 +106,7 @@ impl Expr {
 
     // TODO: Should Expr's be cached? Especially Symbol exprs? Would certainly save
     //       a lot of allocations.
+    /// Construct a new expression from a [`Symbol`].
     pub fn symbol<S: Into<Symbol>>(s: S) -> Expr {
         let s = s.into();
         Expr {
@@ -104,12 +114,14 @@ impl Expr {
         }
     }
 
+    /// Construct a new expression from a [`Number`].
     pub fn number(num: Number) -> Expr {
         Expr {
             inner: Arc::new(ExprKind::from(num)),
         }
     }
 
+    /// Construct a new expression from a [`String`].
     pub fn string<S: Into<String>>(s: S) -> Expr {
         Expr {
             inner: Arc::new(ExprKind::String(s.into())),
@@ -125,6 +137,18 @@ impl Expr {
         Expr::number(Number::real(real))
     }
 
+    /// Returns the outer-most symbol "tag" used in this expression.
+    ///
+    /// To illustrate:
+    ///
+    /// Expression   | Tag
+    /// -------------|----
+    /// `5`          | `None`
+    /// `"hello"`    | `None`
+    /// `foo`        | `foo`
+    /// `f[1, 2, 3]` | `f`
+    /// `g[x][y]`    | `g`
+    //
     // TODO: _[x] probably should return None, even though technically
     //       Blank[][x] has the tag Blank.
     // TODO: The above TODO is probably wrong -- tag() shouldn't have any language
@@ -167,6 +191,7 @@ impl Expr {
         }
     }
 
+    /// If this is a [`Normal`] expression, return that. Otherwise return None.
     pub fn try_normal(&self) -> Option<&Normal> {
         match self.kind() {
             ExprKind::Normal(ref normal) => Some(normal),
@@ -177,6 +202,7 @@ impl Expr {
         }
     }
 
+    /// If this is a [`Symbol`] expression, return that. Otherwise return None.
     pub fn try_symbol(&self) -> Option<&Symbol> {
         match self.kind() {
             ExprKind::Symbol(ref symbol) => Some(symbol),
@@ -187,6 +213,7 @@ impl Expr {
         }
     }
 
+    /// If this is a [`Number`] expression, return that. Otherwise return None.
     pub fn try_number(&self) -> Option<Number> {
         match self.kind() {
             ExprKind::Integer(int) => Some(Number::Integer(*int)),
@@ -214,12 +241,14 @@ impl Expr {
     // Common values
     //==================================
 
+    /// [`Null`](https://reference.wolfram.com/language/ref/Null.html)<sub>WL</sub>.
     pub fn null() -> Expr {
         Expr::symbol(unsafe { Symbol::unchecked_new("System`Null") })
     }
 }
 
 /// Wolfram Language expression variants.
+#[allow(missing_docs)]
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum ExprKind<E = Expr> {
     Integer(i64),
@@ -235,10 +264,17 @@ pub enum ExprKind<E = Expr> {
 /// more arguments.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Normal<E = Expr> {
+    /// The head of this normal expression.
     pub head: E,
+    /// The elements of this normal expression.
+    ///
+    /// If `head` conceptually represents a function, these are the arguments that are
+    /// being applied to `head`.
     pub contents: Vec<E>,
 }
 
+/// Subset of [`ExprKind`] that covers number-type expression values.
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Hash)]
 pub enum Number {
     // TODO: Rename this to MachineInteger
@@ -249,7 +285,9 @@ pub enum Number {
     Real(F64),
 }
 
+/// 64-bit floating-point real number. Not NaN.
 pub type F64 = ordered_float::NotNan<f64>;
+/// 32-bit floating-point real number. Not NaN.
 pub type F32 = ordered_float::NotNan<f32>;
 
 //=======================================
@@ -257,6 +295,7 @@ pub type F32 = ordered_float::NotNan<f32>;
 //=======================================
 
 impl Normal {
+    /// Construct a new normal expression from the head and elements.
     pub fn new<E: Into<Expr>>(head: E, contents: Vec<Expr>) -> Self {
         Normal {
             head: head.into(),
@@ -264,6 +303,7 @@ impl Normal {
         }
     }
 
+    /// Returns `true` if the head of this expression is `sym`.
     pub fn has_head(&self, sym: &Symbol) -> bool {
         self.head.is_symbol(sym)
     }
