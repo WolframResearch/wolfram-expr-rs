@@ -5,6 +5,13 @@
 
 pub mod symbol;
 
+#[doc(hidden)]
+mod test_readme {
+    // Ensure that doc tests in the README.md file get run.
+    #![doc = include_str!("../README.md")]
+}
+
+
 use std::fmt;
 use std::mem;
 use std::sync::Arc;
@@ -131,6 +138,7 @@ impl Expr {
     /// Construct an expression from a floating-point number.
     ///
     /// ```
+    /// # use wolfram_expr::Expr;
     /// let expr = Expr::real(3.14159);
     /// ```
     ///
