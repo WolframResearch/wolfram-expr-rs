@@ -37,6 +37,22 @@ match expr.kind() {
 }
 ```
 
+## Related Links
+
+#### Related crates
+
+* [`wolfram-library-link`][wolfram-library-link] — author libraries that can be
+  dynamically loaded by the Wolfram Language.
+* [`wstp`][wstp] — bindings to the Wolfram Symbolic Transport Protocol, used for passing
+  arbitrary Wolfram expressions between programs.
+* [`wolfram-app-discovery`][wolfram-app-discovery] — utility for locating local
+  installations of Wolfram applications and the Wolfram Language.
+
+
+[wstp]: https://github.com/WolframResearch/wstp-rs
+[wolfram-app-discovery]: https://github.com/WolframResearch/wolfram-app-discovery-rs
+[wolfram-library-link]: https://github.com/WolframResearch/wolfram-library-link-rs
+
 ## License
 
  Licensed under either of

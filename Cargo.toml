@@ -1,7 +1,7 @@
 [package]
 name = "wolfram-expr"
 version = "0.1.0"
-authors = ["Connor Gray <connorg@wolfram.com>"]
+authors = ["Connor Gray <code@connorgray.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 publish = false
