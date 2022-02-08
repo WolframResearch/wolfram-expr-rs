@@ -1,5 +1,9 @@
 # wolfram-expr
 
+[![Crates.io](https://img.shields.io/crates/v/wolfram-expr.svg)](https://crates.io/crates/wolfram-expr)
+![License](https://img.shields.io/crates/l/wolfram-expr.svg)
+[![Documentation](https://docs.rs/wolfram-expr/badge.svg)](https://docs.rs/wolfram-expr)
+
 <h4>
   <a href="https://docs.rs/wolfram-expr">API Documentation</a>
   <span> | </span>
