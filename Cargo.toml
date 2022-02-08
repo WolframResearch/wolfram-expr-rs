@@ -6,7 +6,7 @@ edition = "2018"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/WolframResearch/wolfram-expr-rs"
-description = "Representation of Wolfram expressions in Rust"
+description = "Efficient and ergonomic representation of Wolfram expressions in Rust"
 keywords = ["wolfram", "wolfram-language", "mathematica", "wolfram-engine", "expr", "expression"]
 categories = ["encoding"]
 

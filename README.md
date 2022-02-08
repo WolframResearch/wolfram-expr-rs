@@ -8,7 +8,7 @@
   <a href="https://github.com/WolframResearch/wolfram-expr-rs/blob/master/docs/CONTRIBUTING.md">Contributing</a>
 </h4>
 
-Representation of Wolfram Language expressions.
+Efficient and ergonomic representation of Wolfram expressions in Rust.
 
 ## Examples
 
