@@ -1,4 +1,4 @@
-//! Wolfram Language expressions.
+//! Efficient and ergonomic representation of Wolfram expressions in Rust.
 
 #![allow(clippy::let_and_return)]
 #![warn(missing_docs)]

@@ -1,6 +1,18 @@
 # wolfram-expr
 
-Representation of Wolfram Language expressions.
+[![Crates.io](https://img.shields.io/crates/v/wolfram-expr.svg)](https://crates.io/crates/wolfram-expr)
+![License](https://img.shields.io/crates/l/wolfram-expr.svg)
+[![Documentation](https://docs.rs/wolfram-expr/badge.svg)](https://docs.rs/wolfram-expr)
+
+<h4>
+  <a href="https://docs.rs/wolfram-expr">API Documentation</a>
+  <span> | </span>
+  <a href="https://github.com/WolframResearch/wolfram-expr-rs/blob/master/docs/CHANGELOG.md">Changelog</a>
+  <span> | </span>
+  <a href="https://github.com/WolframResearch/wolfram-expr-rs/blob/master/docs/CONTRIBUTING.md">Contributing</a>
+</h4>
+
+Efficient and ergonomic representation of Wolfram expressions in Rust.
 
 ## Examples
 
@@ -50,7 +62,7 @@ match expr.kind() {
 
 
 [wstp]: https://github.com/WolframResearch/wstp-rs
-[wolfram-app-discovery]: https://github.com/WolframResearch/wolfram-app-discovery-rs
+[wolfram-app-discovery]: https://crates.io/crates/wolfram-app-discovery
 [wolfram-library-link]: https://github.com/WolframResearch/wolfram-library-link-rs
 
 ## License
