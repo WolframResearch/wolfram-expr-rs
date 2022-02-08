@@ -50,7 +50,7 @@ match expr.kind() {
 
 
 [wstp]: https://github.com/WolframResearch/wstp-rs
-[wolfram-app-discovery]: https://github.com/WolframResearch/wolfram-app-discovery-rs
+[wolfram-app-discovery]: https://crates.io/crates/wolfram-app-discovery
 [wolfram-library-link]: https://github.com/WolframResearch/wolfram-library-link-rs
 
 ## License
