@@ -1,5 +1,13 @@
 # wolfram-expr
 
+<h4>
+  <a href="https://docs.rs/wolfram-expr">API Documentation</a>
+  <span> | </span>
+  <a href="https://github.com/WolframResearch/wolfram-expr-rs/blob/master/docs/CHANGELOG.md">Changelog</a>
+  <span> | </span>
+  <a href="https://github.com/WolframResearch/wolfram-expr-rs/blob/master/docs/CONTRIBUTING.md">Contributing</a>
+</h4>
+
 Representation of Wolfram Language expressions.
 
 ## Examples
