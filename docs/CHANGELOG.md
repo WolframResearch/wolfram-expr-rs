@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* The [`Expr`] type, for representing Wolfram Language expressions in an efficient and
-  easy-to-process structure.
+* The [`Expr`](https://docs.rs/wolfram-expr/0.1.0/wolfram_expr/struct.Expr.html) type, for
+  representing Wolfram Language expressions in an efficient and easy-to-process structure.
 
   Construct the expression `{1, 2, 3}`:
 
