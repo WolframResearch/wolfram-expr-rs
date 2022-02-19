@@ -250,6 +250,43 @@ impl Expr {
     pub fn null() -> Expr {
         Expr::symbol(unsafe { Symbol::unchecked_new("System`Null") })
     }
+
+    //==================================
+    // Convenience creation functions
+    //==================================
+
+    /// Construct a new `Rule[_, _]` expression from the left-hand side and right-hand
+    /// side.
+    ///
+    /// # Example
+    ///
+    /// Construct the expression `FontSize -> 16`:
+    ///
+    /// ```
+    /// use wolfram_expr::{Expr, Symbol};
+    ///
+    /// let option = Expr::rule(Symbol::new("System`FontSize"), Expr::from(16));
+    /// ```
+    pub fn rule<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {
+        let lhs = lhs.into();
+
+        Expr::normal(Symbol::new("System`Rule"), vec![lhs, rhs])
+    }
+
+    /// Construct a new `List[...]` expression from it's elements.
+    ///
+    /// # Example
+    ///
+    /// Construct the expression `{1, 2, 3}`:
+    ///
+    /// ```
+    /// use wolfram_expr::Expr;
+    ///
+    /// let list = Expr::list(vec![Expr::from(1), Expr::from(2), Expr::from(3)]);
+    /// ```
+    pub fn list(elements: Vec<Expr>) -> Expr {
+        Expr::normal(Symbol::new("System`List"), elements)
+    }
 }
 
 /// Wolfram Language expression variants.
