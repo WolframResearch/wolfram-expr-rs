@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] – 2022-02-18
+
+### Added
+
+* Added [`Expr::rule()`](https://docs.rs/wolfram-expr/0.1.1/wolfram_expr/struct.Expr.html#method.rule)
+  and [`Expr::list()`](https://docs.rs/wolfram-expr/0.1.1/wolfram_expr/struct.Expr.html#method.list)
+  methods for more convenient construction of `Rule` and `List` expressions. ([#5])
+
+  Construct the expression `FontFamily -> "Courier New"`:
+
+  ```rust
+  use wolfram_expr::{Expr, Symbol};
+
+  let option = Expr::rule(Symbol::new("System`FontFamily"), Expr::string("Courier New"));
+  ```
+
+  Construct the expression `{1, 2, 3}`:
+
+  ```rust
+  use wolfram_expr::Expr;
+
+  let list = Expr::list(vec![Expr::from(1), Expr::from(2), Expr::from(3)]);
+  ```
+
 ## [0.1.0] – 2022-02-08
 
 ### Added
@@ -47,7 +71,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   }
   ```
 
-<!-- This needs to be updated for each tagged release. -->
-[Unreleased]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.0...HEAD
 
+
+
+[#5]: https://github.com/WolframResearch/wolfram-expr-rs/pull/5
+
+
+<!-- This needs to be updated for each tagged release. -->
+[Unreleased]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.1...HEAD
+
+[0.1.1]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/WolframResearch/wolfram-expr-rs/releases/tag/v0.1.0
