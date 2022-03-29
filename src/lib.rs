@@ -214,11 +214,22 @@ impl Expr {
         }
     }
 
+    /// If this is a [`True`] or [`False`] value, return that. Otherwise return None.
+    pub fn try_bool(&self) -> Option<bool> {
+        let s = self.try_symbol()?;
+        if s.eq("System`True") {
+            return Some(true);
+        }
+        if s.eq("System`False") {
+            return Some(false);
+        }
+        None
+    }
 
     /// If this is a [`String`] expression, return that. Otherwise return None.
-    pub fn try_string(&self) -> Option<&String> {
+    pub fn try_str(&self) -> Option<&str> {
         match self.kind() {
-            ExprKind::String(ref string) => Some(string),
+            ExprKind::String(ref string) => Some(string.as_str()),
             _ => None,
         }
     }
@@ -431,7 +442,7 @@ impl fmt::Display for ExprKind {
                 // when printing expressions in a way that they can be read back in as a
                 // string, such as with ToExpression.
                 write!(f, "{:?}", string)
-            }
+            },
             ExprKind::Symbol(ref symbol) => fmt::Display::fmt(symbol, f),
         }
     }
@@ -465,7 +476,7 @@ impl fmt::Display for Number {
                 // Display)
                 let real: f64 = **real;
                 write!(f, "{:?}", real)
-            }
+            },
         }
     }
 }
@@ -501,17 +512,25 @@ impl From<()> for Expr {
 }
 
 impl<T> From<Option<T>> for Expr
-    where Expr: From<T>
+where
+    Expr: From<T>,
 {
     fn from(value: Option<T>) -> Expr {
         match value {
-            None => { ().into() }
-            Some(s) => { s.into() }
+            None => ().into(),
+            Some(s) => s.into(),
         }
     }
 }
 
-
+impl From<bool> for Expr {
+    fn from(value: bool) -> Expr {
+        match value {
+            true => Expr::symbol("System`True"),
+            false => Expr::symbol("System`False"),
+        }
+    }
+}
 
 macro_rules! string_like {
     ($($t:ty),*) => {
