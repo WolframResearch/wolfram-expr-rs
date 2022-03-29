@@ -8,7 +8,7 @@ pub mod symbol;
 #[doc(hidden)]
 mod test_readme {
     // Ensure that doc tests in the README.md file get run.
-    #![doc = include_str!("../README.md")]
+    #![doc = include_str ! ("../README.md")]
 }
 
 
@@ -211,6 +211,15 @@ impl Expr {
             | ExprKind::String(_)
             | ExprKind::Integer(_)
             | ExprKind::Real(_) => None,
+        }
+    }
+
+
+    /// If this is a [`String`] expression, return that. Otherwise return None.
+    pub fn try_string(&self) -> Option<&String> {
+        match self.kind() {
+            ExprKind::String(ref string) => Some(string),
+            _ => None,
         }
     }
 
@@ -422,7 +431,7 @@ impl fmt::Display for ExprKind {
                 // when printing expressions in a way that they can be read back in as a
                 // string, such as with ToExpression.
                 write!(f, "{:?}", string)
-            },
+            }
             ExprKind::Symbol(ref symbol) => fmt::Display::fmt(symbol, f),
         }
     }
@@ -456,7 +465,7 @@ impl fmt::Display for Number {
                 // Display)
                 let real: f64 = **real;
                 write!(f, "{:?}", real)
-            },
+            }
         }
     }
 }
@@ -485,11 +494,38 @@ impl From<Normal> for Expr {
     }
 }
 
-impl From<&str> for Expr {
-    fn from(str: &str) -> Expr {
-        Expr::string(str)
+impl From<()> for Expr {
+    fn from(_: ()) -> Expr {
+        Expr::symbol("System`None")
     }
 }
+
+impl<T> From<Option<T>> for Expr
+    where Expr: From<T>
+{
+    fn from(value: Option<T>) -> Expr {
+        match value {
+            None => { ().into() }
+            Some(s) => { s.into() }
+        }
+    }
+}
+
+
+
+macro_rules! string_like {
+    ($($t:ty),*) => {
+        $(
+            impl From<$t> for Expr {
+                fn from(s: $t) -> Expr {
+                    Expr::string(s)
+                }
+            }
+        )*
+    }
+}
+
+string_like!(&str, &String, String);
 
 //--------------------
 // Integer conversions
