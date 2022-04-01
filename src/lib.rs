@@ -204,7 +204,7 @@ impl Expr {
     }
 
     /// If this is a [`Normal`] expression, return that. Otherwise return None.
-    pub fn try_normal(&self) -> Option<&Normal> {
+    pub fn try_as_normal(&self) -> Option<&Normal> {
         match self.kind() {
             ExprKind::Normal(ref normal) => Some(normal),
             ExprKind::Symbol(_)
@@ -215,8 +215,8 @@ impl Expr {
     }
 
     /// If this is a [`True`] or [`False`] value, return that. Otherwise return None.
-    pub fn try_bool(&self) -> Option<bool> {
-        let s = self.try_symbol()?;
+    pub fn try_as_bool(&self) -> Option<bool> {
+        let s = self.try_as_symbol()?;
         if s.eq("System`True") {
             return Some(true);
         }
@@ -227,7 +227,7 @@ impl Expr {
     }
 
     /// If this is a [`String`] expression, return that. Otherwise return None.
-    pub fn try_str(&self) -> Option<&str> {
+    pub fn try_as_str(&self) -> Option<&str> {
         match self.kind() {
             ExprKind::String(ref string) => Some(string.as_str()),
             _ => None,
@@ -235,7 +235,7 @@ impl Expr {
     }
 
     /// If this is a [`Symbol`] expression, return that. Otherwise return None.
-    pub fn try_symbol(&self) -> Option<&Symbol> {
+    pub fn try_as_symbol(&self) -> Option<&Symbol> {
         match self.kind() {
             ExprKind::Symbol(ref symbol) => Some(symbol),
             ExprKind::Normal(_)
@@ -246,7 +246,7 @@ impl Expr {
     }
 
     /// If this is a [`Number`] expression, return that. Otherwise return None.
-    pub fn try_number(&self) -> Option<Number> {
+    pub fn try_as_number(&self) -> Option<Number> {
         match self.kind() {
             ExprKind::Integer(int) => Some(Number::Integer(*int)),
             ExprKind::Real(real) => Some(Number::Real(*real)),
@@ -292,8 +292,25 @@ impl Expr {
 
         Expr::normal(Symbol::new("System`Rule"), vec![lhs, rhs])
     }
+    /// Construct a new `RuleDelayed[_, _]` expression from the left-hand side and right-hand
+    /// side.
+    ///
+    /// # Example
+    ///
+    /// Construct the expression `x :> RandomReal[]`:
+    ///
+    /// ```
+    /// use wolfram_expr::{Expr, Symbol};
+    ///
+    /// let delayed = Expr::rule(Symbol::new("x"), Expr::normal(Symbol::new("System`RandomReal"), vec![]));
+    /// ```
+    pub fn rule_delayed<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {
+        let lhs = lhs.into();
 
-    /// Construct a new `List[...]` expression from it's elements.
+        Expr::normal(Symbol::new("System`RuleDelayed"), vec![lhs, rhs])
+    }
+
+    /// Construct a new `List[...]`(`{...}`) expression from it's elements.
     ///
     /// # Example
     ///
@@ -306,6 +323,23 @@ impl Expr {
     /// ```
     pub fn list(elements: Vec<Expr>) -> Expr {
         Expr::normal(Symbol::new("System`List"), elements)
+    }
+    /// Construct a new `Association[...]`(`<|...|>`) expression from it's elements.
+    ///
+    /// # Example
+    ///
+    /// Construct the expression `<|"a"->1, "b":>2|>`:
+    ///
+    /// ```
+    /// use wolfram_expr::Expr;
+    ///
+    /// let assoc = Expr::association(vec![
+    ///     Expr::rule(Expr::from("a"), Expr::from(1)),
+    ///     Expr::rule_delayed(Expr::from("b"), Expr::from(2)),
+    /// ]);
+    /// ```
+    pub fn association(elements: Vec<Expr>) -> Expr {
+        Expr::normal(Symbol::new("System`Association"), elements)
     }
 }
 
@@ -501,24 +535,6 @@ impl From<Normal> for Expr {
     fn from(normal: Normal) -> Expr {
         Expr {
             inner: Arc::new(ExprKind::Normal(normal)),
-        }
-    }
-}
-
-impl From<()> for Expr {
-    fn from(_: ()) -> Expr {
-        Expr::symbol("System`None")
-    }
-}
-
-impl<T> From<Option<T>> for Expr
-where
-    Expr: From<T>,
-{
-    fn from(value: Option<T>) -> Expr {
-        match value {
-            None => ().into(),
-            Some(s) => s.into(),
         }
     }
 }
