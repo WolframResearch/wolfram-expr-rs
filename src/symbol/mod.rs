@@ -83,8 +83,8 @@ pub use crate::symbol::parse::{ContextRef, SymbolNameRef, SymbolRef};
 // By using `usize` here, we guarantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
-const _: () = assert!(mem::size_of::<Symbol>() == mem::size_of::<usize>());
-const _: () = assert!(mem::align_of::<Symbol>() == mem::align_of::<usize>());
+const _: () = assert_eq!(mem::size_of::<Symbol>(), mem::size_of::<usize>());
+const _: () = assert_eq!(mem::align_of::<Symbol>(), mem::align_of::<usize>());
 
 impl From<&Symbol> for Symbol {
     fn from(sym: &Symbol) -> Self {
@@ -213,7 +213,7 @@ impl Context {
     /// let context = Context::from_symbol_name(&SymbolName::try_new("MyContext").unwrap());
     /// let private = context.join(SymbolNameRef::try_new("Private").unwrap());
     ///
-    /// assert!(private.as_str() == "MyContext`Private`");
+    /// assert_eq!(private.as_str(), "MyContext`Private`");
     /// ```
     pub fn join(&self, name: SymbolNameRef) -> Context {
         let Context(context) = self;
@@ -230,10 +230,10 @@ impl Context {
     ///
     /// let components = context.components();
     ///
-    /// assert!(components.len() == 3);
-    /// assert!(components[0].as_str() == "MyPackage");
-    /// assert!(components[1].as_str() == "Sub");
-    /// assert!(components[2].as_str() == "Module");
+    /// assert_eq!(components.len(), 3);
+    /// assert_eq!(components[0].as_str(), "MyPackage");
+    /// assert_eq!(components[1].as_str(), "Sub");
+    /// assert_eq!(components[2].as_str(), "Module");
     /// ```
     pub fn components(&self) -> Vec<SymbolNameRef> {
         let Context(string) = self;
@@ -272,9 +272,9 @@ impl RelativeContext {
     ///
     /// let components = context.components();
     ///
-    /// assert!(components.len() == 2);
-    /// assert!(components[0].as_str() == "Sub");
-    /// assert!(components[1].as_str() == "Module");
+    /// assert_eq!(components.len(), 2);
+    /// assert_eq!(components[0].as_str(), "Sub");
+    /// assert_eq!(components[1].as_str(), "Module");
     /// ```
     pub fn components(&self) -> Vec<SymbolNameRef> {
         let RelativeContext(string) = self;

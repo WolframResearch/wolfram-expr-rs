@@ -5,7 +5,7 @@ impl Expr {
     /// If this is a [`Normal`] expression, return that. Otherwise return None.
     pub fn try_as_normal(&self) -> Option<&Normal> {
         match self.kind() {
-            ExprKind::Normal(ref normal) => Some(normal),
+            ExprKind::Normal(normal) => Some(normal),
             ExprKind::Symbol(_)
             | ExprKind::String(_)
             | ExprKind::Integer(_)
@@ -105,47 +105,24 @@ string_like!(&str, &String, String);
 // Integer conversions
 //--------------------
 
-impl From<u8> for Expr {
-    fn from(int: u8) -> Expr {
-        Expr::from(i64::from(int))
+macro_rules! number_like {
+    ($t:ty) => {
+        impl From<$t> for Number {
+            fn from(n: $t) -> Self {
+                Number::Integer(n as i64)
+            }
+        }
+    }
+    ($($t:ty),*) => {
+        $(
+            number_like!($t);
+            number_like!(&$t);
+        )*
     }
 }
 
-impl From<i8> for Expr {
-    fn from(int: i8) -> Expr {
-        Expr::from(i64::from(int))
-    }
-}
-
-impl From<u16> for Expr {
-    fn from(int: u16) -> Expr {
-        Expr::from(i64::from(int))
-    }
-}
-
-impl From<i16> for Expr {
-    fn from(int: i16) -> Expr {
-        Expr::from(i64::from(int))
-    }
-}
-
-impl From<u32> for Expr {
-    fn from(int: u32) -> Expr {
-        Expr::from(i64::from(int))
-    }
-}
-
-impl From<i32> for Expr {
-    fn from(int: i32) -> Expr {
-        Expr::from(i64::from(int))
-    }
-}
-
-impl From<i64> for Expr {
-    fn from(int: i64) -> Expr {
-        Expr::number(Number::Integer(int))
-    }
-}
+number_like![u8, u16, u32, u64, usize];
+number_like![i8, i16, i32, i64, isize];
 
 // impl From<Normal> for ExprKind {
 //     fn from(normal: Normal) -> ExprKind {

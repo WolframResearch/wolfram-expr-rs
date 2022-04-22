@@ -4,15 +4,18 @@
 #![warn(missing_docs)]
 
 mod conversion;
+mod number;
 pub mod symbol;
+mod wxf;
 
 #[doc(hidden)]
 mod test_readme {
     // Ensure that doc tests in the README.md file get run.
-    #![doc = include_str ! ("../README.md")]
+    #![doc = include_str!("../README.md")]
 }
 
 
+use self::number::{Number, F32, F64};
 use std::fmt;
 use std::mem;
 use std::sync::Arc;
@@ -52,10 +55,10 @@ pub struct Expr {
 }
 
 // Assert that Expr has the same size and alignment as a usize / pointer.
-const _: () = assert!(mem::size_of::<Expr>() == mem::size_of::<usize>());
-const _: () = assert!(mem::size_of::<Expr>() == mem::size_of::<*const ()>());
-const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<usize>());
-const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<*const ()>());
+const _: () = assert_eq!(mem::size_of::<Expr>(), mem::size_of::<usize>());
+const _: () = assert_eq!(mem::size_of::<Expr>(), mem::size_of::<*const ()>());
+const _: () = assert_eq!(mem::align_of::<Expr>(), mem::align_of::<usize>());
+const _: () = assert_eq!(mem::align_of::<Expr>(), mem::align_of::<*const ()>());
 
 impl Expr {
     /// Construct a new expression from an [`ExprKind`].
@@ -139,8 +142,9 @@ impl Expr {
     /// Construct an expression from a floating-point number.
     ///
     /// ```
-    /// # use wolfram_expr::Expr;
-    /// let expr = Expr::real(3.14159);
+    /// use std::f64::consts::PI;
+    /// use wolfram_expr::Expr;
+    /// let expr = Expr::real(PI);
     /// ```
     ///
     /// # Panics
@@ -320,23 +324,6 @@ pub struct Normal<E = Expr> {
     contents: Vec<E>,
 }
 
-/// Subset of [`ExprKind`] that covers number-type expression values.
-#[allow(missing_docs)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Hash)]
-pub enum Number {
-    // TODO: Rename this to MachineInteger
-    Integer(i64),
-    // TODO: Make an explicit MachineReal type which hides the inner f64, so that other
-    //       code can make use of WL machine reals with a guaranteed type. In
-    //       particular, change wl_compile::mir::Constant to use that type.
-    Real(F64),
-}
-
-/// 64-bit floating-point real number. Not NaN.
-pub type F64 = ordered_float::NotNan<f64>;
-/// 32-bit floating-point real number. Not NaN.
-pub type F32 = ordered_float::NotNan<f32>;
-
 //=======================================
 // Type Impl's
 //=======================================
@@ -373,22 +360,6 @@ impl Normal {
     /// Returns `true` if the head of this expression is `sym`.
     pub fn has_head(&self, sym: &Symbol) -> bool {
         self.head == *sym
-    }
-}
-
-impl Number {
-    /// # Panics
-    ///
-    /// This function will panic if `r` is NaN.
-    ///
-    /// TODO: Change this function to take `NotNan` instead, so the caller doesn't have to
-    ///       worry about panics.
-    pub fn real(r: f64) -> Self {
-        let r = match ordered_float::NotNan::new(r) {
-            Ok(r) => r,
-            Err(_) => panic!("Number::real: got NaN"),
-        };
-        Number::Real(r)
     }
 }
 
