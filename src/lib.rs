@@ -3,9 +3,11 @@
 #![allow(clippy::let_and_return)]
 #![warn(missing_docs)]
 
+// mod association;
 mod conversion;
 mod number;
 pub mod symbol;
+#[cfg(feature = "wxf")]
 mod wxf;
 
 #[doc(hidden)]
@@ -15,7 +17,7 @@ mod test_readme {
 }
 
 
-use self::number::{Number, F32, F64};
+pub use self::number::{Number, F32, F64};
 use std::fmt;
 use std::mem;
 use std::sync::Arc;
@@ -55,10 +57,10 @@ pub struct Expr {
 }
 
 // Assert that Expr has the same size and alignment as a usize / pointer.
-const _: () = assert_eq!(mem::size_of::<Expr>(), mem::size_of::<usize>());
-const _: () = assert_eq!(mem::size_of::<Expr>(), mem::size_of::<*const ()>());
-const _: () = assert_eq!(mem::align_of::<Expr>(), mem::align_of::<usize>());
-const _: () = assert_eq!(mem::align_of::<Expr>(), mem::align_of::<*const ()>());
+const _: () = assert!(mem::size_of::<Expr>() == mem::size_of::<usize>());
+const _: () = assert!(mem::size_of::<Expr>() == mem::size_of::<*const ()>());
+const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<usize>());
+const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<*const ()>());
 
 impl Expr {
     /// Construct a new expression from an [`ExprKind`].
@@ -107,18 +109,24 @@ impl Expr {
     }
 
     /// Construct a new normal expression from the head and elements.
-    pub fn normal<H: Into<Expr>>(head: H, contents: Vec<Expr>) -> Expr {
-        let head = head.into();
+    pub fn normal(head: Expr, contents: Vec<Expr>) -> Expr {
+        // let head = head.into();
         // let contents = contents.into();
         Expr {
             inner: Arc::new(ExprKind::Normal(Normal { head, contents })),
         }
     }
 
+    /// Construct a new normal expression from the symbol and elements.
+    pub fn function(head: impl Into<Symbol>, contents: Vec<Expr>) -> Expr {
+        let head = head.into();
+        Self::normal(head.into(), contents)
+    }
+
     // TODO: Should Expr's be cached? Especially Symbol exprs? Would certainly save
     //       a lot of allocations.
     /// Construct a new expression from a [`Symbol`].
-    pub fn symbol<S: Into<Symbol>>(s: S) -> Expr {
+    pub fn symbol(s: impl Into<Symbol>) -> Expr {
         let s = s.into();
         Expr {
             inner: Arc::new(ExprKind::Symbol(s)),
@@ -221,6 +229,7 @@ impl Expr {
     //==================================
 
     /// [`Null`](https://reference.wolfram.com/language/ref/Null.html) <sub>WL</sub>.
+    #[inline]
     pub fn null() -> Expr {
         Expr::symbol(unsafe { Symbol::unchecked_new("System`Null") })
     }
@@ -241,10 +250,11 @@ impl Expr {
     ///
     /// let option = Expr::rule(Symbol::new("System`FontSize"), Expr::from(16));
     /// ```
+    #[inline]
     pub fn rule<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {
         let lhs = lhs.into();
 
-        Expr::normal(Symbol::new("System`Rule"), vec![lhs, rhs])
+        Expr::function("System`Rule", vec![lhs, rhs])
     }
     /// Construct a new `RuleDelayed[_, _]` expression from the left-hand side and right-hand
     /// side.
@@ -258,10 +268,11 @@ impl Expr {
     ///
     /// let delayed = Expr::rule(Symbol::new("Global`x"), Expr::normal(Symbol::new("System`RandomReal"), vec![]));
     /// ```
+    #[inline]
     pub fn rule_delayed<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {
         let lhs = lhs.into();
 
-        Expr::normal(Symbol::new("System`RuleDelayed"), vec![lhs, rhs])
+        Expr::function("System`RuleDelayed", vec![lhs, rhs])
     }
 
     /// Construct a new `List[...]`(`{...}`) expression from it's elements.
@@ -275,25 +286,9 @@ impl Expr {
     ///
     /// let list = Expr::list(vec![Expr::from(1), Expr::from(2), Expr::from(3)]);
     /// ```
+    #[inline]
     pub fn list(elements: Vec<Expr>) -> Expr {
-        Expr::normal(Symbol::new("System`List"), elements)
-    }
-    /// Construct a new `Association[...]`(`<|...|>`) expression from it's elements.
-    ///
-    /// # Example
-    ///
-    /// Construct the expression `<|"a"->1, "b":>2|>`:
-    ///
-    /// ```
-    /// use wolfram_expr::Expr;
-    ///
-    /// let assoc = Expr::association(vec![
-    ///     Expr::rule(Expr::from("a"), Expr::from(1)),
-    ///     Expr::rule_delayed(Expr::from("b"), Expr::from(2)),
-    /// ]);
-    /// ```
-    pub fn association(elements: Vec<Expr>) -> Expr {
-        Expr::normal(Symbol::new("System`Association"), elements)
+        Expr::function("System`List", elements)
     }
 }
 

@@ -105,37 +105,6 @@ string_like!(&str, &String, String);
 // Integer conversions
 //--------------------
 
-macro_rules! number_like {
-    ($t:ty) => {
-        impl From<$t> for Number {
-            fn from(n: $t) -> Self {
-                Number::Integer(n as i64)
-            }
-        }
-    }
-    ($($t:ty),*) => {
-        $(
-            number_like!($t);
-            number_like!(&$t);
-        )*
-    }
-}
-
-number_like![u8, u16, u32, u64, usize];
-number_like![i8, i16, i32, i64, isize];
-
-// impl From<Normal> for ExprKind {
-//     fn from(normal: Normal) -> ExprKind {
-//         ExprKind::Normal(Box::new(normal))
-//     }
-// }
-
-// impl From<Symbol> for ExprKind {
-//     fn from(symbol: Symbol) -> ExprKind {
-//         ExprKind::Symbol(symbol)
-//     }
-// }
-
 impl From<Number> for ExprKind {
     fn from(number: Number) -> ExprKind {
         match number {
@@ -144,3 +113,18 @@ impl From<Number> for ExprKind {
         }
     }
 }
+
+macro_rules! number_like {
+    ($($t:ty),*) => {
+        $(
+            impl From<$t> for Expr {
+                fn from(v: $t) -> Self {
+                    Expr::number(Number::from(v))
+                }
+            }
+        )*
+    }
+}
+
+number_like![u8, u16, u32];
+number_like![i8, i16, i32, i64];

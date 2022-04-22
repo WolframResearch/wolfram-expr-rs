@@ -83,8 +83,8 @@ pub use crate::symbol::parse::{ContextRef, SymbolNameRef, SymbolRef};
 // By using `usize` here, we guarantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
-const _: () = assert_eq!(mem::size_of::<Symbol>(), mem::size_of::<usize>());
-const _: () = assert_eq!(mem::align_of::<Symbol>(), mem::align_of::<usize>());
+const _: () = assert!(mem::size_of::<Symbol>() == mem::size_of::<usize>());
+const _: () = assert!(mem::align_of::<Symbol>() == mem::align_of::<usize>());
 
 impl From<&Symbol> for Symbol {
     fn from(sym: &Symbol) -> Self {
@@ -343,6 +343,12 @@ common_impls!(RelativeContext);
 impl Display for SymbolNameRef<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.as_str())
+    }
+}
+
+impl From<&str> for Symbol {
+    fn from(s: &str) -> Self {
+        Symbol::new(s)
     }
 }
 

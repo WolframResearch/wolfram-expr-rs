@@ -31,51 +31,24 @@ impl Number {
     }
 }
 
-impl From<u8> for Number {
-    fn from(n: u8) -> Self {
-        Number::Integer(n as i64)
+
+macro_rules! integer_like {
+    ($($t:ty),*) => {
+        $(
+            impl From<$t> for Number {
+                fn from(n: $t) -> Self {
+                    Number::Integer(n as i64)
+                }
+            }
+            impl From<&$t> for Number {
+                fn from(n: &$t) -> Self {
+                    Number::Integer(*n as i64)
+                }
+            }
+        )*
     }
 }
 
-impl From<u16> for Number {
-    fn from(n: u16) -> Self {
-        Number::Integer(n as i64)
-    }
-}
-
-impl From<u32> for Number {
-    fn from(n: u32) -> Self {
-        Number::Integer(n as i64)
-    }
-}
-
-// range not safe
-// impl From<u64> for Number {
-//     fn from(n: u64) -> Self {
-//         Number::Integer(n as i64)
-//     }
-// }
-
-impl From<i8> for Number {
-    fn from(n: u32) -> Self {
-        Number::Integer(n as i64)
-    }
-}
-
-impl From<i16> for Number {
-    fn from(n: i16) -> Self {
-        Number::Integer(n as i64)
-    }
-}
-
-impl From<i32> for Number {
-    fn from(n: u32) -> Self {
-        Number::Integer(n as i64)
-    }
-}
-
-impl From<i64> for Number {
-    fn from(n: u32) -> Self {
-        Number::Integer(n as i64)
-    }
-}
+// except range not safe
+integer_like![u8, u16, u32];
+integer_like![i8, i16, i32, i64];
