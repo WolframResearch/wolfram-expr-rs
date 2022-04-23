@@ -252,7 +252,7 @@ impl Expr {
     /// ```
     /// use wolfram_expr::{Expr, Symbol};
     ///
-    /// let delayed = Expr::rule(Symbol::new("x"), Expr::normal(Symbol::new("System`RandomReal"), vec![]));
+    /// let delayed = Expr::rule(Symbol::new("Global`x"), Expr::normal(Symbol::new("System`RandomReal"), vec![]));
     /// ```
     pub fn rule_delayed<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {
         let lhs = lhs.into();

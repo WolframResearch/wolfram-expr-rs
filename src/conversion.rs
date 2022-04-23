@@ -16,10 +16,10 @@ impl Expr {
     /// If this is a [True](http://reference.wolfram.com/language/ref/True.html) or [False](http://reference.wolfram.com/language/ref/False.html) value, return that. Otherwise return None.
     pub fn try_as_bool(&self) -> Option<bool> {
         let s = self.try_as_symbol()?;
-        if s.eq("System`True") {
+        if s.as_str() == "System`True" {
             return Some(true);
         }
-        if s.eq("System`False") {
+        if s.as_str() == "System`False" {
             return Some(false);
         }
         None
@@ -81,8 +81,8 @@ impl From<Normal> for Expr {
 impl From<bool> for Expr {
     fn from(value: bool) -> Expr {
         match value {
-            true => Expr::symbol("System`True"),
-            false => Expr::symbol("System`False"),
+            true => Expr::symbol(Symbol::new("System`True")),
+            false => Expr::symbol(Symbol::new("System`False")),
         }
     }
 }
