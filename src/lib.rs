@@ -3,12 +3,13 @@
 #![allow(clippy::let_and_return)]
 #![warn(missing_docs)]
 
+mod conversion;
 pub mod symbol;
 
 #[doc(hidden)]
 mod test_readme {
     // Ensure that doc tests in the README.md file get run.
-    #![doc = include_str!("../README.md")]
+    #![doc = include_str ! ("../README.md")]
 }
 
 
@@ -203,37 +204,6 @@ impl Expr {
         }
     }
 
-    /// If this is a [`Normal`] expression, return that. Otherwise return None.
-    pub fn try_normal(&self) -> Option<&Normal> {
-        match self.kind() {
-            ExprKind::Normal(ref normal) => Some(normal),
-            ExprKind::Symbol(_)
-            | ExprKind::String(_)
-            | ExprKind::Integer(_)
-            | ExprKind::Real(_) => None,
-        }
-    }
-
-    /// If this is a [`Symbol`] expression, return that. Otherwise return None.
-    pub fn try_symbol(&self) -> Option<&Symbol> {
-        match self.kind() {
-            ExprKind::Symbol(ref symbol) => Some(symbol),
-            ExprKind::Normal(_)
-            | ExprKind::String(_)
-            | ExprKind::Integer(_)
-            | ExprKind::Real(_) => None,
-        }
-    }
-
-    /// If this is a [`Number`] expression, return that. Otherwise return None.
-    pub fn try_number(&self) -> Option<Number> {
-        match self.kind() {
-            ExprKind::Integer(int) => Some(Number::Integer(*int)),
-            ExprKind::Real(real) => Some(Number::Real(*real)),
-            ExprKind::Normal(_) | ExprKind::String(_) | ExprKind::Symbol(_) => None,
-        }
-    }
-
     /// Returns `true` if `self` is a `Normal` expr with the head `sym`.
     pub fn has_normal_head(&self, sym: &Symbol) -> bool {
         match *self.kind() {
@@ -246,7 +216,7 @@ impl Expr {
     // Common values
     //==================================
 
-    /// [`Null`](https://reference.wolfram.com/language/ref/Null.html)<sub>WL</sub>.
+    /// [`Null`](https://reference.wolfram.com/language/ref/Null.html) <sub>WL</sub>.
     pub fn null() -> Expr {
         Expr::symbol(unsafe { Symbol::unchecked_new("System`Null") })
     }
@@ -272,8 +242,25 @@ impl Expr {
 
         Expr::normal(Symbol::new("System`Rule"), vec![lhs, rhs])
     }
+    /// Construct a new `RuleDelayed[_, _]` expression from the left-hand side and right-hand
+    /// side.
+    ///
+    /// # Example
+    ///
+    /// Construct the expression `x :> RandomReal[]`:
+    ///
+    /// ```
+    /// use wolfram_expr::{Expr, Symbol};
+    ///
+    /// let delayed = Expr::rule(Symbol::new("Global`x"), Expr::normal(Symbol::new("System`RandomReal"), vec![]));
+    /// ```
+    pub fn rule_delayed<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {
+        let lhs = lhs.into();
 
-    /// Construct a new `List[...]` expression from it's elements.
+        Expr::normal(Symbol::new("System`RuleDelayed"), vec![lhs, rhs])
+    }
+
+    /// Construct a new `List[...]`(`{...}`) expression from it's elements.
     ///
     /// # Example
     ///
@@ -286,6 +273,23 @@ impl Expr {
     /// ```
     pub fn list(elements: Vec<Expr>) -> Expr {
         Expr::normal(Symbol::new("System`List"), elements)
+    }
+    /// Construct a new `Association[...]`(`<|...|>`) expression from it's elements.
+    ///
+    /// # Example
+    ///
+    /// Construct the expression `<|"a"->1, "b":>2|>`:
+    ///
+    /// ```
+    /// use wolfram_expr::Expr;
+    ///
+    /// let assoc = Expr::association(vec![
+    ///     Expr::rule(Expr::from("a"), Expr::from(1)),
+    ///     Expr::rule_delayed(Expr::from("b"), Expr::from(2)),
+    /// ]);
+    /// ```
+    pub fn association(elements: Vec<Expr>) -> Expr {
+        Expr::normal(Symbol::new("System`Association"), elements)
     }
 }
 
@@ -457,103 +461,6 @@ impl fmt::Display for Number {
                 let real: f64 = **real;
                 write!(f, "{:?}", real)
             },
-        }
-    }
-}
-
-//=======================================
-// Conversion trait impl's
-//=======================================
-
-impl From<Symbol> for Expr {
-    fn from(sym: Symbol) -> Expr {
-        Expr::symbol(sym)
-    }
-}
-
-impl From<&Symbol> for Expr {
-    fn from(sym: &Symbol) -> Expr {
-        Expr::symbol(sym)
-    }
-}
-
-impl From<Normal> for Expr {
-    fn from(normal: Normal) -> Expr {
-        Expr {
-            inner: Arc::new(ExprKind::Normal(normal)),
-        }
-    }
-}
-
-impl From<&str> for Expr {
-    fn from(str: &str) -> Expr {
-        Expr::string(str)
-    }
-}
-
-//--------------------
-// Integer conversions
-//--------------------
-
-impl From<u8> for Expr {
-    fn from(int: u8) -> Expr {
-        Expr::from(i64::from(int))
-    }
-}
-
-impl From<i8> for Expr {
-    fn from(int: i8) -> Expr {
-        Expr::from(i64::from(int))
-    }
-}
-
-impl From<u16> for Expr {
-    fn from(int: u16) -> Expr {
-        Expr::from(i64::from(int))
-    }
-}
-
-impl From<i16> for Expr {
-    fn from(int: i16) -> Expr {
-        Expr::from(i64::from(int))
-    }
-}
-
-impl From<u32> for Expr {
-    fn from(int: u32) -> Expr {
-        Expr::from(i64::from(int))
-    }
-}
-
-impl From<i32> for Expr {
-    fn from(int: i32) -> Expr {
-        Expr::from(i64::from(int))
-    }
-}
-
-impl From<i64> for Expr {
-    fn from(int: i64) -> Expr {
-        Expr::number(Number::Integer(int))
-    }
-}
-
-// impl From<Normal> for ExprKind {
-//     fn from(normal: Normal) -> ExprKind {
-//         ExprKind::Normal(Box::new(normal))
-//     }
-// }
-
-// impl From<Symbol> for ExprKind {
-//     fn from(symbol: Symbol) -> ExprKind {
-//         ExprKind::Symbol(symbol)
-//     }
-// }
-
-impl From<Number> for ExprKind {
-    fn from(number: Number) -> ExprKind {
-        match number {
-            Number::Integer(int) => ExprKind::Integer(int),
-            Number::Real(real) => ExprKind::Real(real),
         }
     }
 }
