@@ -11,7 +11,8 @@ keywords = ["wolfram", "wolfram-language", "mathematica", "wolfram-engine", "exp
 categories = ["encoding"]
 
 [features]
-default = []
+default = ["wxf"]
+wxf = ["integer-encoding", "flate2"]
 
 # Whether to publically export nom functions for parsing symbols. This feature should not
 # be considered stable -- it is included only so that wl-parse can build higher-level
@@ -20,6 +21,9 @@ unstable_parse = []
 
 [dependencies]
 ordered-float = "1"
+indexmap = "1.8.1"
+integer-encoding = {version = "3.0.3", optional = true}
+flate2 = {version = "1.0.23", optional = true}
 
 # Used for parsing symbols. These version ranges should be kept in sync with what wl-parse
 # uses.
