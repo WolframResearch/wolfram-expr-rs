@@ -4,6 +4,8 @@
 #![warn(missing_docs)]
 
 mod conversion;
+mod ptr_cmp;
+
 pub mod symbol;
 
 #[doc(hidden)]
@@ -20,6 +22,9 @@ use std::sync::Arc;
 
 #[doc(inline)]
 pub use self::symbol::Symbol;
+
+#[cfg(feature = "unstable_parse")]
+pub use self::ptr_cmp::ExprRefCmp;
 
 #[cfg(feature = "unstable_parse")]
 pub mod parse {
