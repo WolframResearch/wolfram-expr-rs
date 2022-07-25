@@ -13,7 +13,9 @@ impl Expr {
         }
     }
 
-    /// If this is a [True](http://reference.wolfram.com/language/ref/True.html) or [False](http://reference.wolfram.com/language/ref/False.html) value, return that. Otherwise return None.
+    /// If this is a [`True`](http://reference.wolfram.com/language/ref/True.html)
+    /// or [`False`](http://reference.wolfram.com/language/ref/False.html) symbol,
+    /// return that. Otherwise return None.
     pub fn try_as_bool(&self) -> Option<bool> {
         let s = self.try_as_symbol()?;
         if s.as_str() == "System`True" {
