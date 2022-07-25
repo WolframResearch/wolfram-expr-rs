@@ -54,6 +54,28 @@ impl Expr {
             ExprKind::Normal(_) | ExprKind::String(_) | ExprKind::Symbol(_) => None,
         }
     }
+
+    //---------------------------------------------------------------------
+    // SEMVER: This methods have been replaced, remove in a future version.
+    //---------------------------------------------------------------------
+
+    #[deprecated(note = "Use Expr::try_as_normal() instead")]
+    #[allow(missing_docs)]
+    pub fn try_normal(&self) -> Option<&Normal> {
+        self.try_as_normal()
+    }
+
+    #[deprecated(note = "Use Expr::try_as_symbol() instead")]
+    #[allow(missing_docs)]
+    pub fn try_symbol(&self) -> Option<&Symbol> {
+        self.try_as_symbol()
+    }
+
+    #[deprecated(note = "Use Expr::try_as_number() instead")]
+    #[allow(missing_docs)]
+    pub fn try_number(&self) -> Option<Number> {
+        self.try_as_number()
+    }
 }
 
 //=======================================
