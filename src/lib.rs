@@ -282,23 +282,6 @@ impl Expr {
     pub fn list(elements: Vec<Expr>) -> Expr {
         Expr::normal(Symbol::new("System`List"), elements)
     }
-    /// Construct a new `Association[...]`(`<|...|>`) expression from it's elements.
-    ///
-    /// # Example
-    ///
-    /// Construct the expression `<|"a"->1, "b":>2|>`:
-    ///
-    /// ```
-    /// use wolfram_expr::Expr;
-    ///
-    /// let assoc = Expr::association(vec![
-    ///     Expr::rule(Expr::from("a"), Expr::from(1)),
-    ///     Expr::rule_delayed(Expr::from("b"), Expr::from(2)),
-    /// ]);
-    /// ```
-    pub fn association(elements: Vec<Expr>) -> Expr {
-        Expr::normal(Symbol::new("System`Association"), elements)
-    }
 }
 
 /// Wolfram Language expression variants.
