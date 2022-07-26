@@ -257,7 +257,10 @@ impl Expr {
     /// ```
     /// use wolfram_expr::{Expr, Symbol};
     ///
-    /// let delayed = Expr::rule(Symbol::new("Global`x"), Expr::normal(Symbol::new("System`RandomReal"), vec![]));
+    /// let delayed = Expr::rule_delayed(
+    ///     Symbol::new("Global`x"),
+    ///     Expr::normal(Symbol::new("System`RandomReal"), vec![])
+    /// );
     /// ```
     pub fn rule_delayed<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {
         let lhs = lhs.into();
@@ -278,23 +281,6 @@ impl Expr {
     /// ```
     pub fn list(elements: Vec<Expr>) -> Expr {
         Expr::normal(Symbol::new("System`List"), elements)
-    }
-    /// Construct a new `Association[...]`(`<|...|>`) expression from it's elements.
-    ///
-    /// # Example
-    ///
-    /// Construct the expression `<|"a"->1, "b":>2|>`:
-    ///
-    /// ```
-    /// use wolfram_expr::Expr;
-    ///
-    /// let assoc = Expr::association(vec![
-    ///     Expr::rule(Expr::from("a"), Expr::from(1)),
-    ///     Expr::rule_delayed(Expr::from("b"), Expr::from(2)),
-    /// ]);
-    /// ```
-    pub fn association(elements: Vec<Expr>) -> Expr {
-        Expr::normal(Symbol::new("System`Association"), elements)
     }
 }
 
