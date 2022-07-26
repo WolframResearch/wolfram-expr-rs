@@ -6,6 +6,7 @@
 // mod association;
 mod conversion;
 mod number;
+mod ptr_cmp;
 pub mod symbol;
 #[cfg(feature = "wxf")]
 mod wxf;
@@ -25,6 +26,9 @@ use std::sync::Arc;
 
 #[doc(inline)]
 pub use self::symbol::Symbol;
+
+#[cfg(feature = "unstable_parse")]
+pub use self::ptr_cmp::ExprRefCmp;
 
 #[cfg(feature = "unstable_parse")]
 pub mod parse {
@@ -266,7 +270,10 @@ impl Expr {
     /// ```
     /// use wolfram_expr::{Expr, Symbol};
     ///
-    /// let delayed = Expr::rule(Symbol::new("Global`x"), Expr::normal(Symbol::new("System`RandomReal"), vec![]));
+    /// let delayed = Expr::rule_delayed(
+    ///     Symbol::new("Global`x"),
+    ///     Expr::normal(Symbol::new("System`RandomReal"), vec![])
+    /// );
     /// ```
     #[inline]
     pub fn rule_delayed<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {

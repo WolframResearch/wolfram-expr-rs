@@ -13,7 +13,9 @@ impl Expr {
         }
     }
 
-    /// If this is a [True](http://reference.wolfram.com/language/ref/True.html) or [False](http://reference.wolfram.com/language/ref/False.html) value, return that. Otherwise return None.
+    /// If this is a [`True`](http://reference.wolfram.com/language/ref/True.html)
+    /// or [`False`](http://reference.wolfram.com/language/ref/False.html) symbol,
+    /// return that. Otherwise return None.
     pub fn try_as_bool(&self) -> Option<bool> {
         let s = self.try_as_symbol()?;
         if s.as_str() == "System`True" {
@@ -51,6 +53,28 @@ impl Expr {
             ExprKind::Real(real) => Some(Number::Real(*real)),
             ExprKind::Normal(_) | ExprKind::String(_) | ExprKind::Symbol(_) => None,
         }
+    }
+
+    //---------------------------------------------------------------------------
+    // SEMVER: These methods have been replaced; remove them in a future version.
+    //---------------------------------------------------------------------------
+
+    #[deprecated(note = "Use Expr::try_as_normal() instead")]
+    #[allow(missing_docs)]
+    pub fn try_normal(&self) -> Option<&Normal> {
+        self.try_as_normal()
+    }
+
+    #[deprecated(note = "Use Expr::try_as_symbol() instead")]
+    #[allow(missing_docs)]
+    pub fn try_symbol(&self) -> Option<&Symbol> {
+        self.try_as_symbol()
+    }
+
+    #[deprecated(note = "Use Expr::try_as_number() instead")]
+    #[allow(missing_docs)]
+    pub fn try_number(&self) -> Option<Number> {
+        self.try_as_number()
     }
 }
 
