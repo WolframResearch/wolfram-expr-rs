@@ -55,9 +55,9 @@ impl Expr {
         }
     }
 
-    //---------------------------------------------------------------------
-    // SEMVER: This methods have been replaced, remove in a future version.
-    //---------------------------------------------------------------------
+    //---------------------------------------------------------------------------
+    // SEMVER: These methods have been replaced; remove them in a future version.
+    //---------------------------------------------------------------------------
 
     #[deprecated(note = "Use Expr::try_as_normal() instead")]
     #[allow(missing_docs)]
