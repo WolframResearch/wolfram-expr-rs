@@ -3,18 +3,22 @@
 #![allow(clippy::let_and_return)]
 #![warn(missing_docs)]
 
+// mod association;
 mod conversion;
+mod number;
 mod ptr_cmp;
-
 pub mod symbol;
+#[cfg(feature = "wxf")]
+mod wxf;
 
 #[doc(hidden)]
 mod test_readme {
     // Ensure that doc tests in the README.md file get run.
-    #![doc = include_str ! ("../README.md")]
+    #![doc = include_str!("../README.md")]
 }
 
 
+pub use self::number::{Number, F32, F64};
 use std::fmt;
 use std::mem;
 use std::sync::Arc;
@@ -109,18 +113,24 @@ impl Expr {
     }
 
     /// Construct a new normal expression from the head and elements.
-    pub fn normal<H: Into<Expr>>(head: H, contents: Vec<Expr>) -> Expr {
-        let head = head.into();
+    pub fn normal(head: Expr, contents: Vec<Expr>) -> Expr {
+        // let head = head.into();
         // let contents = contents.into();
         Expr {
             inner: Arc::new(ExprKind::Normal(Normal { head, contents })),
         }
     }
 
+    /// Construct a new normal expression from the symbol and elements.
+    pub fn function(head: impl Into<Symbol>, contents: Vec<Expr>) -> Expr {
+        let head = head.into();
+        Self::normal(head.into(), contents)
+    }
+
     // TODO: Should Expr's be cached? Especially Symbol exprs? Would certainly save
     //       a lot of allocations.
     /// Construct a new expression from a [`Symbol`].
-    pub fn symbol<S: Into<Symbol>>(s: S) -> Expr {
+    pub fn symbol(s: impl Into<Symbol>) -> Expr {
         let s = s.into();
         Expr {
             inner: Arc::new(ExprKind::Symbol(s)),
@@ -144,8 +154,9 @@ impl Expr {
     /// Construct an expression from a floating-point number.
     ///
     /// ```
-    /// # use wolfram_expr::Expr;
-    /// let expr = Expr::real(3.14159);
+    /// use std::f64::consts::PI;
+    /// use wolfram_expr::Expr;
+    /// let expr = Expr::real(PI);
     /// ```
     ///
     /// # Panics
@@ -222,6 +233,7 @@ impl Expr {
     //==================================
 
     /// [`Null`](https://reference.wolfram.com/language/ref/Null.html) <sub>WL</sub>.
+    #[inline]
     pub fn null() -> Expr {
         Expr::symbol(unsafe { Symbol::unchecked_new("System`Null") })
     }
@@ -242,10 +254,11 @@ impl Expr {
     ///
     /// let option = Expr::rule(Symbol::new("System`FontSize"), Expr::from(16));
     /// ```
+    #[inline]
     pub fn rule<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {
         let lhs = lhs.into();
 
-        Expr::normal(Symbol::new("System`Rule"), vec![lhs, rhs])
+        Expr::function("System`Rule", vec![lhs, rhs])
     }
     /// Construct a new `RuleDelayed[_, _]` expression from the left-hand side and right-hand
     /// side.
@@ -262,10 +275,11 @@ impl Expr {
     ///     Expr::normal(Symbol::new("System`RandomReal"), vec![])
     /// );
     /// ```
+    #[inline]
     pub fn rule_delayed<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {
         let lhs = lhs.into();
 
-        Expr::normal(Symbol::new("System`RuleDelayed"), vec![lhs, rhs])
+        Expr::function("System`RuleDelayed", vec![lhs, rhs])
     }
 
     /// Construct a new `List[...]`(`{...}`) expression from it's elements.
@@ -279,8 +293,9 @@ impl Expr {
     ///
     /// let list = Expr::list(vec![Expr::from(1), Expr::from(2), Expr::from(3)]);
     /// ```
+    #[inline]
     pub fn list(elements: Vec<Expr>) -> Expr {
-        Expr::normal(Symbol::new("System`List"), elements)
+        Expr::function("System`List", elements)
     }
 }
 
@@ -310,23 +325,6 @@ pub struct Normal<E = Expr> {
     /// being applied to `head`.
     contents: Vec<E>,
 }
-
-/// Subset of [`ExprKind`] that covers number-type expression values.
-#[allow(missing_docs)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Hash)]
-pub enum Number {
-    // TODO: Rename this to MachineInteger
-    Integer(i64),
-    // TODO: Make an explicit MachineReal type which hides the inner f64, so that other
-    //       code can make use of WL machine reals with a guaranteed type. In
-    //       particular, change wl_compile::mir::Constant to use that type.
-    Real(F64),
-}
-
-/// 64-bit floating-point real number. Not NaN.
-pub type F64 = ordered_float::NotNan<f64>;
-/// 32-bit floating-point real number. Not NaN.
-pub type F32 = ordered_float::NotNan<f32>;
 
 //=======================================
 // Type Impl's
@@ -364,22 +362,6 @@ impl Normal {
     /// Returns `true` if the head of this expression is `sym`.
     pub fn has_head(&self, sym: &Symbol) -> bool {
         self.head == *sym
-    }
-}
-
-impl Number {
-    /// # Panics
-    ///
-    /// This function will panic if `r` is NaN.
-    ///
-    /// TODO: Change this function to take `NotNan` instead, so the caller doesn't have to
-    ///       worry about panics.
-    pub fn real(r: f64) -> Self {
-        let r = match ordered_float::NotNan::new(r) {
-            Ok(r) => r,
-            Err(_) => panic!("Number::real: got NaN"),
-        };
-        Number::Real(r)
     }
 }
 
