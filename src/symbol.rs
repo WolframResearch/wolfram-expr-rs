@@ -294,7 +294,7 @@ impl RelativeContext {
 }
 
 macro_rules! common_impls {
-    ($ty:ident) => {
+    (impl $ty:ident) => {
         impl Display for $ty {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 let $ty(string) = self;
@@ -331,10 +331,10 @@ macro_rules! common_impls {
     };
 }
 
-common_impls! { Symbol }
-common_impls!(SymbolName);
-common_impls!(Context);
-common_impls!(RelativeContext);
+common_impls!(impl Symbol);
+common_impls!(impl SymbolName);
+common_impls!(impl Context);
+common_impls!(impl RelativeContext);
 
 //======================================
 // Formatting impls
