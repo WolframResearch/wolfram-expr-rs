@@ -1,8 +1,3 @@
-use crate::{
-    symbol::{Context, RelativeContext, SymbolName},
-    Symbol,
-};
-
 use nom::{
     branch::alt,
     bytes::complete::tag,
@@ -13,155 +8,61 @@ use nom::{
 };
 use nom_locate::LocatedSpan;
 
-/// Borrowed string containing a valid symbol.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct SymbolRef<'s>(&'s str);
+use crate::symbol::{ContextRef, RelativeContext, SymbolNameRef, SymbolRef};
 
-/// Borrowing string containing a valid symbol name.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct SymbolNameRef<'s>(&'s str);
+#[allow(non_snake_case)]
+pub(super) fn SymbolRef_try_new<'s>(string: &'s str) -> Option<SymbolRef<'s>> {
+    let input = LocatedSpan::new(string);
 
-/// Borrowed string containing a valid context.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct ContextRef<'s>(pub(super) &'s str);
+    let (rem, (_span, sym)) = absolute_symbol_ref_ty(input).ok()?;
 
-impl<'s> SymbolRef<'s> {
-    /// Attempt to parse `string` as an absolute symbol.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use wolfram_expr::symbol::SymbolRef;
-    ///
-    /// assert!(matches!(SymbolRef::try_new("System`List"), Some(_)));
-    /// assert!(matches!(SymbolRef::try_new("List"), None));
-    /// assert!(matches!(SymbolRef::try_new("123"), None));
-    /// ```
-    pub fn try_new(string: &'s str) -> Option<Self> {
-        let input = LocatedSpan::new(string);
-
-        let (rem, (_span, sym)) = absolute_symbol_ref_ty(input).ok()?;
-
-        // Check that the input didn't contain any trailing characters after the symbol.
-        if rem.input_len() == 0 {
-            Some(sym)
-        } else {
-            None
-        }
-    }
-
-    /// Get the borrowed string data.
-    pub fn as_str(&self) -> &'s str {
-        let SymbolRef(string) = self;
-        string
-    }
-
-    /// Convert this borrowed string into an owned [`Symbol`].
-    pub fn to_symbol(&self) -> Symbol {
-        let SymbolRef(string) = self;
-        unsafe { Symbol::unchecked_new(string.to_owned()) }
-    }
-
-    #[doc(hidden)]
-    pub unsafe fn unchecked_new(string: &'s str) -> Self {
-        SymbolRef(string)
+    // Check that the input didn't contain any trailing characters after the symbol.
+    if rem.input_len() == 0 {
+        Some(sym)
+    } else {
+        None
     }
 }
 
-impl<'s> SymbolNameRef<'s> {
-    /// Attempt to parse `string` as a symbol name.
-    pub fn try_new(string: &'s str) -> Option<Self> {
-        let input = LocatedSpan::new(string);
+#[allow(non_snake_case)]
+pub(super) fn SymbolNameRef_try_new<'s>(string: &'s str) -> Option<SymbolNameRef<'s>> {
+    let input = LocatedSpan::new(string);
 
-        let (rem, (_span, sym)) = symbol_name_ref_ty(input).ok()?;
+    let (rem, (_span, sym)) = symbol_name_ref_ty(input).ok()?;
 
-        // Check that the input didn't contain any trailing characters after the symbol.
-        if rem.input_len() == 0 {
-            Some(sym)
-        } else {
-            None
-        }
-    }
-
-    /// Get the borrowed string data.
-    pub fn as_str(&self) -> &'s str {
-        let SymbolNameRef(string) = self;
-        string
-    }
-
-    /// Convert this borrowed string into an owned [`SymbolName`].
-    pub fn to_symbol_name(&self) -> SymbolName {
-        let SymbolNameRef(string) = self;
-        unsafe { SymbolName::unchecked_new(string.to_owned()) }
-    }
-
-    #[doc(hidden)]
-    pub unsafe fn unchecked_new(string: &'s str) -> Self {
-        SymbolNameRef(string)
+    // Check that the input didn't contain any trailing characters after the symbol.
+    if rem.input_len() == 0 {
+        Some(sym)
+    } else {
+        None
     }
 }
 
-impl<'s> ContextRef<'s> {
-    /// Attempt to parse `string` as context.
-    pub fn try_new(string: &'s str) -> Option<Self> {
-        let input = LocatedSpan::new(string);
+#[allow(non_snake_case)]
+pub(super) fn ContextRef_try_new<'s>(string: &'s str) -> Option<ContextRef<'s>> {
+    let input = LocatedSpan::new(string);
 
-        let (remaining, _) = absolute_context_path(input).ok()?;
+    let (remaining, _) = absolute_context_path(input).ok()?;
 
-        // Check that the input didn't contain any trailing characters after the symbol.
-        if remaining.input_len() == 0 {
-            Some(ContextRef(input.fragment()))
-        } else {
-            None
-        }
-    }
-
-    /// Get the borrowed string data.
-    pub fn as_str(&self) -> &'s str {
-        let ContextRef(string) = self;
-        string
-    }
-
-    /// Convert this borrowed string into an owned [`Context`].
-    pub fn to_context(&self) -> Context {
-        let ContextRef(string) = self;
-        unsafe { Context::unchecked_new(string.to_owned()) }
-    }
-
-    #[doc(hidden)]
-    pub unsafe fn unchecked_new(string: &'s str) -> Self {
-        ContextRef(string)
+    // Check that the input didn't contain any trailing characters after the symbol.
+    if remaining.input_len() == 0 {
+        Some(ContextRef(input.fragment()))
+    } else {
+        None
     }
 }
 
-impl SymbolName {
-    /// Attempt to parse `input` as a symbol name.
-    ///
-    /// A symbol name is a symbol without any context marks.
-    pub fn try_new(input: &str) -> Option<SymbolName> {
-        SymbolNameRef::try_new(input)
-            .as_ref()
-            .map(SymbolNameRef::to_symbol_name)
-    }
+// TODO(cleanup): Add RelativeContextRef type, use here instead.
+#[allow(non_snake_case)]
+pub(super) fn RelativeContext_try_new(input: &str) -> Option<RelativeContext> {
+    let input = LocatedSpan::new(input);
 
-    /// Get a borrowed [`SymbolNameRef`] from this `SymbolName`.
-    pub fn as_symbol_name_ref(&self) -> SymbolNameRef {
-        SymbolNameRef(self.as_str())
-    }
-}
+    let (remaining, _) = relative_context_path(input).ok()?;
 
-impl RelativeContext {
-    /// Attempt to parse `input` as a relative context.
-    pub fn try_new(input: &str) -> Option<Self> {
-        let input = LocatedSpan::new(input);
-
-        let (remaining, _) = relative_context_path(input).ok()?;
-
-        if remaining.input_len() == 0 {
-            Some(unsafe { RelativeContext::unchecked_new(input.fragment().to_owned()) })
-        } else {
-            None
-        }
+    if remaining.input_len() == 0 {
+        Some(unsafe { RelativeContext::unchecked_new(input.fragment().to_owned()) })
+    } else {
+        None
     }
 }
 

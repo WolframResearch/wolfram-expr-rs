@@ -45,6 +45,14 @@ Operations on Symbols
 
 */
 
+//==========================================================
+// Types
+//==========================================================
+
+//======================================
+// Owned Data
+//======================================
+
 // TODO: Change these types to be Arc<str>. This has the consequence of increasing the
 //       size of these types from 64-bits to 128 bits, so first take care that they are
 //       not passed through a C FFI anywhere as a pointer-sized type.
@@ -78,13 +86,31 @@ pub struct Context(Arc<String>);
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RelativeContext(Arc<String>);
 
-pub use crate::symbol::parse::{ContextRef, SymbolNameRef, SymbolRef};
-
 // By using `usize` here, we guarantee that we can later change this to be a pointer
 // instead without changing the sizes of a lot of Expr types. This is good for FFI/ABI
 // compatibility if I decide to change the way Symbol works.
 const _: () = assert!(mem::size_of::<Symbol>() == mem::size_of::<usize>());
 const _: () = assert!(mem::align_of::<Symbol>() == mem::align_of::<usize>());
+
+//======================================
+// Borrowed Data
+//======================================
+
+/// Borrowed string containing a valid symbol.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct SymbolRef<'s>(&'s str);
+
+/// Borrowing string containing a valid symbol name.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct SymbolNameRef<'s>(&'s str);
+
+/// Borrowed string containing a valid context.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct ContextRef<'s>(pub(super) &'s str);
+
+//==========================================================
+// Impls -- Owned Types
+//==========================================================
 
 impl From<&Symbol> for Symbol {
     fn from(sym: &Symbol) -> Self {
@@ -157,6 +183,22 @@ impl Symbol {
         //         to and including the last grave mark will be a valid absolute context.
         let (_, name) = string.split_at(last_grave + 1);
         unsafe { SymbolNameRef::unchecked_new(name) }
+    }
+}
+
+impl SymbolName {
+    /// Attempt to parse `input` as a symbol name.
+    ///
+    /// A symbol name is a symbol without any context marks.
+    pub fn try_new(input: &str) -> Option<SymbolName> {
+        SymbolNameRef::try_new(input)
+            .as_ref()
+            .map(SymbolNameRef::to_symbol_name)
+    }
+
+    /// Get a borrowed [`SymbolNameRef`] from this `SymbolName`.
+    pub fn as_symbol_name_ref(&self) -> SymbolNameRef {
+        SymbolNameRef(self.as_str())
     }
 }
 
@@ -263,6 +305,11 @@ impl Context {
 }
 
 impl RelativeContext {
+    /// Attempt to parse `input` as a relative context.
+    pub fn try_new(input: &str) -> Option<Self> {
+        crate::symbol::parse::RelativeContext_try_new(input)
+    }
+
     /// Return the components of this [`RelativeContext`].
     ///
     /// ```
@@ -335,6 +382,92 @@ common_impls!(impl Symbol);
 common_impls!(impl SymbolName);
 common_impls!(impl Context);
 common_impls!(impl RelativeContext);
+
+//==========================================================
+// Impls -- Borrowed Types
+//==========================================================
+
+impl<'s> SymbolRef<'s> {
+    /// Attempt to parse `string` as an absolute symbol.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wolfram_expr::symbol::SymbolRef;
+    ///
+    /// assert!(matches!(SymbolRef::try_new("System`List"), Some(_)));
+    /// assert!(matches!(SymbolRef::try_new("List"), None));
+    /// assert!(matches!(SymbolRef::try_new("123"), None));
+    /// ```
+    pub fn try_new(string: &'s str) -> Option<Self> {
+        crate::symbol::parse::SymbolRef_try_new(string)
+    }
+
+    /// Get the borrowed string data.
+    pub fn as_str(&self) -> &'s str {
+        let SymbolRef(string) = self;
+        string
+    }
+
+    /// Convert this borrowed string into an owned [`Symbol`].
+    pub fn to_symbol(&self) -> Symbol {
+        let SymbolRef(string) = self;
+        unsafe { Symbol::unchecked_new(string.to_owned()) }
+    }
+
+    #[doc(hidden)]
+    pub unsafe fn unchecked_new(string: &'s str) -> Self {
+        SymbolRef(string)
+    }
+}
+
+impl<'s> SymbolNameRef<'s> {
+    /// Attempt to parse `string` as a symbol name.
+    pub fn try_new(string: &'s str) -> Option<Self> {
+        crate::symbol::parse::SymbolNameRef_try_new(string)
+    }
+
+    /// Get the borrowed string data.
+    pub fn as_str(&self) -> &'s str {
+        let SymbolNameRef(string) = self;
+        string
+    }
+
+    /// Convert this borrowed string into an owned [`SymbolName`].
+    pub fn to_symbol_name(&self) -> SymbolName {
+        let SymbolNameRef(string) = self;
+        unsafe { SymbolName::unchecked_new(string.to_owned()) }
+    }
+
+    #[doc(hidden)]
+    pub unsafe fn unchecked_new(string: &'s str) -> Self {
+        SymbolNameRef(string)
+    }
+}
+
+impl<'s> ContextRef<'s> {
+    /// Attempt to parse `string` as a context.
+    pub fn try_new(string: &'s str) -> Option<Self> {
+        crate::symbol::parse::ContextRef_try_new(string)
+    }
+
+    /// Get the borrowed string data.
+    pub fn as_str(&self) -> &'s str {
+        let ContextRef(string) = self;
+        string
+    }
+
+    /// Convert this borrowed string into an owned [`Context`].
+    pub fn to_context(&self) -> Context {
+        let ContextRef(string) = self;
+        unsafe { Context::unchecked_new(string.to_owned()) }
+    }
+
+    #[doc(hidden)]
+    pub unsafe fn unchecked_new(string: &'s str) -> Self {
+        ContextRef(string)
+    }
+}
 
 //======================================
 // Formatting impls
