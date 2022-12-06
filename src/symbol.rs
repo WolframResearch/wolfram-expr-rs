@@ -155,34 +155,21 @@ impl Symbol {
         }
     }
 
+    /// Get a borrowed [`SymbolRef`] from this [`Symbol`].
+    pub fn as_symbol_ref(&self) -> SymbolRef {
+        let Symbol(arc_string) = self;
+
+        SymbolRef(arc_string.as_str())
+    }
+
     /// Get the context path part of a symbol as an [`ContextRef`].
     pub fn context(&self) -> ContextRef {
-        let string = self.as_str();
-
-        let last_grave = string
-            .rfind('`')
-            .expect("Failed to find grave '`' character in symbol");
-
-        // SAFETY: All valid Symbol's will contain at least one grave mark '`', will
-        //         have at least 1 character after that grave mark, and the string up
-        //         to and including the last grave mark will be a valid absolute context.
-        let (context, _) = string.split_at(last_grave + 1);
-        unsafe { ContextRef::unchecked_new(context) }
+        self.as_symbol_ref().context()
     }
 
     /// Get the symbol name part of a symbol as a [`SymbolNameRef`].
     pub fn symbol_name(&self) -> SymbolNameRef {
-        let string = self.as_str();
-
-        let last_grave = string
-            .rfind('`')
-            .expect("Failed to find grave '`' character in symbol");
-
-        // SAFETY: All valid Symbol's will contain at least one grave mark '`', will
-        //         have at least 1 character after that grave mark, and the string up
-        //         to and including the last grave mark will be a valid absolute context.
-        let (_, name) = string.split_at(last_grave + 1);
-        unsafe { SymbolNameRef::unchecked_new(name) }
+        self.as_symbol_ref().symbol_name()
     }
 }
 
@@ -418,6 +405,37 @@ impl<'s> SymbolRef<'s> {
     #[doc(hidden)]
     pub unsafe fn unchecked_new(string: &'s str) -> Self {
         SymbolRef(string)
+    }
+
+    /// Get the context path part of a symbol as an [`ContextRef`].
+    pub fn context(&self) -> ContextRef<'s> {
+        let string = self.as_str();
+
+        let last_grave = string
+            .rfind('`')
+            .expect("Failed to find grave '`' character in symbol");
+
+        // SAFETY: All valid Symbol's will contain at least one grave mark '`', will
+        //         have at least 1 character after that grave mark, and the string up
+        //         to and including the last grave mark will be a valid absolute context.
+        let (context, _) = string.split_at(last_grave + 1);
+
+        unsafe { ContextRef::unchecked_new(context) }
+    }
+
+    /// Get the symbol name part of a symbol as a [`SymbolNameRef`].
+    pub fn symbol_name(&self) -> SymbolNameRef<'s> {
+        let string = self.as_str();
+
+        let last_grave = string
+            .rfind('`')
+            .expect("Failed to find grave '`' character in symbol");
+
+        // SAFETY: All valid Symbol's will contain at least one grave mark '`', will
+        //         have at least 1 character after that grave mark, and the string up
+        //         to and including the last grave mark will be a valid absolute context.
+        let (_, name) = string.split_at(last_grave + 1);
+        unsafe { SymbolNameRef::unchecked_new(name) }
     }
 }
 
