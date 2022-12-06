@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.3] – 2022-12-06
+
+### Added
+
+* Added new convenience methods for working with `SymbolStr`s. ([#15])
+
+  The following methods have been added:
+
+  * [`Symbol::as_symbol_ref()`](https://docs.rs/wolfram-expr/0.1.3/wolfram_expr/struct.Symbol.html#method.as_symbol_ref)
+  * [`SymbolRef::context()`](https://docs.rs/wolfram-expr/0.1.3/wolfram_expr/symbol/struct.SymbolRef.html#method.context)
+  * [`SymbolRef::symbol_name()`](https://docs.rs/wolfram-expr/0.1.3/wolfram_expr/symbol/struct.SymbolRef.html#method.symbol_name)
+
+
+
 ## [0.1.2] – 2022-07-25
 
 ### Added
@@ -111,10 +125,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#7]: https://github.com/WolframResearch/wolfram-expr-rs/pull/7
 [#12]: https://github.com/WolframResearch/wolfram-expr-rs/pull/12
 
+<!-- v0.1.3 -->
+[#15]: https://github.com/WolframResearch/wolfram-expr-rs/pull/15
+
 
 <!-- This needs to be updated for each tagged release. -->
-[Unreleased]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.3...HEAD
 
+[0.1.3]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/WolframResearch/wolfram-expr-rs/releases/tag/v0.1.0
