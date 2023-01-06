@@ -1,8 +1,8 @@
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 
-mod ser;
-mod de;
+pub mod ser;
+pub mod de;
 
 
 pub enum WolframError {}

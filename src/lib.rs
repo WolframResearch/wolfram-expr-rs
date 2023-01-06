@@ -8,6 +8,8 @@ mod ptr_cmp;
 
 #[cfg(feature = "serde")]
 mod serde_support;
+#[cfg(feature = "serde")]
+pub use serde_support::ser::WolframSerializer;
 
 pub mod symbol;
 
