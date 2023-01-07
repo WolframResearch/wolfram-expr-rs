@@ -1,4 +1,4 @@
-use serde::Serializer;
+use serde::{Serialize, Serializer};
 use serde_derive::{Deserialize, Serialize};
 use wolfram_expr::{Expr, WolframSerializer};
 
@@ -19,6 +19,10 @@ fn test() {
     let mut serializer = WolframSerializer {
         readable: true,
     };
-    let out = serializer.serialize_seq(vec![1, 2, 3]);
+    let input = TestBody {
+        str: "",
+        string: "".to_string(),
+    };
+    let out = input.serialize(&serializer).unwrap();
     println!("{:?}", out);
 }

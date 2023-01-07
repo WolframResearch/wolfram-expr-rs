@@ -12,18 +12,16 @@ pub struct WolframSerializer {
     pub readable: bool,
 }
 
-pub struct WolframListSerializer {
-    list: Vec<Expr>
-}
-impl WolframListSerializer {
-    pub fn new(capacity: usize) -> Self {
-        Self {
-            list: Vec::with_capacity(capacity)
-        }
-    }
+pub struct WolframListSerializer<'a> {
+    config: &'a WolframSerializer,
+    terms: Vec<Expr>,
 }
 
-pub struct WolframDictSerializer {}
+pub struct WolframDictSerializer<'a> {
+    config: &'a WolframSerializer,
+    rules: Vec<Expr>,
+}
+
 
 impl Error for WolframError {
     fn custom<T>(msg: T) -> Self where T: Display {
@@ -31,17 +29,35 @@ impl Error for WolframError {
     }
 }
 
+impl<'a> WolframListSerializer<'a> {
+    pub fn new(capacity: usize, config: &'a WolframSerializer) -> Self {
+        Self {
+            config,
+            terms: Vec::with_capacity(capacity),
+        }
+    }
+}
 
-impl Serializer for WolframSerializer {
+impl<'a> WolframDictSerializer<'a> {
+    pub fn new(capacity: usize, config: &'a WolframSerializer) -> Self {
+        Self {
+            config,
+            rules: Vec::with_capacity(capacity),
+        }
+    }
+}
+
+
+impl<'a> Serializer for &'a WolframSerializer {
     type Ok = Expr;
     type Error = WolframError;
-    type SerializeSeq = WolframListSerializer;
-    type SerializeTuple = WolframListSerializer;
-    type SerializeTupleStruct = WolframListSerializer;
-    type SerializeTupleVariant = WolframListSerializer;
-    type SerializeMap = WolframDictSerializer;
-    type SerializeStruct = WolframDictSerializer;
-    type SerializeStructVariant = WolframDictSerializer;
+    type SerializeSeq = WolframListSerializer<'a>;
+    type SerializeTuple = WolframListSerializer<'a>;
+    type SerializeTupleStruct = WolframListSerializer<'a>;
+    type SerializeTupleVariant = WolframListSerializer<'a>;
+    type SerializeMap = WolframDictSerializer<'a>;
+    type SerializeStruct = WolframDictSerializer<'a>;
+    type SerializeStructVariant = WolframDictSerializer<'a>;
 
     fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
         Ok(Expr::from(v))
@@ -136,15 +152,11 @@ impl Serializer for WolframSerializer {
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
-        WolframListSerializer {
-
-        };
-
-        todo!()
+        Ok(WolframListSerializer::new(len.unwrap_or(0), &self))
     }
 
     fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, Self::Error> {
-        todo!()
+        Ok(WolframListSerializer::new(len, &self))
     }
 
     fn serialize_tuple_struct(self, name: &'static str, len: usize) -> Result<Self::SerializeTupleStruct, Self::Error> {
@@ -160,7 +172,7 @@ impl Serializer for WolframSerializer {
     }
 
     fn serialize_struct(self, name: &'static str, len: usize) -> Result<Self::SerializeStruct, Self::Error> {
-        todo!()
+        Ok(WolframDictSerializer::new(len, &self))
     }
 
     fn serialize_struct_variant(self, name: &'static str, variant_index: u32, variant: &'static str, len: usize) -> Result<Self::SerializeStructVariant, Self::Error> {
@@ -184,7 +196,7 @@ impl Serializer for WolframSerializer {
     }
 }
 
-impl SerializeSeq for WolframListSerializer {
+impl<'a> SerializeSeq for WolframListSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
@@ -198,7 +210,7 @@ impl SerializeSeq for WolframListSerializer {
 }
 
 
-impl SerializeTuple for WolframListSerializer {
+impl<'a> SerializeTuple for WolframListSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
@@ -211,7 +223,7 @@ impl SerializeTuple for WolframListSerializer {
     }
 }
 
-impl SerializeTupleStruct for WolframListSerializer {
+impl<'a> SerializeTupleStruct for WolframListSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
@@ -224,7 +236,7 @@ impl SerializeTupleStruct for WolframListSerializer {
     }
 }
 
-impl SerializeTupleVariant for WolframListSerializer {
+impl<'a> SerializeTupleVariant for WolframListSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
@@ -237,7 +249,7 @@ impl SerializeTupleVariant for WolframListSerializer {
     }
 }
 
-impl SerializeMap for WolframDictSerializer {
+impl<'a> SerializeMap for WolframDictSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
@@ -254,12 +266,15 @@ impl SerializeMap for WolframDictSerializer {
     }
 }
 
-impl SerializeStruct for WolframDictSerializer {
+impl<'a> SerializeStruct for WolframDictSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
     fn serialize_field<T: ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error> where T: Serialize {
-        todo!()
+        let lhs = Expr::string(key);
+        let rhs = value.serialize(self.config)?;
+        self.rules.push(Expr::rule(lhs, rhs));
+        Ok(())
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
@@ -267,7 +282,7 @@ impl SerializeStruct for WolframDictSerializer {
     }
 }
 
-impl SerializeStructVariant for WolframDictSerializer {
+impl<'a> SerializeStructVariant for WolframDictSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
