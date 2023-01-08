@@ -1,10 +1,13 @@
 use std::fmt::{Debug, Display};
 
+use serde::ser::{
+    Error, SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant,
+    SerializeTuple, SerializeTupleStruct, SerializeTupleVariant,
+};
 use serde::{Serialize, Serializer};
-use serde::ser::{Error, SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant, SerializeTuple, SerializeTupleStruct, SerializeTupleVariant};
 
-use crate::Expr;
 use crate::serde_support::WolframError;
+use crate::{Expr, Symbol};
 
 ///
 pub struct WolframSerializer {
@@ -24,7 +27,10 @@ pub struct WolframDictSerializer<'a> {
 
 
 impl Error for WolframError {
-    fn custom<T>(msg: T) -> Self where T: Display {
+    fn custom<T>(msg: T) -> Self
+    where
+        T: Display,
+    {
         todo!()
     }
 }
@@ -104,11 +110,17 @@ impl<'a> Serializer for &'a WolframSerializer {
     }
 
     fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        self.serialize_f64(v as f64)
     }
 
     fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        if v.is_nan() {
+            return Ok(Expr::symbol(Symbol::new("System`Indeterminate")));
+        }
+        if v.is_infinite() {
+            return Ok(Expr::symbol(Symbol::new("System`Infinity")));
+        }
+        Ok(Expr::real(v))
     }
 
     fn serialize_char(self, v: char) -> Result<Self::Ok, Self::Error> {
@@ -127,7 +139,10 @@ impl<'a> Serializer for &'a WolframSerializer {
         todo!()
     }
 
-    fn serialize_some<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error> where T: Serialize {
+    fn serialize_some<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error>
+    where
+        T: Serialize,
+    {
         todo!()
     }
 
@@ -139,19 +154,43 @@ impl<'a> Serializer for &'a WolframSerializer {
         todo!()
     }
 
-    fn serialize_unit_variant(self, name: &'static str, variant_index: u32, variant: &'static str) -> Result<Self::Ok, Self::Error> {
+    fn serialize_unit_variant(
+        self,
+        name: &'static str,
+        variant_index: u32,
+        variant: &'static str,
+    ) -> Result<Self::Ok, Self::Error> {
         todo!()
     }
 
-    fn serialize_newtype_struct<T: ?Sized>(self, name: &'static str, value: &T) -> Result<Self::Ok, Self::Error> where T: Serialize {
+    fn serialize_newtype_struct<T: ?Sized>(
+        self,
+        name: &'static str,
+        value: &T,
+    ) -> Result<Self::Ok, Self::Error>
+    where
+        T: Serialize,
+    {
         todo!()
     }
 
-    fn serialize_newtype_variant<T: ?Sized>(self, name: &'static str, variant_index: u32, variant: &'static str, value: &T) -> Result<Self::Ok, Self::Error> where T: Serialize {
+    fn serialize_newtype_variant<T: ?Sized>(
+        self,
+        name: &'static str,
+        variant_index: u32,
+        variant: &'static str,
+        value: &T,
+    ) -> Result<Self::Ok, Self::Error>
+    where
+        T: Serialize,
+    {
         todo!()
     }
 
-    fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
+    fn serialize_seq(
+        self,
+        len: Option<usize>,
+    ) -> Result<Self::SerializeSeq, Self::Error> {
         Ok(WolframListSerializer::new(len.unwrap_or(0), &self))
     }
 
@@ -159,35 +198,75 @@ impl<'a> Serializer for &'a WolframSerializer {
         Ok(WolframListSerializer::new(len, &self))
     }
 
-    fn serialize_tuple_struct(self, name: &'static str, len: usize) -> Result<Self::SerializeTupleStruct, Self::Error> {
+    fn serialize_tuple_struct(
+        self,
+        name: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeTupleStruct, Self::Error> {
         todo!()
     }
 
-    fn serialize_tuple_variant(self, name: &'static str, variant_index: u32, variant: &'static str, len: usize) -> Result<Self::SerializeTupleVariant, Self::Error> {
+    fn serialize_tuple_variant(
+        self,
+        name: &'static str,
+        variant_index: u32,
+        variant: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeTupleVariant, Self::Error> {
         todo!()
     }
 
-    fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
+    fn serialize_map(
+        self,
+        len: Option<usize>,
+    ) -> Result<Self::SerializeMap, Self::Error> {
         todo!()
     }
 
-    fn serialize_struct(self, name: &'static str, len: usize) -> Result<Self::SerializeStruct, Self::Error> {
+    fn serialize_struct(
+        self,
+        name: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeStruct, Self::Error> {
         Ok(WolframDictSerializer::new(len, &self))
     }
 
-    fn serialize_struct_variant(self, name: &'static str, variant_index: u32, variant: &'static str, len: usize) -> Result<Self::SerializeStructVariant, Self::Error> {
+    fn serialize_struct_variant(
+        self,
+        name: &'static str,
+        variant_index: u32,
+        variant: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeStructVariant, Self::Error> {
         todo!()
     }
 
-    fn collect_seq<I>(self, iter: I) -> Result<Self::Ok, Self::Error> where I: IntoIterator, <I as IntoIterator>::Item: Serialize {
+    fn collect_seq<I>(self, iter: I) -> Result<Self::Ok, Self::Error>
+    where
+        I: IntoIterator,
+        <I as IntoIterator>::Item: Serialize,
+    {
+        let iter = iter.into_iter();
+        let mut serializer = WolframListSerializer::new(iter.size_hint().0, &self);
+        for item in iter {
+            SerializeSeq::serialize_element(&mut serializer, &item)?;
+        }
+        SerializeSeq::end(serializer)
+    }
+
+    fn collect_map<K, V, I>(self, iter: I) -> Result<Self::Ok, Self::Error>
+    where
+        K: Serialize,
+        V: Serialize,
+        I: IntoIterator<Item = (K, V)>,
+    {
         todo!()
     }
 
-    fn collect_map<K, V, I>(self, iter: I) -> Result<Self::Ok, Self::Error> where K: Serialize, V: Serialize, I: IntoIterator<Item=(K, V)> {
-        todo!()
-    }
-
-    fn collect_str<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error> where T: Display {
+    fn collect_str<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error>
+    where
+        T: Display,
+    {
         todo!()
     }
 
@@ -200,12 +279,16 @@ impl<'a> SerializeSeq for WolframListSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
-    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> where T: Serialize {
-        todo!()
+    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
+    where
+        T: Serialize,
+    {
+        self.terms.push(value.serialize(self.config)?);
+        Ok(())
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        Ok(Expr::list(self.terms))
     }
 }
 
@@ -214,12 +297,15 @@ impl<'a> SerializeTuple for WolframListSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
-    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> where T: Serialize {
-        todo!()
+    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
+    where
+        T: Serialize,
+    {
+        SerializeSeq::serialize_element(self, value)
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        SerializeSeq::end(self)
     }
 }
 
@@ -227,12 +313,15 @@ impl<'a> SerializeTupleStruct for WolframListSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
-    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> where T: Serialize {
+    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
+    where
+        T: Serialize,
+    {
         todo!()
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        SerializeSeq::end(self)
     }
 }
 
@@ -240,7 +329,10 @@ impl<'a> SerializeTupleVariant for WolframListSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
-    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> where T: Serialize {
+    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
+    where
+        T: Serialize,
+    {
         todo!()
     }
 
@@ -253,11 +345,17 @@ impl<'a> SerializeMap for WolframDictSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
-    fn serialize_key<T: ?Sized>(&mut self, key: &T) -> Result<(), Self::Error> where T: Serialize {
+    fn serialize_key<T: ?Sized>(&mut self, key: &T) -> Result<(), Self::Error>
+    where
+        T: Serialize,
+    {
         todo!()
     }
 
-    fn serialize_value<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> where T: Serialize {
+    fn serialize_value<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
+    where
+        T: Serialize,
+    {
         todo!()
     }
 
@@ -270,7 +368,14 @@ impl<'a> SerializeStruct for WolframDictSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
-    fn serialize_field<T: ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error> where T: Serialize {
+    fn serialize_field<T: ?Sized>(
+        &mut self,
+        key: &'static str,
+        value: &T,
+    ) -> Result<(), Self::Error>
+    where
+        T: Serialize,
+    {
         let lhs = Expr::string(key);
         let rhs = value.serialize(self.config)?;
         self.rules.push(Expr::rule(lhs, rhs));
@@ -278,7 +383,7 @@ impl<'a> SerializeStruct for WolframDictSerializer<'a> {
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        Ok(Expr::normal(Symbol::new("System`Association"), self.rules))
     }
 }
 
@@ -286,7 +391,14 @@ impl<'a> SerializeStructVariant for WolframDictSerializer<'a> {
     type Ok = Expr;
     type Error = WolframError;
 
-    fn serialize_field<T: ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error> where T: Serialize {
+    fn serialize_field<T: ?Sized>(
+        &mut self,
+        key: &'static str,
+        value: &T,
+    ) -> Result<(), Self::Error>
+    where
+        T: Serialize,
+    {
         todo!()
     }
 
