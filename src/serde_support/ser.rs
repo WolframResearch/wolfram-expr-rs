@@ -1,4 +1,4 @@
-use std::fmt::{Debug, Display};
+use std::fmt::Display;
 
 use serde::ser::{
     Error, SerializeMap, SerializeSeq, SerializeStruct, SerializeStructVariant,
@@ -17,11 +17,15 @@ pub struct WolframSerializer {
 
 pub struct WolframListSerializer<'a> {
     config: &'a WolframSerializer,
+    namespace: &'static str,
+    variant: &'static str,
     terms: Vec<Expr>,
 }
 
 pub struct WolframDictSerializer<'a> {
     config: &'a WolframSerializer,
+    namespace: &'static str,
+    variant: &'static str,
     rules: Vec<Expr>,
 }
 
@@ -31,16 +35,27 @@ impl Error for WolframError {
     where
         T: Display,
     {
-        todo!()
+        Self::RuntimeError {
+            message: msg.to_string(),
+        }
     }
 }
 
 impl<'a> WolframListSerializer<'a> {
+    #[inline]
     pub fn new(capacity: usize, config: &'a WolframSerializer) -> Self {
         Self {
             config,
+            namespace: "",
+            variant: "",
             terms: Vec::with_capacity(capacity),
         }
+    }
+    #[inline(always)]
+    pub fn with_name(mut self, class: &'static str, variant: &'static str) -> Self {
+        self.namespace = class;
+        self.variant = variant;
+        self
     }
 }
 
@@ -48,8 +63,15 @@ impl<'a> WolframDictSerializer<'a> {
     pub fn new(capacity: usize, config: &'a WolframSerializer) -> Self {
         Self {
             config,
+            namespace: "",
+            variant: "",
             rules: Vec::with_capacity(capacity),
         }
+    }
+    pub fn with_name(mut self, class: &'static str, variant: &'static str) -> Self {
+        self.namespace = class;
+        self.variant = variant;
+        self
     }
 }
 
@@ -86,7 +108,7 @@ impl<'a> Serializer for &'a WolframSerializer {
     }
 
     fn serialize_i128(self, v: i128) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        unimplemented!("serialize i128 `{v}` is not supported yet")
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
@@ -102,11 +124,11 @@ impl<'a> Serializer for &'a WolframSerializer {
     }
 
     fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        unimplemented!("serialize u64 `{v}` is not supported yet")
     }
 
     fn serialize_u128(self, v: u128) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        unimplemented!("serialize u128 `{v}` is not supported yet")
     }
 
     fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
@@ -124,7 +146,7 @@ impl<'a> Serializer for &'a WolframSerializer {
     }
 
     fn serialize_char(self, v: char) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        self.serialize_str(&v.to_string())
     }
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
@@ -132,18 +154,18 @@ impl<'a> Serializer for &'a WolframSerializer {
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        unimplemented!("serialize bytes `{v:?}` is not supported yet")
     }
 
     fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        Ok(Expr::symbol(Symbol::new("System`None")))
     }
 
     fn serialize_some<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
     {
-        todo!()
+        value.serialize(self)
     }
 
     fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
@@ -151,7 +173,7 @@ impl<'a> Serializer for &'a WolframSerializer {
     }
 
     fn serialize_unit_struct(self, name: &'static str) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        unimplemented!("serialize unit `{name}` is not supported yet")
     }
 
     fn serialize_unit_variant(
@@ -160,7 +182,7 @@ impl<'a> Serializer for &'a WolframSerializer {
         variant_index: u32,
         variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        unimplemented!("serialize unit variant `{name}{variant_index}{variant}` is not supported yet")
     }
 
     fn serialize_newtype_struct<T: ?Sized>(
@@ -171,7 +193,8 @@ impl<'a> Serializer for &'a WolframSerializer {
     where
         T: Serialize,
     {
-        todo!()
+        let _ = value;
+        unimplemented!("serialize newtype struct `{name}` is not supported yet")
     }
 
     fn serialize_newtype_variant<T: ?Sized>(
@@ -184,7 +207,8 @@ impl<'a> Serializer for &'a WolframSerializer {
     where
         T: Serialize,
     {
-        todo!()
+        let _ = (value, variant, variant_index);
+        unimplemented!("serialize newtype struct `{name}` is not supported yet")
     }
 
     fn serialize_seq(
@@ -203,24 +227,24 @@ impl<'a> Serializer for &'a WolframSerializer {
         name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeTupleStruct, Self::Error> {
-        todo!()
+        Ok(WolframListSerializer::new(len, &self).with_name("", name))
     }
 
     fn serialize_tuple_variant(
         self,
         name: &'static str,
-        variant_index: u32,
+        _: u32,
         variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeTupleVariant, Self::Error> {
-        todo!()
+        Ok(WolframListSerializer::new(len, &self).with_name(name, variant))
     }
 
     fn serialize_map(
         self,
         len: Option<usize>,
     ) -> Result<Self::SerializeMap, Self::Error> {
-        todo!()
+        Ok(WolframDictSerializer::new(len.unwrap_or(0), &self))
     }
 
     fn serialize_struct(
@@ -228,17 +252,17 @@ impl<'a> Serializer for &'a WolframSerializer {
         name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
-        Ok(WolframDictSerializer::new(len, &self))
+        Ok(WolframDictSerializer::new(len, &self).with_name("", name))
     }
 
     fn serialize_struct_variant(
         self,
         name: &'static str,
-        variant_index: u32,
+        _: u32,
         variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
-        todo!()
+        Ok(WolframDictSerializer::new(len, &self).with_name(name, variant))
     }
 
     fn collect_seq<I>(self, iter: I) -> Result<Self::Ok, Self::Error>
@@ -260,14 +284,15 @@ impl<'a> Serializer for &'a WolframSerializer {
         V: Serialize,
         I: IntoIterator<Item = (K, V)>,
     {
-        todo!()
+        let _ = iter.into_iter();
+        unimplemented!("collect map is not supported yet")
     }
 
     fn collect_str<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error>
     where
         T: Display,
     {
-        todo!()
+        unimplemented!("collect str `{value}` is not supported yet")
     }
 
     fn is_human_readable(&self) -> bool {
@@ -288,7 +313,14 @@ impl<'a> SerializeSeq for WolframListSerializer<'a> {
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(Expr::list(self.terms))
+        let head = if self.namespace.is_empty() {
+            Symbol::new("System`List")
+        } else if self.namespace.is_empty() {
+            Symbol::new(self.variant)
+        } else {
+            Symbol::new(&format!("{}`{}", self.namespace, self.variant))
+        };
+        Ok(Expr::normal(head, self.terms))
     }
 }
 
@@ -317,7 +349,7 @@ impl<'a> SerializeTupleStruct for WolframListSerializer<'a> {
     where
         T: Serialize,
     {
-        todo!()
+        SerializeSeq::serialize_element(self, value)
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {

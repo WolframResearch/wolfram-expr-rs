@@ -1,11 +1,14 @@
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 
-pub mod ser;
 pub mod de;
+pub mod ser;
 
 
-pub enum WolframError {}
+pub enum WolframError {
+    RuntimeError { message: String },
+}
+
 impl Error for WolframError {}
 
 impl Debug for WolframError {
