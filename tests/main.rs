@@ -22,6 +22,10 @@ pub struct Point3 {
 
 #[derive(Serialize, Deserialize)]
 pub struct TestBody<'a> {
+    empty: TestEmpty,
+    empty_tuple: TestEmptyTuple,
+    empty_dict: TestEmptyDict,
+    unit: (),
     bool: bool,
     int: i64,
     c: char,
@@ -40,6 +44,10 @@ fn test_serialize() {
     let str = "ref string";
     let bytes = &[1, 2, 3, 4, 5];
     let input = TestBody {
+        empty: TestEmpty,
+        empty_tuple: TestEmptyTuple(),
+        empty_dict: TestEmptyDict {},
+        unit: (),
         bool: true,
         int: 42,
         c: 'c',

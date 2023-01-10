@@ -68,8 +68,8 @@ impl<'a> WolframDictSerializer<'a> {
             rules: Vec::with_capacity(capacity),
         }
     }
-    pub fn with_name(mut self, class: &'static str, variant: &'static str) -> Self {
-        self.namespace = class;
+    pub fn with_name(mut self, namespace: &'static str, variant: &'static str) -> Self {
+        self.namespace = namespace;
         self.variant = variant;
         self
     }
@@ -169,11 +169,11 @@ impl<'a> Serializer for &'a WolframSerializer {
     }
 
     fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        Ok(Expr::null())
     }
 
     fn serialize_unit_struct(self, name: &'static str) -> Result<Self::Ok, Self::Error> {
-        unimplemented!("serialize unit `{name}` is not supported yet")
+        Ok(Expr::normal(Symbol::new(&format!("Global`{name}")), vec![]))
     }
 
     fn serialize_unit_variant(
@@ -365,11 +365,11 @@ impl<'a> SerializeTupleVariant for WolframListSerializer<'a> {
     where
         T: Serialize,
     {
-        todo!()
+        SerializeSeq::serialize_element(self, value)
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        SerializeSeq::end(self)
     }
 }
 
@@ -381,18 +381,20 @@ impl<'a> SerializeMap for WolframDictSerializer<'a> {
     where
         T: Serialize,
     {
-        todo!()
+        let _ = key;
+        unimplemented!("serialize key is not supported yet")
     }
 
     fn serialize_value<T: ?Sized>(&mut self, value: &T) -> Result<(), Self::Error>
     where
         T: Serialize,
     {
-        todo!()
+        let _ = value;
+        unimplemented!("serialize value is not supported yet")
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        unimplemented!("end is not supported yet")
     }
 }
 
@@ -431,10 +433,10 @@ impl<'a> SerializeStructVariant for WolframDictSerializer<'a> {
     where
         T: Serialize,
     {
-        todo!()
+        SerializeStruct::serialize_field(self, key, value)
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        todo!()
+        SerializeStruct::end(self)
     }
 }
