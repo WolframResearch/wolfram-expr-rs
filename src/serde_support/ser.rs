@@ -9,10 +9,9 @@ use serde::{Serialize, Serializer};
 use crate::serde_support::WolframError;
 use crate::{Expr, Symbol};
 
-///
+/// Serialize a value into a Wolfram Language expression.
 pub struct WolframSerializer {
-    ///
-    pub readable: bool,
+    // pub readable: bool,
 }
 
 pub struct WolframListSerializer<'a> {
@@ -296,7 +295,7 @@ impl<'a> Serializer for &'a WolframSerializer {
     }
 
     fn is_human_readable(&self) -> bool {
-        self.readable
+        true
     }
 }
 

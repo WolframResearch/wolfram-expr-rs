@@ -40,7 +40,7 @@ pub struct TestBody<'a> {
 
 #[test]
 fn test_serialize() {
-    let serializer = WolframSerializer { readable: true };
+    let serializer = WolframSerializer {};
     let str = "ref string";
     let bytes = &[1, 2, 3, 4, 5];
     let input = TestBody {
