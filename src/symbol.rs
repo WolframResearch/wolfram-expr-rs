@@ -402,8 +402,9 @@ impl<'s> SymbolRef<'s> {
         unsafe { Symbol::unchecked_new(string.to_owned()) }
     }
 
+    // TODO: Document this method
     #[doc(hidden)]
-    pub unsafe fn unchecked_new(string: &'s str) -> Self {
+    pub const unsafe fn unchecked_new(string: &'s str) -> Self {
         SymbolRef(string)
     }
 

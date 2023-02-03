@@ -19,9 +19,4 @@ default = []
 unstable_parse = []
 
 [dependencies]
-ordered-float = "1"
-
-# Used for parsing symbols. These version ranges should be kept in sync with what wl-parse
-# uses.
-nom = "^7.1"
-nom_locate = "^4"
+ordered-float = "3.4.0"

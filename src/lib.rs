@@ -8,6 +8,9 @@ mod ptr_cmp;
 
 pub mod symbol;
 
+#[cfg(test)]
+mod tests;
+
 #[doc(hidden)]
 mod test_readme {
     // Ensure that doc tests in the README.md file get run.
@@ -25,11 +28,6 @@ pub use self::symbol::Symbol;
 
 #[cfg(feature = "unstable_parse")]
 pub use self::ptr_cmp::ExprRefCmp;
-
-#[cfg(feature = "unstable_parse")]
-pub mod parse {
-    pub use crate::symbol::parse::*;
-}
 
 /// Wolfram Language expression.
 ///
