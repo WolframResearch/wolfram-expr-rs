@@ -29,11 +29,6 @@ pub use self::symbol::Symbol;
 #[cfg(feature = "unstable_parse")]
 pub use self::ptr_cmp::ExprRefCmp;
 
-#[cfg(feature = "unstable_parse")]
-pub mod parse {
-    pub use crate::symbol::parse::*;
-}
-
 /// Wolfram Language expression.
 ///
 /// # Example

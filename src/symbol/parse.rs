@@ -1,24 +1,12 @@
-use nom::{
-    branch::alt,
-    bytes::complete::tag,
-    combinator::{complete, recognize},
-    multi::{many0, many1},
-    sequence::{pair, tuple},
-    IResult, InputLength,
-};
-use nom_locate::LocatedSpan;
+// TODO(!): Replace all of this symbol parsing logic with functionality from
+//          wolfram-code-parse, once that is available.
 
 use crate::symbol::{ContextRef, RelativeContext, SymbolNameRef, SymbolRef};
 
 #[allow(non_snake_case)]
 pub(super) fn SymbolRef_try_new<'s>(string: &'s str) -> Option<SymbolRef<'s>> {
-    let input = LocatedSpan::new(string);
-
-    let (rem, (_span, sym)) = absolute_symbol_ref_ty(input).ok()?;
-
-    // Check that the input didn't contain any trailing characters after the symbol.
-    if rem.input_len() == 0 {
-        Some(sym)
+    if parse_symbol_like(string)? == SymbolLike::AbsoluteSymbol {
+        Some(SymbolRef(string))
     } else {
         None
     }
@@ -26,13 +14,8 @@ pub(super) fn SymbolRef_try_new<'s>(string: &'s str) -> Option<SymbolRef<'s>> {
 
 #[allow(non_snake_case)]
 pub(super) fn SymbolNameRef_try_new<'s>(string: &'s str) -> Option<SymbolNameRef<'s>> {
-    let input = LocatedSpan::new(string);
-
-    let (rem, (_span, sym)) = symbol_name_ref_ty(input).ok()?;
-
-    // Check that the input didn't contain any trailing characters after the symbol.
-    if rem.input_len() == 0 {
-        Some(sym)
+    if parse_symbol_like(string)? == SymbolLike::SymbolName {
+        Some(SymbolNameRef(string))
     } else {
         None
     }
@@ -40,13 +23,8 @@ pub(super) fn SymbolNameRef_try_new<'s>(string: &'s str) -> Option<SymbolNameRef
 
 #[allow(non_snake_case)]
 pub(super) fn ContextRef_try_new<'s>(string: &'s str) -> Option<ContextRef<'s>> {
-    let input = LocatedSpan::new(string);
-
-    let (remaining, _) = absolute_context_path(input).ok()?;
-
-    // Check that the input didn't contain any trailing characters after the symbol.
-    if remaining.input_len() == 0 {
-        Some(ContextRef(input.fragment()))
+    if parse_symbol_like(string)? == SymbolLike::AbsoluteContext {
+        Some(ContextRef(string))
     } else {
         None
     }
@@ -55,72 +33,95 @@ pub(super) fn ContextRef_try_new<'s>(string: &'s str) -> Option<ContextRef<'s>> 
 // TODO(cleanup): Add RelativeContextRef type, use here instead.
 #[allow(non_snake_case)]
 pub(super) fn RelativeContext_try_new(input: &str) -> Option<RelativeContext> {
-    let input = LocatedSpan::new(input);
-
-    let (remaining, _) = relative_context_path(input).ok()?;
-
-    if remaining.input_len() == 0 {
-        Some(unsafe { RelativeContext::unchecked_new(input.fragment().to_owned()) })
+    if parse_symbol_like(input)? == SymbolLike::RelativeContext {
+        Some(unsafe { RelativeContext::unchecked_new(input.to_owned()) })
     } else {
         None
     }
 }
 
-//======================================
-// Compound combinators -- these conceptually still only parse single tokens, and are used
-// directly by wl-parse.
-//======================================
-
-type StrSpan<'a> = LocatedSpan<&'a str>;
-
-#[cfg_attr(not(feature = "unstable_parse"), allow(dead_code))]
-pub fn symbol(i: StrSpan) -> IResult<StrSpan, StrSpan> {
-    alt((absolute_symbol, relative_symbol, symbol_name))(i)
+#[derive(Debug, PartialEq)]
+enum SymbolLike {
+    /// `` ctx`foo ``
+    AbsoluteSymbol,
+    /// `foo`
+    SymbolName,
+    /// `` `foo ``
+    RelativeSymbol,
+    /// `` ctx` ``
+    AbsoluteContext,
+    /// `` `ctx` ``
+    RelativeContext,
 }
 
-pub fn symbol_name(i: StrSpan) -> IResult<StrSpan, StrSpan> {
-    use nom::character::complete::{alpha1, digit1};
+fn parse_symbol_like(input: &str) -> Option<SymbolLike> {
+    if input.is_empty() {
+        return None;
+    }
 
-    let (i, res) = recognize(tuple((
-        many1(alt((alpha1, tag("$")))),
-        many0(alt((digit1, alpha1, tag("$")))),
-    )))(i)?;
-    Ok((i, res))
+    let components: Vec<&str> = input.split("`").collect();
+
+    let like = match components.as_slice() {
+        [only] if is_symbol_component(*only) => SymbolLike::SymbolName,
+        // "`...`"
+        ["", inner @ .., ""] if inner.iter().copied().all(is_symbol_component) => {
+            SymbolLike::RelativeContext
+        },
+        // "`..."
+        ["", rest @ ..] if rest.iter().copied().all(is_symbol_component) => {
+            SymbolLike::RelativeSymbol
+        },
+        // "...`"
+        [most @ .., ""] if most.iter().copied().all(is_symbol_component) => {
+            SymbolLike::AbsoluteContext
+        },
+
+        components if components.iter().copied().all(is_symbol_component) => {
+            SymbolLike::AbsoluteSymbol
+        },
+
+        _ => return None,
+    };
+
+    Some(like)
 }
 
-fn absolute_context_path(i: StrSpan) -> IResult<StrSpan, StrSpan> {
-    recognize(many1(complete(pair(symbol_name, tag("`")))))(i)
+
+fn is_symbol_component(str: &str) -> bool {
+    if str.is_empty() {
+        return false;
+    }
+
+    debug_assert!(!str.contains('`'));
+
+    let mut chars = str.chars();
+
+    let first_char = chars.next().unwrap();
+
+    if !first_char.is_alphabetic() && first_char != '$' {
+        return false;
+    }
+
+    for char in chars {
+        match char {
+            '_' | '-' => return false,
+            _ if char.is_alphabetic() => (),
+            _ if char.is_digit(10) => (),
+            '$' => (),
+            _ => return false,
+        }
+    }
+
+    true
 }
 
-fn relative_context_path(i: StrSpan) -> IResult<StrSpan, StrSpan> {
-    // ` (<symbol_name>`)+
-    recognize(pair(tag("`"), many1(complete(pair(symbol_name, tag("`"))))))(i)
+#[test]
+fn test_is_symbol_component() {
+    assert!(is_symbol_component("foo"));
+    assert!(is_symbol_component("$bar"));
 }
 
-fn absolute_symbol(i: StrSpan) -> IResult<StrSpan, StrSpan> {
-    recognize(pair(absolute_context_path, symbol_name))(i)
-}
-
-fn relative_symbol(i: StrSpan) -> IResult<StrSpan, StrSpan> {
-    recognize(pair(relative_context_path, symbol_name))(i)
-}
-
-//======================================
-// Parsers which also return the safe wrappers.
-// These are meant to be used outside of this crate.
-//======================================
-
-// These return a (StrSpan, <type>) so that the consumer can get line / extent information
-// for the consumed input.
-
-fn absolute_symbol_ref_ty(i: StrSpan) -> IResult<StrSpan, (StrSpan, SymbolRef)> {
-    let (i, span) = absolute_symbol(i)?;
-    let sym = SymbolRef(span.fragment());
-    Ok((i, (span, sym)))
-}
-
-fn symbol_name_ref_ty(i: StrSpan) -> IResult<StrSpan, (StrSpan, SymbolNameRef)> {
-    let (i, span) = symbol_name(i)?;
-    let symname = SymbolNameRef(span.fragment());
-    Ok((i, (span, symname)))
+#[test]
+fn test_parse_symbol_like() {
+    assert_eq!(parse_symbol_like("foo"), Some(SymbolLike::SymbolName));
 }
