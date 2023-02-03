@@ -8,6 +8,9 @@ mod ptr_cmp;
 
 pub mod symbol;
 
+#[cfg(test)]
+mod tests;
+
 #[doc(hidden)]
 mod test_readme {
     // Ensure that doc tests in the README.md file get run.
