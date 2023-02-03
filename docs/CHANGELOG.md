@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.1.4] – 2023-02-03
+
+### Changed
+
+* Remove `nom` and `nom_locate` as dependencies of `wolfram-expr`. ([#17])
+
+* Mark `SymbolRef::unchecked_new()` as `const`. ([#17])
+
+* Update `ordered-float` dependency from v1.x.x series to v3.4.0. ([#17])
+
+
+
 ## [0.1.3] – 2022-12-06
 
 ### Added
@@ -128,10 +140,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- v0.1.3 -->
 [#15]: https://github.com/WolframResearch/wolfram-expr-rs/pull/15
 
+<!-- v0.1.4 -->
+[#17]: https://github.com/WolframResearch/wolfram-expr-rs/pull/17
+
 
 <!-- This needs to be updated for each tagged release. -->
-[Unreleased]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.4...HEAD
 
+[0.1.4]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/WolframResearch/wolfram-expr-rs/compare/v0.1.0...v0.1.1
