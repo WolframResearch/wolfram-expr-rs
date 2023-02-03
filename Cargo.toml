@@ -19,4 +19,4 @@ default = []
 unstable_parse = []
 
 [dependencies]
-ordered-float = "1"
+ordered-float = "3.4.0"
