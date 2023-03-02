@@ -6,6 +6,9 @@
 mod conversion;
 mod ptr_cmp;
 
+#[cfg(feature = "serde")]
+mod serde_support;
+
 pub mod symbol;
 
 #[cfg(test)]
