@@ -6,8 +6,8 @@ use serde::ser::{
 };
 use serde::{Serialize, Serializer};
 
-use crate::serde_support::WolframError;
-use crate::{Expr, Symbol};
+
+use crate::{Expr, Symbol, WolframError};
 
 /// Serialize a value into a Wolfram Language expression.
 pub struct WolframSerializer {
@@ -34,9 +34,7 @@ impl Error for WolframError {
     where
         T: Display,
     {
-        Self::RuntimeError {
-            message: msg.to_string(),
-        }
+        WolframError::runtime_error(msg)
     }
 }
 

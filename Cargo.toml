@@ -11,7 +11,8 @@ keywords = ["wolfram", "wolfram-language", "mathematica", "wolfram-engine", "exp
 categories = ["encoding"]
 
 [features]
-unstable-serde = []
+default = []
+unstable-serde = ["serde"]
 
 # Whether to publically export nom functions for parsing symbols. This feature should not
 # be considered stable -- it is included only so that wl-parse can build higher-level
