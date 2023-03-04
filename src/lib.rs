@@ -6,6 +6,13 @@
 mod conversion;
 mod ptr_cmp;
 
+#[cfg(feature = "unstable-serde")]
+mod serde_support;
+#[cfg(feature = "unstable-serde")]
+pub use serde_support::ser::WolframSerializer;
+mod error;
+pub use error::WolframError;
+
 pub mod symbol;
 
 #[cfg(test)]
