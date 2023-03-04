@@ -6,9 +6,9 @@
 mod conversion;
 mod ptr_cmp;
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "unstable-serde")]
 mod serde_support;
-#[cfg(feature = "serde")]
+#[cfg(feature = "unstable-serde")]
 pub use serde_support::ser::WolframSerializer;
 
 pub mod symbol;
