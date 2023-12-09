@@ -149,7 +149,7 @@ impl Symbol {
     /// and handle the error condition.
     #[track_caller]
     pub fn new(input: &str) -> Self {
-        match Symbol::try_new(input) {
+        match Self::try_new(input) {
             Some(symbol) => symbol,
             None => panic!("string is not parseable as a symbol: {}", input),
         }
@@ -157,7 +157,7 @@ impl Symbol {
 
     /// Get a borrowed [`SymbolRef`] from this [`Symbol`].
     pub fn as_symbol_ref(&self) -> SymbolRef {
-        let Symbol(arc_string) = self;
+        let Self(arc_string) = self;
 
         SymbolRef(arc_string.as_str())
     }
@@ -177,7 +177,7 @@ impl SymbolName {
     /// Attempt to parse `input` as a symbol name.
     ///
     /// A symbol name is a symbol without any context marks.
-    pub fn try_new(input: &str) -> Option<SymbolName> {
+    pub fn try_new(input: &str) -> Option<Self> {
         SymbolNameRef::try_new(input)
             .as_ref()
             .map(SymbolNameRef::to_symbol_name)
@@ -311,7 +311,7 @@ impl RelativeContext {
     /// assert!(components[1].as_str() == "Module");
     /// ```
     pub fn components(&self) -> Vec<SymbolNameRef> {
-        let RelativeContext(string) = self;
+        let Self(string) = self;
 
         let comps: Vec<SymbolNameRef> = string
             .split('`')
