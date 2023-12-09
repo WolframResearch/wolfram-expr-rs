@@ -83,30 +83,30 @@ impl Expr {
 //=======================================
 
 impl From<Symbol> for Expr {
-    fn from(sym: Symbol) -> Expr {
-        Expr::symbol(sym)
+    fn from(sym: Symbol) -> Self {
+        Self::symbol(sym)
     }
 }
 
 impl From<&Symbol> for Expr {
-    fn from(sym: &Symbol) -> Expr {
-        Expr::symbol(sym)
+    fn from(sym: &Symbol) -> Self {
+        Self::symbol(sym)
     }
 }
 
 impl From<Normal> for Expr {
-    fn from(normal: Normal) -> Expr {
-        Expr {
+    fn from(normal: Normal) -> Self {
+        Self {
             inner: Arc::new(ExprKind::Normal(normal)),
         }
     }
 }
 
 impl From<bool> for Expr {
-    fn from(value: bool) -> Expr {
+    fn from(value: bool) -> Self {
         match value {
-            true => Expr::symbol(Symbol::new("System`True")),
-            false => Expr::symbol(Symbol::new("System`False")),
+            true => Self::symbol(Symbol::new("System`True")),
+            false => Self::symbol(Symbol::new("System`False")),
         }
     }
 }
@@ -115,8 +115,8 @@ macro_rules! string_like {
     ($($t:ty),*) => {
         $(
             impl From<$t> for Expr {
-                fn from(s: $t) -> Expr {
-                    Expr::string(s)
+                fn from(s: $t) -> Self {
+                    Self::string(s)
                 }
             }
         )*

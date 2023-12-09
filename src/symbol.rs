@@ -217,7 +217,7 @@ impl Context {
     /// and handle the error condition.
     #[track_caller]
     pub fn new(input: &str) -> Self {
-        match Context::try_new(input) {
+        match Self::try_new(input) {
             Some(context) => context,
             None => panic!("string is not parseable as a context: {}", input),
         }
@@ -225,12 +225,12 @@ impl Context {
 
     /// The `` Global` `` context.
     pub fn global() -> Self {
-        Context(Arc::new(String::from("Global`")))
+        Self(Arc::new(String::from("Global`")))
     }
 
     /// The `` System` `` context.
     pub fn system() -> Self {
-        Context(Arc::new(String::from("System`")))
+        Self(Arc::new(String::from("System`")))
     }
 
     /// Construct a new [`Context`] by appending a new context component to this
@@ -244,9 +244,9 @@ impl Context {
     ///
     /// assert!(private.as_str() == "MyContext`Private`");
     /// ```
-    pub fn join(&self, name: SymbolNameRef) -> Context {
-        let Context(context) = self;
-        Context::try_new(&format!("{}{}`", context, name.as_str()))
+    pub fn join(&self, name: SymbolNameRef) -> Self {
+        let Self(context) = self;
+        Self::try_new(&format!("{}{}`", context, name.as_str()))
             .expect("Context::join(): invalid Context")
     }
 
@@ -265,7 +265,7 @@ impl Context {
     /// assert!(components[2].as_str() == "Module");
     /// ```
     pub fn components(&self) -> Vec<SymbolNameRef> {
-        let Context(string) = self;
+        let Self(string) = self;
 
         let comps: Vec<SymbolNameRef> = string
             .split('`')
@@ -287,7 +287,7 @@ impl Context {
 
     /// Create the context `` name` ``.
     pub fn from_symbol_name(name: &SymbolName) -> Self {
-        Context::try_new(&format!("{}`", name)).unwrap()
+        Self::try_new(&format!("{}`", name)).unwrap()
     }
 }
 
@@ -392,20 +392,20 @@ impl<'s> SymbolRef<'s> {
 
     /// Get the borrowed string data.
     pub fn as_str(&self) -> &'s str {
-        let SymbolRef(string) = self;
+        let Self(string) = self;
         string
     }
 
     /// Convert this borrowed string into an owned [`Symbol`].
     pub fn to_symbol(&self) -> Symbol {
-        let SymbolRef(string) = self;
+        let Self(string) = self;
         unsafe { Symbol::unchecked_new(string.to_owned()) }
     }
 
     // TODO: Document this method
     #[doc(hidden)]
     pub const unsafe fn unchecked_new(string: &'s str) -> Self {
-        SymbolRef(string)
+        Self(string)
     }
 
     /// Get the context path part of a symbol as an [`ContextRef`].
@@ -448,19 +448,19 @@ impl<'s> SymbolNameRef<'s> {
 
     /// Get the borrowed string data.
     pub fn as_str(&self) -> &'s str {
-        let SymbolNameRef(string) = self;
+        let Self(string) = self;
         string
     }
 
     /// Convert this borrowed string into an owned [`SymbolName`].
     pub fn to_symbol_name(&self) -> SymbolName {
-        let SymbolNameRef(string) = self;
+        let Self(string) = self;
         unsafe { SymbolName::unchecked_new(string.to_owned()) }
     }
 
     #[doc(hidden)]
     pub unsafe fn unchecked_new(string: &'s str) -> Self {
-        SymbolNameRef(string)
+        Self(string)
     }
 }
 
@@ -472,19 +472,19 @@ impl<'s> ContextRef<'s> {
 
     /// Get the borrowed string data.
     pub fn as_str(&self) -> &'s str {
-        let ContextRef(string) = self;
+        let Self(string) = self;
         string
     }
 
     /// Convert this borrowed string into an owned [`Context`].
     pub fn to_context(&self) -> Context {
-        let ContextRef(string) = self;
+        let Self(string) = self;
         unsafe { Context::unchecked_new(string.to_owned()) }
     }
 
     #[doc(hidden)]
     pub unsafe fn unchecked_new(string: &'s str) -> Self {
-        ContextRef(string)
+        Self(string)
     }
 }
 
