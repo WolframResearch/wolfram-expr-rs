@@ -60,12 +60,16 @@ const _: () = assert!(mem::size_of::<Expr>() == mem::size_of::<*const ()>());
 const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<usize>());
 const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<*const ()>());
 
+impl From<ExprKind> for Expr {
+    fn from(kind: ExprKind) -> Self {
+        Self { inner: kind.into() }
+    }
+}
+
 impl Expr {
     /// Construct a new expression from an [`ExprKind`].
     pub fn new(kind: ExprKind) -> Self {
-        Self {
-            inner: Arc::new(kind),
-        }
+        kind.into()
     }
 
     /// Consume `self` and return an owned [`ExprKind`].
@@ -110,33 +114,24 @@ impl Expr {
     pub fn normal<H: Into<Expr>>(head: H, contents: Vec<Expr>) -> Self {
         let head = head.into();
         // let contents = contents.into();
-        Self {
-            inner: Arc::new(ExprKind::Normal(Normal { head, contents })),
-        }
+        ExprKind::Normal(Normal { head, contents }).into()
     }
 
     // TODO: Should Expr's be cached? Especially Symbol exprs? Would certainly save
     //       a lot of allocations.
     /// Construct a new expression from a [`Symbol`].
     pub fn symbol<S: Into<Symbol>>(s: S) -> Self {
-        let s = s.into();
-        Self {
-            inner: Arc::new(ExprKind::Symbol(s)),
-        }
+        ExprKind::Symbol(s.into()).into()
     }
 
     /// Construct a new expression from a [`Number`].
     pub fn number(num: Number) -> Expr {
-        Self {
-            inner: Arc::new(ExprKind::from(num)),
-        }
+        ExprKind::from(num).into()
     }
 
     /// Construct a new expression from a [`String`].
     pub fn string<S: Into<String>>(s: S) -> Self {
-        Self {
-            inner: Arc::new(ExprKind::String(s.into())),
-        }
+        ExprKind::String(s.into()).into()
     }
 
     /// Construct an expression from a floating-point number.
@@ -180,13 +175,10 @@ impl Expr {
     /// If this represents a [`Normal`] expression, return its head. Otherwise, return
     /// `None`.
     pub fn normal_head(&self) -> Option<Expr> {
-        match *self.inner {
-            ExprKind::Normal(ref normal) => Some(normal.head.clone()),
-            ExprKind::Symbol(_)
-            | ExprKind::Integer(_)
-            | ExprKind::Real(_)
-            | ExprKind::String(_) => None,
-        }
+        let ExprKind::Normal(ref normal) = self.inner.as_ref() else {
+            return None;
+        };
+        Some(normal.head.clone())
     }
 
     /// Attempt to get the element at `index` of a `Normal` expression.
@@ -198,13 +190,10 @@ impl Expr {
     ///
     /// This function does not panic.
     pub fn normal_part(&self, index_0: usize) -> Option<&Expr> {
-        match self.kind() {
-            ExprKind::Normal(ref normal) => normal.contents.get(index_0),
-            ExprKind::Symbol(_)
-            | ExprKind::Integer(_)
-            | ExprKind::Real(_)
-            | ExprKind::String(_) => None,
-        }
+        let ExprKind::Normal(ref normal) = self.kind() else {
+            return None;
+        };
+        normal.contents.get(index_0)
     }
 
     /// Returns `true` if `self` is a `Normal` expr with the head `sym`.
