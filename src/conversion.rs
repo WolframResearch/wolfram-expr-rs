@@ -88,7 +88,7 @@ impl From<&Symbol> for Expr {
 impl From<Normal> for Expr {
     fn from(normal: Normal) -> Self {
         Self {
-            inner: Arc::new(ExprKind::Normal(normal)),
+            inner: ExprKind::Normal(normal).into(),
         }
     }
 }

@@ -149,10 +149,8 @@ impl Symbol {
     /// and handle the error condition.
     #[track_caller]
     pub fn new(input: &str) -> Self {
-        match Self::try_new(input) {
-            Some(symbol) => symbol,
-            None => panic!("string is not parseable as a symbol: {}", input),
-        }
+        Self::try_new(input)
+            .unwrap_or_else(|| panic!("string is not parseable as a symbol: {}", input))
     }
 
     /// Get a borrowed [`SymbolRef`] from this [`Symbol`].
@@ -217,20 +215,18 @@ impl Context {
     /// and handle the error condition.
     #[track_caller]
     pub fn new(input: &str) -> Self {
-        match Self::try_new(input) {
-            Some(context) => context,
-            None => panic!("string is not parseable as a context: {}", input),
-        }
+        Self::try_new(input)
+            .unwrap_or_else(|| panic!("string is not parseable as a symbol: {}", input))
     }
 
     /// The `` Global` `` context.
     pub fn global() -> Self {
-        Self(Arc::new(String::from("Global`")))
+        Self(String::from("Global`").into())
     }
 
     /// The `` System` `` context.
     pub fn system() -> Self {
-        Self(Arc::new(String::from("System`")))
+        Self(String::from("System`").into())
     }
 
     /// Construct a new [`Context`] by appending a new context component to this
@@ -358,7 +354,7 @@ macro_rules! common_impls {
             /// often *not* what is really needed, it's marked unsafe as a deterent to
             /// possible users.
             pub(crate) unsafe fn unchecked_new<S: Into<String>>(input: S) -> $ty {
-                let inner: Arc<String> = Arc::new(input.into());
+                let inner: Arc<_> = Arc::new(input.into());
                 $ty(inner)
             }
         }
