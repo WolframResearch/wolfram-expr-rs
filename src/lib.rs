@@ -230,9 +230,7 @@ impl Expr {
     /// let option = Expr::rule(Symbol::new("System`FontSize"), Expr::from(16));
     /// ```
     pub fn rule<LHS: Into<Self>>(lhs: LHS, rhs: Self) -> Self {
-        let lhs = lhs.into();
-
-        Self::normal(Symbol::new("System`Rule"), vec![lhs, rhs])
+        Self::normal(Symbol::new("System`Rule"), vec![lhs.into(), rhs])
     }
     /// Construct a new `RuleDelayed[_, _]` expression from the left-hand side and right-hand
     /// side.
@@ -250,9 +248,7 @@ impl Expr {
     /// );
     /// ```
     pub fn rule_delayed<LHS: Into<Self>>(lhs: LHS, rhs: Self) -> Self {
-        let lhs = lhs.into();
-
-        Self::normal(Symbol::new("System`RuleDelayed"), vec![lhs, rhs])
+        Self::normal(Symbol::new("System`RuleDelayed"), vec![lhs.into(), rhs])
     }
 
     /// Construct a new `List[...]`(`{...}`) expression from it's elements.
