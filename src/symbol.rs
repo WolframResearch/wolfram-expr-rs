@@ -309,7 +309,7 @@ impl RelativeContext {
     pub fn components(&self) -> Vec<SymbolNameRef> {
         let Self(string) = self;
 
-        let comps: Vec<SymbolNameRef> = string
+        string
             .split('`')
             // Remove the last component, which will always be the empty string
             .filter(|comp| !comp.is_empty())
@@ -317,9 +317,7 @@ impl RelativeContext {
                 SymbolNameRef::try_new(comp)
                     .expect("RelativeContext::components(): invalid context component")
             })
-            .collect();
-
-        comps
+            .collect()
     }
 }
 

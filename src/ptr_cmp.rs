@@ -38,18 +38,13 @@ pub struct ExprRefCmp(pub Expr);
 
 impl Hash for ExprRefCmp {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let Self(Expr { inner }) = self;
-        let ptr: *const ExprKind = Arc::as_ptr(inner);
-        ptr.hash(state);
+        Arc::as_ptr(&self.0.inner).hash(state)
     }
 }
 
 impl PartialEq for ExprRefCmp {
     fn eq(&self, other: &Self) -> bool {
-        let Self(Expr { inner: self_inner }) = self;
-        let Self(Expr { inner: other_inner }) = other;
-
-        Arc::ptr_eq(self_inner, other_inner)
+        Arc::ptr_eq(&self.0.inner, &other.0.inner)
     }
 }
 
