@@ -376,8 +376,7 @@ impl Number {
 
 impl fmt::Debug for Expr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let Self { inner } = self;
-        write!(f, "{:?}", inner)
+        write!(f, "{:?}", self.inner)
     }
 }
 
@@ -436,8 +435,7 @@ impl fmt::Display for Number {
             Self::Real(ref real) => {
                 // Make sure we're not printing NotNan (which surprisingly implements
                 // Display)
-                let real: f64 = **real;
-                write!(f, "{:?}", real)
+                write!(f, "{:?}", **real)
             },
         }
     }

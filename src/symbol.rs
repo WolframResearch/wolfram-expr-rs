@@ -155,9 +155,7 @@ impl Symbol {
 
     /// Get a borrowed [`SymbolRef`] from this [`Symbol`].
     pub fn as_symbol_ref(&self) -> SymbolRef {
-        let Self(arc_string) = self;
-
-        SymbolRef(arc_string.as_str())
+        SymbolRef(self.0.as_str())
     }
 
     /// Get the context path part of a symbol as an [`ContextRef`].
@@ -241,8 +239,7 @@ impl Context {
     /// assert!(private.as_str() == "MyContext`Private`");
     /// ```
     pub fn join(&self, name: SymbolNameRef) -> Self {
-        let Self(context) = self;
-        Self::try_new(&format!("{}{}`", context, name.as_str()))
+        Self::try_new(&format!("{}{}`", self.0, name.as_str()))
             .expect("Context::join(): invalid Context")
     }
 
@@ -261,9 +258,8 @@ impl Context {
     /// assert!(components[2].as_str() == "Module");
     /// ```
     pub fn components(&self) -> Vec<SymbolNameRef> {
-        let Self(string) = self;
-
-        let comps: Vec<SymbolNameRef> = string
+        let comps: Vec<SymbolNameRef> = self
+            .0
             .split('`')
             // Remove the last component, which will always be the empty string
             .filter(|comp| !comp.is_empty())
@@ -307,9 +303,7 @@ impl RelativeContext {
     /// assert!(components[1].as_str() == "Module");
     /// ```
     pub fn components(&self) -> Vec<SymbolNameRef> {
-        let Self(string) = self;
-
-        string
+        self.0
             .split('`')
             // Remove the last component, which will always be the empty string
             .filter(|comp| !comp.is_empty())
@@ -386,14 +380,12 @@ impl<'s> SymbolRef<'s> {
 
     /// Get the borrowed string data.
     pub fn as_str(&self) -> &'s str {
-        let Self(string) = self;
-        string
+        self.0
     }
 
     /// Convert this borrowed string into an owned [`Symbol`].
     pub fn to_symbol(&self) -> Symbol {
-        let Self(string) = self;
-        unsafe { Symbol::unchecked_new(string.to_owned()) }
+        unsafe { Symbol::unchecked_new(self.0.to_owned()) }
     }
 
     // TODO: Document this method
@@ -442,14 +434,12 @@ impl<'s> SymbolNameRef<'s> {
 
     /// Get the borrowed string data.
     pub fn as_str(&self) -> &'s str {
-        let Self(string) = self;
-        string
+        self.0
     }
 
     /// Convert this borrowed string into an owned [`SymbolName`].
     pub fn to_symbol_name(&self) -> SymbolName {
-        let Self(string) = self;
-        unsafe { SymbolName::unchecked_new(string.to_owned()) }
+        unsafe { SymbolName::unchecked_new(self.0.to_owned()) }
     }
 
     #[doc(hidden)]
@@ -466,14 +456,12 @@ impl<'s> ContextRef<'s> {
 
     /// Get the borrowed string data.
     pub fn as_str(&self) -> &'s str {
-        let Self(string) = self;
-        string
+        self.0
     }
 
     /// Convert this borrowed string into an owned [`Context`].
     pub fn to_context(&self) -> Context {
-        let Self(string) = self;
-        unsafe { Context::unchecked_new(string.to_owned()) }
+        unsafe { Context::unchecked_new(self.0.to_owned()) }
     }
 
     #[doc(hidden)]

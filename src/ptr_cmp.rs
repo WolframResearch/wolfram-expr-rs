@@ -3,7 +3,7 @@ use std::{
     sync::Arc,
 };
 
-use crate::{Expr, ExprKind};
+use crate::Expr;
 
 
 /// [`Expr`] wrapper that compares by reference instead of by value.
