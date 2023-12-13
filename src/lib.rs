@@ -60,12 +60,16 @@ const _: () = assert!(mem::size_of::<Expr>() == mem::size_of::<*const ()>());
 const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<usize>());
 const _: () = assert!(mem::align_of::<Expr>() == mem::align_of::<*const ()>());
 
+impl From<ExprKind> for Expr {
+    fn from(kind: ExprKind) -> Self {
+        Self { inner: kind.into() }
+    }
+}
+
 impl Expr {
     /// Construct a new expression from an [`ExprKind`].
-    pub fn new(kind: ExprKind) -> Expr {
-        Expr {
-            inner: Arc::new(kind),
-        }
+    pub fn new(kind: ExprKind) -> Self {
+        kind.into()
     }
 
     /// Consume `self` and return an owned [`ExprKind`].
@@ -107,36 +111,27 @@ impl Expr {
     }
 
     /// Construct a new normal expression from the head and elements.
-    pub fn normal<H: Into<Expr>>(head: H, contents: Vec<Expr>) -> Expr {
+    pub fn normal<H: Into<Expr>>(head: H, contents: Vec<Expr>) -> Self {
         let head = head.into();
         // let contents = contents.into();
-        Expr {
-            inner: Arc::new(ExprKind::Normal(Normal { head, contents })),
-        }
+        ExprKind::Normal(Normal { head, contents }).into()
     }
 
     // TODO: Should Expr's be cached? Especially Symbol exprs? Would certainly save
     //       a lot of allocations.
     /// Construct a new expression from a [`Symbol`].
-    pub fn symbol<S: Into<Symbol>>(s: S) -> Expr {
-        let s = s.into();
-        Expr {
-            inner: Arc::new(ExprKind::Symbol(s)),
-        }
+    pub fn symbol<S: Into<Symbol>>(s: S) -> Self {
+        ExprKind::Symbol(s.into()).into()
     }
 
     /// Construct a new expression from a [`Number`].
     pub fn number(num: Number) -> Expr {
-        Expr {
-            inner: Arc::new(ExprKind::from(num)),
-        }
+        ExprKind::from(num).into()
     }
 
     /// Construct a new expression from a [`String`].
-    pub fn string<S: Into<String>>(s: S) -> Expr {
-        Expr {
-            inner: Arc::new(ExprKind::String(s.into())),
-        }
+    pub fn string<S: Into<String>>(s: S) -> Self {
+        ExprKind::String(s.into()).into()
     }
 
     /// Construct an expression from a floating-point number.
@@ -149,8 +144,8 @@ impl Expr {
     /// # Panics
     ///
     /// This function will panic if `real` is NaN.
-    pub fn real(real: f64) -> Expr {
-        Expr::number(Number::real(real))
+    pub fn real(real: f64) -> Self {
+        Self::number(Number::real(real))
     }
 
     /// Returns the outer-most symbol "tag" used in this expression.
@@ -180,13 +175,10 @@ impl Expr {
     /// If this represents a [`Normal`] expression, return its head. Otherwise, return
     /// `None`.
     pub fn normal_head(&self) -> Option<Expr> {
-        match *self.inner {
-            ExprKind::Normal(ref normal) => Some(normal.head.clone()),
-            ExprKind::Symbol(_)
-            | ExprKind::Integer(_)
-            | ExprKind::Real(_)
-            | ExprKind::String(_) => None,
-        }
+        let ExprKind::Normal(ref normal) = self.inner.as_ref() else {
+            return None;
+        };
+        Some(normal.head.clone())
     }
 
     /// Attempt to get the element at `index` of a `Normal` expression.
@@ -198,13 +190,10 @@ impl Expr {
     ///
     /// This function does not panic.
     pub fn normal_part(&self, index_0: usize) -> Option<&Expr> {
-        match self.kind() {
-            ExprKind::Normal(ref normal) => normal.contents.get(index_0),
-            ExprKind::Symbol(_)
-            | ExprKind::Integer(_)
-            | ExprKind::Real(_)
-            | ExprKind::String(_) => None,
-        }
+        let ExprKind::Normal(ref normal) = self.kind() else {
+            return None;
+        };
+        normal.contents.get(index_0)
     }
 
     /// Returns `true` if `self` is a `Normal` expr with the head `sym`.
@@ -220,8 +209,8 @@ impl Expr {
     //==================================
 
     /// [`Null`](https://reference.wolfram.com/language/ref/Null.html) <sub>WL</sub>.
-    pub fn null() -> Expr {
-        Expr::symbol(unsafe { Symbol::unchecked_new("System`Null") })
+    pub fn null() -> Self {
+        Self::symbol(unsafe { Symbol::unchecked_new("System`Null") })
     }
 
     //==================================
@@ -240,10 +229,8 @@ impl Expr {
     ///
     /// let option = Expr::rule(Symbol::new("System`FontSize"), Expr::from(16));
     /// ```
-    pub fn rule<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {
-        let lhs = lhs.into();
-
-        Expr::normal(Symbol::new("System`Rule"), vec![lhs, rhs])
+    pub fn rule<LHS: Into<Self>>(lhs: LHS, rhs: Self) -> Self {
+        Self::normal(Symbol::new("System`Rule"), vec![lhs.into(), rhs])
     }
     /// Construct a new `RuleDelayed[_, _]` expression from the left-hand side and right-hand
     /// side.
@@ -260,10 +247,8 @@ impl Expr {
     ///     Expr::normal(Symbol::new("System`RandomReal"), vec![])
     /// );
     /// ```
-    pub fn rule_delayed<LHS: Into<Expr>>(lhs: LHS, rhs: Expr) -> Expr {
-        let lhs = lhs.into();
-
-        Expr::normal(Symbol::new("System`RuleDelayed"), vec![lhs, rhs])
+    pub fn rule_delayed<LHS: Into<Self>>(lhs: LHS, rhs: Self) -> Self {
+        Self::normal(Symbol::new("System`RuleDelayed"), vec![lhs.into(), rhs])
     }
 
     /// Construct a new `List[...]`(`{...}`) expression from it's elements.
@@ -277,8 +262,8 @@ impl Expr {
     ///
     /// let list = Expr::list(vec![Expr::from(1), Expr::from(2), Expr::from(3)]);
     /// ```
-    pub fn list(elements: Vec<Expr>) -> Expr {
-        Expr::normal(Symbol::new("System`List"), elements)
+    pub fn list(elements: Vec<Self>) -> Self {
+        Self::normal(Symbol::new("System`List"), elements)
     }
 }
 
@@ -333,7 +318,7 @@ pub type F32 = ordered_float::NotNan<f32>;
 impl Normal {
     /// Construct a new normal expression from the head and elements.
     pub fn new<E: Into<Expr>>(head: E, contents: Vec<Expr>) -> Self {
-        Normal {
+        Self {
             head: head.into(),
             contents,
         }
@@ -377,7 +362,7 @@ impl Number {
             Ok(r) => r,
             Err(_) => panic!("Number::real: got NaN"),
         };
-        Number::Real(r)
+        Self::Real(r)
     }
 }
 
@@ -387,8 +372,7 @@ impl Number {
 
 impl fmt::Debug for Expr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let Expr { inner } = self;
-        write!(f, "{:?}", inner)
+        write!(f, "{:?}", self.inner)
     }
 }
 
@@ -405,10 +389,10 @@ impl fmt::Display for Expr {
 impl fmt::Display for ExprKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ExprKind::Normal(ref normal) => fmt::Display::fmt(normal, f),
-            ExprKind::Integer(ref int) => fmt::Display::fmt(int, f),
-            ExprKind::Real(ref real) => fmt::Display::fmt(real, f),
-            ExprKind::String(ref string) => {
+            Self::Normal(ref normal) => fmt::Display::fmt(normal, f),
+            Self::Integer(ref int) => fmt::Display::fmt(int, f),
+            Self::Real(ref real) => fmt::Display::fmt(real, f),
+            Self::String(ref string) => {
                 // Escape any '"' which appear in the string.
                 // Using the Debug implementation will cause \n, \t, etc. to appear in
                 // place of the literal character they are escapes for. This is necessary
@@ -416,7 +400,7 @@ impl fmt::Display for ExprKind {
                 // string, such as with ToExpression.
                 write!(f, "{:?}", string)
             },
-            ExprKind::Symbol(ref symbol) => fmt::Display::fmt(symbol, f),
+            Self::Symbol(ref symbol) => fmt::Display::fmt(symbol, f),
         }
     }
 }
@@ -443,12 +427,11 @@ impl fmt::Display for Normal {
 impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Number::Integer(ref int) => write!(f, "{}", int),
-            Number::Real(ref real) => {
+            Self::Integer(ref int) => write!(f, "{}", int),
+            Self::Real(ref real) => {
                 // Make sure we're not printing NotNan (which surprisingly implements
                 // Display)
-                let real: f64 = **real;
-                write!(f, "{:?}", real)
+                write!(f, "{:?}", **real)
             },
         }
     }
