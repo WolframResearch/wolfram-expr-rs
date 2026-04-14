@@ -46,6 +46,10 @@ match expr.kind() {
         e.head(),
         e.elements().len()
     ),
+    ExprKind::BigInteger(bi) => println!("got bignum {}", bi),
+    ExprKind::BigReal { digits, precision } => {
+        println!("got bigreal {}`{}", digits, precision)
+    },
 }
 ```
 

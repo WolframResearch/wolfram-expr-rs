@@ -11,12 +11,24 @@ keywords = ["wolfram", "wolfram-language", "mathematica", "wolfram-engine", "exp
 categories = ["encoding"]
 
 [features]
-default = []
+default = ["wxf", "chrono"]
 
 # Whether to publically export nom functions for parsing symbols. This feature should not
 # be considered stable -- it is included only so that wl-parse can build higher-level
 # expression parsing on top of it.
 unstable_parse = []
 
+# Whether to enable the WXF (Wolfram Exchange Format) codec.
+wxf = ["dep:flate2"]
+
+# Conversions between `chrono::NaiveDate`/`DateTime<Utc>` and `Expr::DateObject[...]`.
+chrono = ["dep:chrono"]
+
 [dependencies]
 ordered-float = "3.4.0"
+num-bigint = "0.4"
+flate2 = { version = "1", optional = true }
+chrono = { version = "0.4", optional = true, default-features = false, features = ["clock"] }
+
+[dev-dependencies]
+proptest = "1"

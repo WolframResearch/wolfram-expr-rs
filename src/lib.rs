@@ -8,6 +8,15 @@ mod ptr_cmp;
 
 pub mod symbol;
 
+#[cfg(feature = "wxf")]
+pub mod wxf;
+
+#[cfg(feature = "chrono")]
+mod chrono_interop;
+
+#[cfg(feature = "chrono")]
+pub use chrono_interop::DateConversionError;
+
 #[cfg(test)]
 mod tests;
 
@@ -171,7 +180,11 @@ impl Expr {
     //       semantics built in to it.
     pub fn tag(&self) -> Option<Symbol> {
         match *self.inner {
-            ExprKind::Integer(_) | ExprKind::Real(_) | ExprKind::String(_) => None,
+            ExprKind::Integer(_)
+            | ExprKind::Real(_)
+            | ExprKind::String(_)
+            | ExprKind::BigInteger(_)
+            | ExprKind::BigReal { .. } => None,
             ExprKind::Normal(ref normal) => normal.head.tag(),
             ExprKind::Symbol(ref sym) => Some(sym.clone()),
         }
@@ -185,7 +198,9 @@ impl Expr {
             ExprKind::Symbol(_)
             | ExprKind::Integer(_)
             | ExprKind::Real(_)
-            | ExprKind::String(_) => None,
+            | ExprKind::String(_)
+            | ExprKind::BigInteger(_)
+            | ExprKind::BigReal { .. } => None,
         }
     }
 
@@ -203,7 +218,9 @@ impl Expr {
             ExprKind::Symbol(_)
             | ExprKind::Integer(_)
             | ExprKind::Real(_)
-            | ExprKind::String(_) => None,
+            | ExprKind::String(_)
+            | ExprKind::BigInteger(_)
+            | ExprKind::BigReal { .. } => None,
         }
     }
 
@@ -266,6 +283,24 @@ impl Expr {
         Expr::normal(Symbol::new("System`RuleDelayed"), vec![lhs, rhs])
     }
 
+    /// Construct an arbitrary-precision integer expression.
+    pub fn bigint<B: Into<num_bigint::BigInt>>(b: B) -> Expr {
+        Expr {
+            inner: Arc::new(ExprKind::BigInteger(b.into())),
+        }
+    }
+
+    /// Construct an arbitrary-precision real expression from its decimal digit
+    /// string and precision (number of significant decimal digits).
+    pub fn bigreal<S: Into<String>>(digits: S, precision: u32) -> Expr {
+        Expr {
+            inner: Arc::new(ExprKind::BigReal {
+                digits: digits.into(),
+                precision,
+            }),
+        }
+    }
+
     /// Construct a new `List[...]`(`{...}`) expression from it's elements.
     ///
     /// # Example
@@ -291,6 +326,12 @@ pub enum ExprKind<E = Expr> {
     String(String),
     Symbol(Symbol),
     Normal(Normal<E>),
+    /// Arbitrary-precision integer. Produced when a `WL` integer exceeds
+    /// [`i64`] range (for example via WXF's `I` token).
+    BigInteger(num_bigint::BigInt),
+    /// Arbitrary-precision real. `digits` is the decimal digit string as
+    /// serialized in WL (`mantissa[`precision]` form is not pre-parsed).
+    BigReal { digits: String, precision: u32 },
 }
 
 /// Wolfram Language "normal" expression: `f[...]`.
@@ -417,6 +458,10 @@ impl fmt::Display for ExprKind {
                 write!(f, "{:?}", string)
             },
             ExprKind::Symbol(ref symbol) => fmt::Display::fmt(symbol, f),
+            ExprKind::BigInteger(ref bi) => write!(f, "{}", bi),
+            ExprKind::BigReal { ref digits, precision } => {
+                write!(f, "{}`{}", digits, precision)
+            },
         }
     }
 }

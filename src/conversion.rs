@@ -9,7 +9,9 @@ impl Expr {
             ExprKind::Symbol(_)
             | ExprKind::String(_)
             | ExprKind::Integer(_)
-            | ExprKind::Real(_) => None,
+            | ExprKind::Real(_)
+            | ExprKind::BigInteger(_)
+            | ExprKind::BigReal { .. } => None,
         }
     }
 
@@ -42,7 +44,9 @@ impl Expr {
             ExprKind::Normal(_)
             | ExprKind::String(_)
             | ExprKind::Integer(_)
-            | ExprKind::Real(_) => None,
+            | ExprKind::Real(_)
+            | ExprKind::BigInteger(_)
+            | ExprKind::BigReal { .. } => None,
         }
     }
 
@@ -51,7 +55,11 @@ impl Expr {
         match self.kind() {
             ExprKind::Integer(int) => Some(Number::Integer(*int)),
             ExprKind::Real(real) => Some(Number::Real(*real)),
-            ExprKind::Normal(_) | ExprKind::String(_) | ExprKind::Symbol(_) => None,
+            ExprKind::Normal(_)
+            | ExprKind::String(_)
+            | ExprKind::Symbol(_)
+            | ExprKind::BigInteger(_)
+            | ExprKind::BigReal { .. } => None,
         }
     }
 
