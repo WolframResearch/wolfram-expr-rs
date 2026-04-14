@@ -11,7 +11,7 @@ keywords = ["wolfram", "wolfram-language", "mathematica", "wolfram-engine", "exp
 categories = ["encoding"]
 
 [features]
-default = ["wxf", "chrono"]
+default = ["wxf", "chrono", "num_complex"]
 
 # Whether to publically export nom functions for parsing symbols. This feature should not
 # be considered stable -- it is included only so that wl-parse can build higher-level
@@ -24,11 +24,21 @@ wxf = ["dep:flate2"]
 # Conversions between `chrono::NaiveDate`/`DateTime<Utc>` and `Expr::DateObject[...]`.
 chrono = ["dep:chrono"]
 
+# Conversions between `num_complex::Complex<f64>` and `Expr::Complex[re, im]`.
+num_complex = ["dep:num-complex"]
+
+# `serde::Serialize` / `serde::Deserialize` for `Expr` itself, plus a
+# `serde_json::Value` <-> `Expr` bridge.
+serde = ["dep:serde", "dep:serde_json"]
+
 [dependencies]
 ordered-float = "3.4.0"
 num-bigint = "0.4"
 flate2 = { version = "1", optional = true }
 chrono = { version = "0.4", optional = true, default-features = false, features = ["clock"] }
+num-complex = { version = "0.4", optional = true }
+serde = { version = "1", optional = true, features = ["derive"] }
+serde_json = { version = "1", optional = true }
 
 [dev-dependencies]
 proptest = "1"

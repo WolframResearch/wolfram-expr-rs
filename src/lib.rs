@@ -17,6 +17,18 @@ mod chrono_interop;
 #[cfg(feature = "chrono")]
 pub use chrono_interop::DateConversionError;
 
+#[cfg(feature = "num_complex")]
+mod num_complex_interop;
+
+#[cfg(feature = "num_complex")]
+pub use num_complex_interop::ComplexConversionError;
+
+#[cfg(feature = "serde")]
+mod serde_impl;
+
+#[cfg(feature = "serde")]
+pub use serde_impl::{expr_to_json, JsonBridgeError};
+
 #[cfg(test)]
 mod tests;
 
