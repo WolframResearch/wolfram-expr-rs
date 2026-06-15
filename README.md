@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> **This repository is archived.** The `wolfram-expr` crate now lives in the [`wolfram-rust-library`](https://github.com/WolframResearch/wolfram-rust-library) monorepo, in the [`wolfram-expr/`](https://github.com/WolframResearch/wolfram-rust-library/tree/HEAD/wolfram-expr) directory.
+
 # wolfram-expr
 
 [![Crates.io](https://img.shields.io/crates/v/wolfram-expr.svg)](https://crates.io/crates/wolfram-expr)
